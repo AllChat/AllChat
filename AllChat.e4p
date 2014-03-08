@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-4.6.dtd">
 <!-- eric4 project file for project AllChat -->
-<!-- Saved: 2014-03-07, 11:35:08 -->
+<!-- Saved: 2014-03-08, 22:42:22 -->
 <!-- Copyright (C) 2014 ,  -->
 <Project version="4.6">
   <Language></Language>
@@ -13,6 +13,19 @@
   <Email></Email>
   <Sources>
     <Source>__init__.py</Source>
+    <Source>allchat/accounts/__init__.py</Source>
+    <Source>allchat/database/__init__.py</Source>
+    <Source>allchat/filestore/__init__.py</Source>
+    <Source>allchat/friends/__init__.py</Source>
+    <Source>allchat/groups/__init__.py</Source>
+    <Source>allchat/heatbeat/__init__.py</Source>
+    <Source>allchat/login/__init__.py</Source>
+    <Source>allchat/messages/__init__.py</Source>
+    <Source>allchat/records/__init__.py</Source>
+    <Source>allchat/versions/__init__.py</Source>
+    <Source>allchat/__init__.py</Source>
+    <Source>bin/run.py</Source>
+    <Source>allchat/accounts/views.py</Source>
   </Sources>
   <Forms>
   </Forms>
