@@ -14,3 +14,4 @@ from allchat import accounts
 from allchat import versions
 
 app.register_blueprint(versions.version)
+app.register_blueprint(accounts.account, url_prefix = '/v1')
