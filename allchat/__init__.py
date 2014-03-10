@@ -1,8 +1,8 @@
 from flask import Flask
 
 app = Flask(__name__)
-
 from allchat import accounts
+app.config.from_pyfile('../conf/allchat.cfg', silent = True)
 #from allchat import database
 #from allchat import filestore
 #from allchat import friends
