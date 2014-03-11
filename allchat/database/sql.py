@@ -16,5 +16,3 @@ def get_session(url, encode = "utf-8"):
     else:
         raise Exception("DATABASE URL is None")
         
-def model_query():
-    pass
