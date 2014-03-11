@@ -1,5 +1,5 @@
 from allchat import app
-from allchat.database.sqlalchemy import get_session
+from allchat.database.sql import get_session
 
 def init_db():
     if app.config['DATABASE'].upper() == 'MYSQL':
