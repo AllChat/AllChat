@@ -1,11 +1,9 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Table, Column, Integer, String, Enum, MetaData, ForeignKey, Unicode, Boolean, DateTime
-from sqlalchemy.orm import sessionmaker, relationship, backref
-from sqlalchemy import create_engine, ForeignKey
-from sqlalchemy.databases import mysql
+from sqlalchemy.orm import relationship, backref
+from sqlalchemy import ForeignKey
 import datetime
 from allchat import app
-
 
 Base = declarative_base()
 
@@ -20,8 +18,8 @@ class UserInfo(Base):
     username = Column(String(50), index = True, unique = True, nullable = False)
     nickname = Column(Unicode(50))
     password = Column(String(50), nullable = False)
-    state = Column(Enum(('online', 'invisible', 'offline')), nullable = False)
-    method = Column(Enum(('web', 'mobile', 'desktop')))
+    state = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
+    method = Column(Enum('web', 'mobile', 'desktop', name = 'method'))
     getunreadmsg = Column(Boolean, nullable = False, default = False)
     login = Column(DateTime(timezone = True))
     created = Column(DateTime(timezone = True), nullable = False)
@@ -50,8 +48,8 @@ class UserInfo(Base):
         self.updated = self.created if not updated else updated
         self.deleted = deleted
         self.ip = "0.0.0.0" if not ip else ip
-        self.port = app.config["CLIENT_PORT"] if not port else port
-            
+        #self.port = app.config["CLIENT_PORT"] if not port else port
+        
 class GroupList(Base):
     __tablename__ = "grouplist"
     __table_args__ = {
@@ -61,10 +59,10 @@ class GroupList(Base):
     id = Column(Integer, primary_key = True)
     group_id = Column(Integer, nullable = False, index = True)
     group_name = Column(Unicode(50))
-    role = Column(Enum(('owner', 'manager', 'member')), nullable = False)
+    role = Column(Enum('owner', 'manager', 'member', name = 'role'), nullable = False)
     index = Column(Integer, ForeignKey('userinfo.id'))
     
-    def __init__(self, group_id,  index, group_name = None, role = "member"):
+    def __init__(self, group_id, index, group_name = None, role = "member"):
         self.group_id = group_id
         self.group_name = group_name
         self.role = role

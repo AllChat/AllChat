@@ -4,6 +4,7 @@ from allchat.database.sql import get_session
 def init_db():
     if app.config['DATABASE'].upper() == 'MYSQL':
         import MySQLdb
+        origin_url = app.config['DATABASE_URL']
         url = app.config['DATABASE_URL']
         if url.startswith("mysql://"):
             url = url[8:]
@@ -33,8 +34,9 @@ def init_db():
         conn = MySQLdb.connect(host = info['host'], port = info['port'], user = info['user'], passwd = info['passwd'])
         cursor = conn.cursor()
         cursor.execute("create database if not exists %s" % (db_name,))
+        conn.close()
+        return get_session(origin_url)
     elif app.config['DATABASE'].upper() == 'SQLITE':
         pass
     else:
         pass
-    return get_session(url)
