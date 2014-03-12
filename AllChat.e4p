@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-4.6.dtd">
 <!-- eric4 project file for project AllChat -->
-<!-- Saved: 2014-03-11, 20:44:37 -->
+<!-- Saved: 2014-03-12, 10:51:31 -->
 <!-- Copyright (C) 2014 ,  -->
 <Project version="4.6">
   <Language></Language>
@@ -27,6 +27,7 @@
     <Source>allchat/accounts/views.py</Source>
     <Source>allchat/database/models.py</Source>
     <Source>allchat/database/sql.py</Source>
+    <Source>bin/run.py</Source>
   </Sources>
   <Forms>
   </Forms>
