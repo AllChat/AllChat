@@ -2,6 +2,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Table, Column, Integer, String, Enum, MetaData, ForeignKey, Unicode, Boolean, DateTime
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import ForeignKey
+from sqlalchemy import func
 import datetime
 from allchat import app
 

@@ -5,7 +5,7 @@ from sqlalchemy.databases import mysql
 
 db_session = None
 
-def get_session(url, encode = "utf-8", echo = True):
+def get_session(url = None, encode = "utf-8", echo = True):
     global db_session
     if url is not None:
         if db_session is None:
@@ -17,5 +17,7 @@ def get_session(url, encode = "utf-8", echo = True):
         else:
             return db_session
     else:
-        raise Exception("DATABASE URL is None")
-        
+        if(db_session is not None):
+            return db_session
+        else:
+            raise Exception("DATABASE URL is None")
