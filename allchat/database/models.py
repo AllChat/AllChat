@@ -49,7 +49,7 @@ class UserInfo(Base):
         self.updated = self.created if not updated else updated
         self.deleted = deleted
         self.ip = "0.0.0.0" if not ip else ip
-        #self.port = app.config["CLIENT_PORT"] if not port else port
+        self.port = app.config["CLIENT_PORT"] if not port else port
         
 class GroupList(Base):
     __tablename__ = "grouplist"
