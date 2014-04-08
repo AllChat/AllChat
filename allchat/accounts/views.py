@@ -40,7 +40,8 @@ class accounts_view(MethodView):
         else:
             return make_response(("Please upload a json data", 403, ))
     def put(self, name):
-        pass
+        if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
+            pass
     def delete(self, name):
         pass
     def get(self, name):
