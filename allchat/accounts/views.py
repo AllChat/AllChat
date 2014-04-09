@@ -2,9 +2,10 @@ from flask.views import MethodView
 from flask import request, make_response, g, session
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, GroupList, FriendList, GroupInfo
+from sqlalchemy import and_
 import datetime, string, re
 
-tmp_str = "^[\w@#$%^&*_.]+$"
+tmp_str = "^[\w!@#$%^&*_.]+$"
 
 class accounts_view(MethodView):
     def post(self):
@@ -31,8 +32,12 @@ class accounts_view(MethodView):
             except Exception, e:
                 user = UserInfo(account, password, nickname)
                 db_session.add(user)
-                db_session.commit()
-                return "Account is created successfully"
+                try:
+                    db_session.commit()
+                except:
+                    db_session.rollback()
+                    return ("DataBase Failed", 503, )
+                return ("Account is created successfully", 201, )
             else:
                 if(not db_user.deleted):
                     return make_response(("The account {0} is already existed".format(account), 400, ))
@@ -40,15 +45,61 @@ class accounts_view(MethodView):
                     if(password == db_user.password):
                         db_user.deleted = False
                         db_session.add(db_user)
-                        db_session.commit()
-                        return "Account is recoveried successfully"
+                        try:
+                            db_session.commit()
+                        except:
+                            db_session.rollback()
+                            return ("DataBase Failed", 503, )
+                        return ("Account is recoveried successfully", 200, )
                     else:
                         return make_response(("The account {0} is already existed".format(account), 400, ))
         else:
             return make_response(("Please upload a json data", 403, ))
     def put(self, name):
-        if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
-            pass
+        if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json" and name is not None):
+            try:
+                para = request.get_json()
+            except Exception as e:
+                resp = make_response(("The json data can't be parsed", 403, ))
+                return resp
+            old_password = None
+            new_password = None
+            nickname = None
+            if(('new_password' in para) and ('old_password' in para)):
+                old_password = para['old_password']
+                new_password = para['new_password']
+            if('nickname' in para):
+                nickname = para['nickname']
+            if(not any((old_password, new_password, nickname))):
+                return ("No content in request", 202)
+            db_session = get_session()
+            try:
+                user = db_session.query(UserInfo).filter(and_(UserInfo.username == name, UserInfo.deleted == False)).one()
+            except Exception, e:
+                return make_response(("The account {0} isn't existed".format(name), 404, ))
+            if(all((new_password, old_password))):
+                tmp_re = re.compile(tmp_str)
+                if((user.password == old_password) and tmp_re.match(new_password)):
+                    user.password = new_password
+                else:
+                    return ("Wrong Password", 403, )
+            if(nickname):
+                if(user.state != 'offline'):
+                    if(len(nickname) > 50 ):
+                        return make_response(("The nickname {0} exceed the maximum length".format(nickname), 400, ))
+                    else:
+                        user.nickname = nickname
+                else:
+                    return ("Please login first", 401, )
+            db_session.add(user)
+            try:
+                db_session.commit()
+            except:
+                db_session.rollback()
+                return ("DataBase Failed", 503, )
+            return ("The account modified sucessfully", 200, )
+        else:
+            return make_response(("Please upload a json data", 403, ))
     def delete(self, name):
         pass
     def get(self, name):
