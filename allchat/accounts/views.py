@@ -61,7 +61,9 @@ class accounts_view(MethodView):
         else:
             return make_response(("Please upload a json data", 403, ))
     def put(self, name):
-        if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json" and name is not None):
+        if( name is None):
+            return ("Account name shouldn't be None", 403)
+        if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
             try:
                 para = request.get_json()
             except Exception as e:
@@ -113,10 +115,34 @@ class accounts_view(MethodView):
             except:
                 db_session.rollback()
                 return ("DataBase Failed", 503, )
-            return ("The account modified sucessfully", 200, )
+            return ("The account is modified sucessfully", 200, )
         else:
             return make_response(("Please upload a json data", 403, ))
     def delete(self, name):
-        pass
+        if( name is None):
+            return ("Account name shouldn't be None", 403)
+        if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json" and name is not None):
+            try:
+                para = request.get_json()
+            except Exception as e:
+                resp = make_response(("The json data can't be parsed", 403, ))
+                return resp
+            if(not para['password']):
+                return ('Please upload the account {user} password'.format(user = name), 401)
+            db_session = get_session()
+            try:
+                user = db_session.query(UserInfo).filter(and_(UserInfo.username == name, UserInfo.deleted == False, UserInfo.password == para['password'])).one()
+            except Exception, e:
+                return make_response(("The account {0} isn't existed or password is wrong".format(name), 404, ))
+            user.deleted = True
+            db_session.add(user)
+            try:
+                db_session.commit()
+            except:
+                db_session.rollback()
+                return ("DataBase Failed", 503, )
+            return ("The account is deleted sucessfully", 200, )
+        else:
+            return make_response(("Please upload a json data", 403, ))
     def get(self, name):
         pass
