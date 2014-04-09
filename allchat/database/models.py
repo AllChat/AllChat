@@ -19,6 +19,7 @@ class UserInfo(Base):
     username = Column(String(50), index = True, unique = True, nullable = False)
     nickname = Column(Unicode(50))
     password = Column(String(50), nullable = False)
+    email = Column(String(100), nullable = False)
     state = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
     method = Column(Enum('web', 'mobile', 'desktop', name = 'method'))
     getunreadmsg = Column(Boolean, nullable = False, default = False)
@@ -32,11 +33,12 @@ class UserInfo(Base):
     groups = relationship('GroupList', backref=backref('users', order_by=id))
     friends = relationship('FriendList', backref=backref('users', order_by=id))
     
-    def __init__(self, username, password, nickname = None, state = None, method = None, 
+    def __init__(self, username, password, email, nickname = None, state = None, method = None, 
                 getunreadmsg = False, login = None, created = None, updated = None, deleted = False, 
                 ip = None, port = None):
         self.username = username
         self.nickname = nickname
+        self.email = email
         self.password = password
         if state is None:
             self.state = 'offline'

@@ -19,6 +19,9 @@ class accounts_view(MethodView):
             account = para['account']
             password = para['password']
             nickname = para['nickname']
+            email = para['email']
+            if(not all((account, password, nickname, email))):
+                return make_response(("Missing important data in the request", 400, ))
             tmp_re = re.compile(tmp_str)
             if((len(account) > 50) or not (tmp_re.match(account))):
                 return make_response(("The account {0} is illegal".format(account), 400, ))
@@ -26,11 +29,13 @@ class accounts_view(MethodView):
                 return make_response(("The password {0} is illegal".format(password), 400, ))
             if(len(nickname) > 50):
                 return make_response(("The nickname {0} exceed the maximum length".format(nickname), 400, ))
+            if((len(email) > 100) or (len(email.split('@')) != 2)):
+                return make_response(("The email {0} is unacceptable".format(nickname), 400, ))
             db_session = get_session()
             try:
                 db_user = db_session.query(UserInfo).filter_by(username = account).one()
             except Exception, e:
-                user = UserInfo(account, password, nickname)
+                user = UserInfo(account, password, email, nickname)
                 db_session.add(user)
                 try:
                     db_session.commit()
@@ -65,12 +70,15 @@ class accounts_view(MethodView):
             old_password = None
             new_password = None
             nickname = None
+            email = None
             if(('new_password' in para) and ('old_password' in para)):
                 old_password = para['old_password']
                 new_password = para['new_password']
             if('nickname' in para):
                 nickname = para['nickname']
-            if(not any((old_password, new_password, nickname))):
+            if('email' in para):
+                email = para['email']
+            if(not any((old_password, new_password, nickname, email))):
                 return ("No content in request", 202)
             db_session = get_session()
             try:
@@ -89,6 +97,14 @@ class accounts_view(MethodView):
                         return make_response(("The nickname {0} exceed the maximum length".format(nickname), 400, ))
                     else:
                         user.nickname = nickname
+                else:
+                    return ("Please login first", 401, )
+            if(email):
+                if(user.state != 'offline'):
+                    if(len(email) > 100 or (len(email.split('@')) != 2)):
+                        return make_response(("The email {0} is unacceptable".format(email), 400, ))
+                    else:
+                        user.email = email
                 else:
                     return ("Please login first", 401, )
             db_session.add(user)
