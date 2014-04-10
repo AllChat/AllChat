@@ -12,7 +12,7 @@ from allchat import accounts
 #from allchat import friends
 #from allchat import groups
 #from allchat import heatbeat
-#from allchat import login
+from allchat import login
 #from allchat import messages
 #from allchat import records
 from allchat import versions
