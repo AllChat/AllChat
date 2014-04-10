@@ -1,28 +1,28 @@
 from flask.views import MethodView
 from flask import request, make_response, g, session
 from allchat.database.sql import get_session
+from allchat.database.models import UserInfo
 from sqlalchemy import and_
 import time, string
 
 class login_view(MethodView):
     def get(self):
         return make_response(("This is the login page", 200, ))
-    def post(self):
+    def post(self,name):
         if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
             try:
                 para = request.get_json()
             except Exception as e:
                 resp = make_response(("The json data can't be parsed", 403, ))
                 return resp
-
-            account = name
+            
             password = para['password']
             logstate = para['state']
-            if(logstate not in Enum('online', 'invisible')):
+            if(logstate not in ['online', 'invisible']):
                 return make_response(("The login state is illegal", 403, ))
             db_session = get_session()
             try:
-                db_user = db_session.query(UserInfo).filter_by(username = account).one()
+                db_user = db_session.query(UserInfo).filter_by(username = name).one()
             except Exception, e:
                 return make_response(("The user is not registered yet", 403, ))
             else:
