@@ -19,6 +19,8 @@ from allchat import versions
 
 app.register_blueprint(versions.version)
 app.register_blueprint(accounts.account, url_prefix = '/v1')
+app.register_blueprint(login.login, url_prefix = '/v1')
+
 
 
 @app.before_first_request
