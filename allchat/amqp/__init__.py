@@ -1,4 +1,6 @@
 import allchat
+from allchat.amqp import Impl_kombu as rabbitmq
 
 def init_amqp():
-    pass
+    rabbitmq.get_connection()
+    rabbitmq.get_exchange()

@@ -3,7 +3,7 @@ from flask import request, make_response, g, session
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, GroupList, FriendList, GroupInfo
 from sqlalchemy import and_
-import datetime, string, re
+import re
 
 tmp_str = "^[\w!@#$%^&*_.]+$"
 
