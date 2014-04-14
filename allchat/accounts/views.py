@@ -3,6 +3,7 @@ from flask import request, make_response, g, session
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, GroupList, FriendList, GroupInfo
 from sqlalchemy import and_
+from allchat.amqp.Impl_kombu import RPC, cast
 import re
 
 tmp_str = "^[\w!@#$%^&*_.]+$"
@@ -42,6 +43,7 @@ class accounts_view(MethodView):
                 except:
                     db_session.rollback()
                     return ("DataBase Failed", 503, )
+                RPC.create_queue(user.username, user.username)
                 return ("Account is created successfully", 201, )
             else:
                 if(not db_user.deleted):
@@ -55,6 +57,7 @@ class accounts_view(MethodView):
                         except:
                             db_session.rollback()
                             return ("DataBase Failed", 503, )
+                        RPC.create_queue(db_user.username, db_user.username)
                         return ("Account is recoveried successfully", 200, )
                     else:
                         return make_response(("The account {0} is already existed".format(account), 400, ))
@@ -141,6 +144,7 @@ class accounts_view(MethodView):
             except:
                 db_session.rollback()
                 return ("DataBase Failed", 503, )
+            RPC.del_queue(user.username)
             return ("The account is deleted sucessfully", 200, )
         else:
             return make_response(("Please upload a json data", 403, ))

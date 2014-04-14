@@ -6,6 +6,7 @@ app.config.from_pyfile('../conf/allchat.cfg', silent = True)
 
 from allchat.database.sql import get_session
 from allchat.database import init_db
+from allchat.amqp import init_rpc
 from allchat import accounts
 #from allchat import database
 #from allchat import filestore
@@ -26,6 +27,7 @@ app.register_blueprint(login.login, url_prefix = '/v1')
 @app.before_first_request
 def init():
     init_db()
+    init_rpc()
     
 @app.teardown_request
 def shutdown_session(exception=None):

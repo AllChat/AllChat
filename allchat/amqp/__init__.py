@@ -21,7 +21,11 @@ def init_rpc():
     if len(account.split(":", 1)) != 2 or len(address.split(":", 1)) != 2:
         raise Exception("Please configure an available RPC_URL, \
                         the correct pattern is 'amqp://user:password@address:port//'")
-    RPC.init_connection(url)
+    try:
+        RPC.init_connection(url)
+    except Exception,e:
+        raise e
+
     RPC.init_exchange(exchange_name)
 
 
