@@ -1,36 +1,113 @@
-from kombu import Exchange, Connection, Consumer, Producer
-
+from kombu import Exchange, Connection, Consumer, Producer,Queue
+import allchat
 
 class rpc(object):
     def __init__(self):
         self.exchange = None
-        connection = None
-        connection_pool = None
-        queue = {}
-        consumer = {}
-        producer = {}
+        self.connection = None
+        self.connection_pool = None
+        self.queue = {}
+        self.consumer = {}
+        self.producer = {}
+
+    def init_exchange(self, name = 'AllChat', type = 'direct', channel = None, durable = True, delivery_mode = 2):
+        if self.exchange is None:
+            self.exchange = Exchange(name, type, channel = channel, durable = durable, delivery_mode = delivery_mode)
+        return self.exchange
+
+    def init_connection(self,url,ssl = False):
+        if self.connection is None:
+            self.connection = Connection(url, ssl = ssl)
+            try:
+                self.connection.connect()
+            except Exception,e:
+                raise e
+            else:
+                self.connection.close()
+        return self.connection
 
     def get_exchange(self):
         if self.exchange is None:
-            pass
+            raise Exception("No exchange. Please invoke init_exchange firstly")
         else:
             return self.exchange
 
-    def get_connection(self):
-        pass
+    def create_connection(self):
+        if self.connection_pool is None:
+            self.connection_pool = self.connection.Pool(allchat.app.config['RPC_POOL_NUM'])
+        return self.connection_pool.acquire()
 
-    def create_consumer(self):
-        pass
+    def release_connection(self, conn):
+        try:
+            if conn is not None:
+                conn.release()
+        except Exception,e:
+            raise e
 
-    def release_consumer(self):
-        pass
+    # def create_channel(self, conn):
+    #     if conn is not None:
+    #         return conn.channel()
+    #     else:
+    #         return None
+    #
+    # def release_channel(self, channel):
+    #     try:
+    #         if channel is not None:
+    #             channel.close()
+    #     except Exception,e:
+    #         raise e
 
-    def create_producer(self):
-        pass
+    def create_consumer(self, name, channel , queues = None, callbacks = None):
+        if name in self.consumer:
+            self.consumer[name].revive(channel)
+        else:
+            if not any([queues, callbacks]):
+                raise Exception("queues and callbacks can't be None")
+            if isinstance(callbacks, list):
+                self.consumer[name] = Consumer(channel, queues, callbacks)
+            else:
+                self.consumer[name] = Consumer(channel, queues)
+                self.consumer[name].register_callback(callbacks)
+        self.consumer[name].comsume()
+        return self.consumer[name]
 
-    def release_producer(self):
-        pass
+    def release_consumer(self, name):
+        try:
+            if name in self.consumer:
+                self.consumer[name].cancel()
+        except Exception,e:
+            raise e
 
-    def create_queue(self):
-        pass
+    def create_producer(self, name, channel):
+        if name in self.producer:
+            self.producer[name].revive(channel)
+        else:
+            self.producer[name] = Producer(channel, self.get_exchange())
+        return self.producer[name]
 
+    def release_producer(self, name):
+        try:
+            if name in self.producer:
+                self.producer[name].close()
+        except Exception,e:
+            raise e
+
+    def create_queue(self, name, routing_key, durable = True):
+        if(name not in self.queue):
+            self.queue[name] = Queue(name, self.get_exchange(), routing_key, durable = durable)
+        return self.queue[name]
+
+    def del_queue(self, name):
+        try:
+            if name in self.queue:
+                self.queue[name].delete()
+        except Exception,e:
+            raise e
+
+def cast(producer, message, routing_key, delivery_mode = 2):
+    try:
+        producer.publish(message, routing_key, delivery_mode)
+    except Exception,e:
+        raise e
+
+RPC = rpc()
