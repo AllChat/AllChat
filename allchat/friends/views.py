@@ -66,4 +66,40 @@ class friends_view(MethodView):
         pass
 
     def put(self, name):
-        pass
+        if name is None:
+            return ("Error in the URL. Please put the account name in the URL.", 403)
+        if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
+            try:
+                para = request.get_json()
+            except Exception,e:
+                return ("The json data can't be parsed", 403, )
+            db_session = get_session()
+            try:
+                req_user = db_session.query(UserInfo).filter(and_(UserInfo.username == name,
+                                        UserInfo.deleted == False, UserInfo.state != 'offline'))
+            except Exception,e:
+                return ("The account {account} is not exist or offline".format(account = name), 404)
+            else:
+                try:
+                    resp_user = db_session.query(UserInfo).join(FriendList).filter(
+                                            and_(UserInfo.username == para['account'],UserInfo.deleted == False,
+                                                FriendList.username == name, FriendList.confirmed == False)).one()
+                except Exception,e:
+                    return ("Can't invoke the API before someone request to add you as a friend", 403)
+                else:
+                    if para['result'] == 'accept':
+                        resp_user.friends.confirmed = True
+                        req_user.friends.append(FriendList(para['account'], True))
+                    elif para['result'] == 'reject':
+                        resp_user.friends = []
+                    db_session.add(req_user)
+                    db_session.add(resp_user)
+                    try:
+                        db_session.commit()
+                    except:
+                        db_session.rollback()
+                        return ("DataBase Failed", 503, )
+                    else:
+                        return ("You have confirmed to add {account} as your friend".format(resp_user.username), 200)
+        else:
+            return ("Please upload a json data", 403)
