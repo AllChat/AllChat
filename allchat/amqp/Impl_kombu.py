@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from kombu import Exchange, Connection, Consumer, Producer,Queue
 import allchat
 
@@ -9,6 +10,7 @@ class rpc(object):
         self.queue = {}
         self.consumer = {}
         self.producer = {}
+        self.callbacks = {}
 
     def init_exchange(self, name = 'AllChat', type = 'direct', channel = None, durable = True, delivery_mode = 2):
         if self.exchange is None:
@@ -44,6 +46,13 @@ class rpc(object):
         except Exception,e:
             raise e
 
+    def close_connection(self, conn):
+        try:
+            if conn is not None:
+                conn.close()
+        except Exception,e:
+            raise e
+
     # def create_channel(self, conn):
     #     if conn is not None:
     #         return conn.channel()
@@ -57,18 +66,36 @@ class rpc(object):
     #     except Exception,e:
     #         raise e
 
-    def create_consumer(self, name, channel , queues = None, callbacks = None):
+    # def create_consumer(self, name, channel , queues = None, callbacks = None):
+    #     if name in self.consumer:
+    #         self.consumer[name].revive(channel)
+    #     else:
+    #         if not any([queues, callbacks]):
+    #             raise Exception("queues and callbacks can't be None")
+    #         if isinstance(callbacks, list):
+    #             self.consumer[name] = Consumer(channel, queues, callbacks)
+    #         else:
+    #             self.consumer[name] = Consumer(channel, queues)
+    #             self.consumer[name].register_callback(callbacks)
+    #     self.consumer[name].consume()
+    #     return self.consumer[name]
+
+    def create_consumer(self, name, channel , queues = None):
         if name in self.consumer:
+            try:
+                if self.callbacks[name] != self.consumer[name].callbacks:
+                    self.consumer[name].callbacks = self.callbacks[name]
+            except KeyError,e:
+                raise Exception("Please invoke register_callbacks before")
             self.consumer[name].revive(channel)
         else:
-            if not any([queues, callbacks]):
-                raise Exception("queues and callbacks can't be None")
-            if isinstance(callbacks, list):
-                self.consumer[name] = Consumer(channel, queues, callbacks)
-            else:
-                self.consumer[name] = Consumer(channel, queues)
-                self.consumer[name].register_callback(callbacks)
-        self.consumer[name].comsume()
+            if not queues:
+                raise Exception("The parameter queues can't be None")
+            try:
+                self.consumer[name] = Consumer(channel, queues, self.callbacks[name])
+            except KeyError,e:
+                raise Exception("Please invoke register_callbacks before")
+        self.consumer[name].consume()
         return self.consumer[name]
 
     def release_consumer(self, name):
@@ -99,10 +126,43 @@ class rpc(object):
 
     def del_queue(self, name):
         try:
+            if name in self.callbacks:
+                del self.callbacks[name]
+            if name in self.consumer:
+                try:
+                    self.consumer[name].close()
+                except Exception, e:
+                    pass
+                del self.consumer[name]
+            if name in self.producer:
+                try:
+                    self.producer[name].close()
+                except Exception, e:
+                    pass
+                del self.producer[name]
             if name in self.queue:
+                tmp = self.create_connection() #Kombu中删除Queue，必须保证Queue是绑定在一个channel上的，否则删除失败
+                self.queue[name].maybe_bind(tmp)
                 self.queue[name].delete()
+                self.close_connection(tmp)
+                del self.queue[name]
         except Exception,e:
             raise e
+
+    def register_callbacks(self, name, callbacks):
+        if isinstance(callbacks, list):
+            self.callbacks[name] = callbacks
+        else:
+            raise Exception("The parameter callbacks should be a list")
+
+    def extend_callbacks(self, name, callbacks):
+        if isinstance(callbacks, list):
+            if name in self.callbacks:
+                self.callbacks[name].extend(callbacks)
+            else:
+                raise Exception("The {account} callbacks don't exist".format(account = name))
+        else:
+            raise Exception("The parameter callbacks should be a list")
 
 def cast(producer, message, routing_key, delivery_mode = 2):
     try:

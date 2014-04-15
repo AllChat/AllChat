@@ -4,6 +4,7 @@ from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, GroupList, FriendList, GroupInfo
 from sqlalchemy import and_
 from allchat.amqp.Impl_kombu import RPC, cast
+from allchat.messages.handles import rpc_callbacks
 import re
 
 tmp_str = "^[\w!@#$%^&*_.]+$"
@@ -44,6 +45,8 @@ class accounts_view(MethodView):
                     db_session.rollback()
                     return ("DataBase Failed", 503, )
                 RPC.create_queue(user.username, user.username)
+                tmp = rpc_callbacks()
+                RPC.register_callbacks(user.username, [tmp])
                 return ("Account is created successfully", 201, )
             else:
                 if(not db_user.deleted):

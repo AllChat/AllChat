@@ -18,6 +18,9 @@ def func(body, message):
     print body
     message.ack()
 
+def test(body, message):
+    message.ack()
+
 if __name__ == '__main__':
     #app.run(debug = True, use_debugger = False, use_reloader = False)
     amqp.init_rpc()
@@ -26,18 +29,22 @@ if __name__ == '__main__':
     cast(pro,"kakakakakakaka", "test")
     RPC.release_connection(conn)
     RPC.release_producer("pengdong")
+    RPC.register_callbacks("fang", [func])
 
-
-    queue = RPC.create_queue("test", "test")
+    queue = RPC.create_queue("fang", "test")
     conn = RPC.create_connection()
-    com = RPC.create_consumer("fang", conn, queue, func)
-    conn.drain_events()
+    com = RPC.create_consumer("fang", conn, queue)
+    #conn.drain_events()
     RPC.release_connection(conn)
     RPC.release_consumer("fang")
 
     conn = RPC.create_connection()
+    RPC.extend_callbacks("fang", [test])
     com = RPC.create_consumer("fang", conn)
-    conn.drain_events()
+    RPC.release_consumer(com)
+    RPC.release_connection(conn)
+
+    RPC.del_queue("fang")
 
     print "over"
 

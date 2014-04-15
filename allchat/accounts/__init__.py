@@ -1,6 +1,5 @@
 from flask import Blueprint
 from allchat.accounts import views
-import allchat
 
 account = Blueprint('accounts', __name__)
 account_view = views.accounts_view.as_view('accounts_view')
