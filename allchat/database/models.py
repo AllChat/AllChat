@@ -30,8 +30,8 @@ class UserInfo(Base):
     ip = Column(String(15), nullable = False, default = "0.0.0.0")
     port = Column(Integer, nullable = False, default = 0)
     
-    groups = relationship('GroupList', backref=backref('users', order_by=id))
-    friends = relationship('FriendList', backref=backref('users', order_by=id))
+    groups = relationship('GroupList', backref=backref('user', order_by=id))
+    friends = relationship('FriendList', backref=backref('user', order_by=id))
     
     def __init__(self, username, password, email, nickname = None, state = None, method = None, 
                 getunreadmsg = False, login = None, created = None, updated = None, deleted = False, 
@@ -65,11 +65,10 @@ class GroupList(Base):
     role = Column(Enum('owner', 'manager', 'member', name = 'role'), nullable = False)
     index = Column(Integer, ForeignKey('userinfo.id'))
     
-    def __init__(self, group_id, index, group_name = None, role = "member"):
+    def __init__(self, group_id, group_name = None, role = "member"):
         self.group_id = group_id
         self.group_name = group_name
         self.role = role
-        self.index = index
         
         
 class FriendList(Base):
@@ -80,11 +79,12 @@ class FriendList(Base):
     }
     id = Column(Integer, primary_key = True)
     username = Column(String(50), index = True, unique = True, nullable = False)
+    confirmed = Column(Boolean, nullable = False, default = False)
     index = Column(Integer, ForeignKey('userinfo.id'))
     
-    def __init__(self, username, index):
+    def __init__(self, username, confirmed):
         self.username = username
-        self.index = index
+        self.confirmed = confirmed
 
 class GroupInfo(Base):
     __tablename__ = "groupinfo"

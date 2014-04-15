@@ -5,7 +5,7 @@ from sqlalchemy.databases import mysql
 
 db_session = None
 
-def get_session(url = None, encode = "utf-8", echo = True):
+def get_session(url = None, encode = "utf-8", echo = False):
     global db_session
     if url is not None:
         if db_session is None:

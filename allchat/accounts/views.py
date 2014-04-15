@@ -1,9 +1,9 @@
 from flask.views import MethodView
-from flask import request, make_response, g, session
+from flask import request, make_response
 from allchat.database.sql import get_session
-from allchat.database.models import UserInfo, GroupList, FriendList, GroupInfo
+from allchat.database.models import UserInfo
 from sqlalchemy import and_
-from allchat.amqp.Impl_kombu import RPC, cast
+from allchat.amqp.Impl_kombu import RPC
 from allchat.messages.handles import rpc_callbacks
 import re
 
@@ -44,9 +44,13 @@ class accounts_view(MethodView):
                 except:
                     db_session.rollback()
                     return ("DataBase Failed", 503, )
-                RPC.create_queue(user.username, user.username)
                 tmp = rpc_callbacks()
                 RPC.register_callbacks(user.username, [tmp])
+                queue = RPC.create_queue(user.username, user.username)
+                cnn = RPC.create_connection()
+                RPC.create_consumer(user.username, cnn, queue)
+                RPC.release_consumer(user.username)
+                RPC.release_connection(cnn)
                 return ("Account is created successfully", 201, )
             else:
                 if(not db_user.deleted):

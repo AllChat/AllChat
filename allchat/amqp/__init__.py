@@ -25,7 +25,6 @@ def init_rpc():
         RPC.init_connection(url)
     except Exception,e:
         raise e
-
     RPC.init_exchange(exchange_name)
 
 

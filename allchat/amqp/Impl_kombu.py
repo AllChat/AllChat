@@ -80,7 +80,7 @@ class rpc(object):
     #     self.consumer[name].consume()
     #     return self.consumer[name]
 
-    def create_consumer(self, name, channel , queues = None):
+    def create_consumer(self, name, channel, queues = None):
         if name in self.consumer:
             try:
                 if self.callbacks[name] != self.consumer[name].callbacks:
@@ -90,11 +90,13 @@ class rpc(object):
             self.consumer[name].revive(channel)
         else:
             if not queues:
-                raise Exception("The parameter queues can't be None")
+                queues = self.create_queue(name, name)
             try:
-                self.consumer[name] = Consumer(channel, queues, self.callbacks[name])
+                self.callbacks[name]
             except KeyError,e:
                 raise Exception("Please invoke register_callbacks before")
+            else:
+                self.consumer[name] = Consumer(channel, queues, self.callbacks[name])
         self.consumer[name].consume()
         return self.consumer[name]
 
