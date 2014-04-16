@@ -1,7 +1,7 @@
 from flask.views import MethodView
 from flask import request, make_response, g, session
 from allchat.database.sql import get_session
-from allchat.database.models import UserInfo
+from allchat.database.models import UserInfo, GroupMember
 from sqlalchemy import and_
 import time, string
 
@@ -25,18 +25,20 @@ class login_view(MethodView):
                 db_user = db_session.query(UserInfo).filter_by(username = name).one()
             except Exception, e:
                 return make_response(("The user is not registered yet", 403, ))
+            if(password == db_user.password):
+                db_user.state = logstate
+                db_user.login = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
+                for db_member in db_groupmember:
+                    db_member.member_logstate = logstate
+                try:
+                    db_session.commit()
+                except:
+                    db_session.rollback()
+                    return ("DataBase Failed", 503, )
+                #render_template to new page or stay at current page?
+                return make_response(("Successful logged in", 200, ))
             else:
-                if(password == db_user.password):
-                    db_user.state = logstate
-                    db_user.login = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
-                    try:
-                        db_session.commit()
-                    except:
-                        db_session.rollback()
-                        return ("DataBase Failed", 503, )
-                    #render_template to new page or stay at current page?
-                    return make_response(("Successful logged in", 200, ))
-                else:
-                    return make_response(("Password is wrong, please check out", 403, ))
+                return make_response(("Password is wrong, please check out", 403, ))
         else:
             return make_response(("Please upload a json data", 403, ))

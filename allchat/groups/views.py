@@ -33,17 +33,34 @@ class groups_view(MethodView):
                 group_id = 10000
             else:
                 group_id = max_group_id[0]+1
-            group = GroupInfo(group_id, account, group_name)
+            # add users in userlist to group if userlist is not empty
+            # update both GroupMember and GroupInfo 
+            user_count = 1
+            member = GroupMember(group_id, account, db_user.state, "owner")
+            db_session.add(member)
+            illegal_users = set()
+            if userlist:
+                for user in {}.fromkeys(userlist).keys(): # eliminate the duplicated account
+                    try:
+                        db_user = db_session.query(UserInfo).filter_by(username = user).one()
+                    except Exception, e:
+                        illegal_users.add(user)
+                    else:
+                        if user != account:
+                            member = GroupMember(group_id, user, db_user.state)
+                            db_session.add(member)
+                            user_count += 1
+            group = GroupInfo(group_id, account, group_name,user_count)
             db_session.add(group)
             try:
                 db_session.commit()
             except:
                 db_session.rollback()
                 return ("DataBase Failed", 503, )
-            # add users in userlist to group if userlist is not empty
-
-            #return json if group is successfully created
-            return ("Group created successfully!", 201)
+            if illegal_users:
+                return ("Group created,but these users are illegal:"+','.join(illegal_users), 202)
+            else:
+                return ("Group created successfully!", 201)
         else:
             return ("Please upload a json data", 403)
 
@@ -60,19 +77,25 @@ class groups_view(MethodView):
             return ("Error in the URL. Please contain proper group id in the URL.", 403)
         if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
             # check whether the applying user is the owner of the group
-
-            ## user account get from the upload json?? or just get from session(reliable and convinient)??
+            try:
+                para = request.get_json()
+            except Exception as e:
+                resp = make_response(("The json data can't be parsed", 403, ))
+                return resp
+            account = para['account']
             db_session = get_session()
             try:
                 db_group = db_session.query(GroupInfo).filter_by(group_id = groupID).one()
             except Exception, e:
                 return ("Group not found", 404)
-            ###
-            # if group is deleted, should keep it or just clean the record from database??
-            if db_group.deleted == True:
-                return ("Group does not exist", 404)
-            db_group.deleted = True
-            db_session.add(db_group)
+            if account != db_group.owner:
+                return ("You don't have the permission to the operation", 405)
+            # permission validated, delete the group info from GroupInfo and GroupMember 
+            group_name = db_group.group_name
+            db_session.delete(db_group)
+            db_groupmember = db_session.query(GroupMember).filter_by(group_id = groupID).all()
+            for db_member in db_groupmember:
+                db_session.delete(db_member)
             try:
                 db_session.commit()
             except:

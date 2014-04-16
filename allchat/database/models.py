@@ -30,7 +30,7 @@ class UserInfo(Base):
     ip = Column(String(15), nullable = False, default = "0.0.0.0")
     port = Column(Integer, nullable = False, default = 0)
     
-    groups = relationship('GroupList', backref=backref('user', order_by=id))
+    groups = relationship('GroupMember', backref=backref('user', order_by=id))
     friends = relationship('FriendList', backref=backref('user', order_by=id))
     
     def __init__(self, username, password, email, nickname = None, state = None, method = None, 
@@ -64,6 +64,7 @@ class GroupMember(Base):
     member_account = Column(String(50), index = True, nullable = False)
     role = Column(Enum('owner', 'manager', 'member', name = 'role'), nullable = False)
     member_logstate = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
+    index = Column(Integer, ForeignKey('userinfo.id'))
     
     def __init__(self, group_id, member_account, member_logstate, role = "member"):
         self.group_id = group_id
