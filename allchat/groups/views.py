@@ -1,7 +1,7 @@
 from flask.views import MethodView
 from flask import request, make_response, g, session
 from allchat.database.sql import get_session
-from allchat.database.models import UserInfo, GroupList, FriendList, GroupInfo
+from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
 from sqlalchemy import and_, desc
 from allchat.amqp.Impl_kombu import RPC, cast
 
@@ -47,13 +47,37 @@ class groups_view(MethodView):
         else:
             return ("Please upload a json data", 403)
 
-    def put(self,group_id):
-        if group_id is None:
+    def put(self,groupID):
+        if groupID is None:
             return ("Error in the URL. Please contain proper group id in the URL.", 403)
         if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
             pass
         else:
             return ("Please upload a json data", 403)
 
-    def delete(self, group_id):
-        pass
+    def delete(self, groupID):
+        if groupID is None:
+            return ("Error in the URL. Please contain proper group id in the URL.", 403)
+        if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
+            # check whether the applying user is the owner of the group
+
+            ## user account get from the upload json?? or just get from session(reliable and convinient)??
+            db_session = get_session()
+            try:
+                db_group = db_session.query(GroupInfo).filter_by(group_id = groupID).one()
+            except Exception, e:
+                return ("Group not found", 404)
+            ###
+            # if group is deleted, should keep it or just clean the record from database??
+            if db_group.deleted == True:
+                return ("Group does not exist", 404)
+            db_group.deleted = True
+            db_session.add(db_group)
+            try:
+                db_session.commit()
+            except:
+                db_session.rollback()
+                return ("DataBase Failed", 503, )
+            return ("Group deleted successfully", 201)
+        else:
+            return ("Please upload a json data", 403)

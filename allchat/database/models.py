@@ -53,21 +53,22 @@ class UserInfo(Base):
         self.ip = "0.0.0.0" if not ip else ip
         self.port = app.config["CLIENT_PORT"] if not port else port
         
-class GroupList(Base):
-    __tablename__ = "grouplist"
+class GroupMember(Base):
+    __tablename__ = "groupmember"
     __table_args__ = {
         'mysql_engine': 'InnoDB',
         'mysql_charset': 'utf8'
     }
     id = Column(Integer, primary_key = True)
     group_id = Column(Integer, nullable = False, index = True)
-    group_name = Column(Unicode(50))
+    member_account = Column(String(50), index = True, nullable = False)
     role = Column(Enum('owner', 'manager', 'member', name = 'role'), nullable = False)
-    index = Column(Integer, ForeignKey('userinfo.id'))
+    member_logstate = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
     
-    def __init__(self, group_id, group_name = None, role = "member"):
+    def __init__(self, group_id, member_account, member_logstate, role = "member"):
         self.group_id = group_id
-        self.group_name = group_name
+        self.member_account = member_account
+        self.member_logstate = member_logstate
         self.role = role
         
         
@@ -96,14 +97,17 @@ class GroupInfo(Base):
     group_id = Column(Integer, nullable = False, index = True, unique = True)
     group_name = Column(Unicode(50))
     owner = Column(String(50), nullable = False)
+    group_size = Column(Integer, nullable = False)
+    group_volume = Column(Integer, nullable = False)
     created = Column(DateTime(timezone = True), nullable = False)
     updated = Column(DateTime(timezone = True), nullable = False)
-    deleted = Column(Boolean, nullable = False, default = False)
     
-    def __init__(self, group_id, owner, group_name = None, created = None, updated = None, deleted = False):
+    def __init__(self, group_id, owner, group_name = None, group_size = 1, group_volume = 100, created = None, updated = None):
         self.group_id = group_id
         self.owner = owner
         self.group_name = group_name
+        self.group_size = group_size
+        self.group_volume = group_volume
         self.created = datetime.datetime.utcnow() if not created else created
         self.updated = self.created if not updated else updated
-        self.deleted = deleted
+        

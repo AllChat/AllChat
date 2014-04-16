@@ -2,7 +2,7 @@
 from flask.views import MethodView
 from flask import request, make_response, g, session
 from allchat.database.sql import get_session
-from allchat.database.models import UserInfo, GroupList, FriendList, GroupInfo
+from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
 from sqlalchemy import and_
 from allchat.amqp.Impl_kombu import RPC, cast
 from flask import json
