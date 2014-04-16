@@ -100,7 +100,7 @@ class GroupMember(Base):
         'mysql_charset': 'utf8'
     }
     id = Column(Integer, primary_key = True)
-    group_id = Column(Integer, nullable = False, index = True)
+    group_id = Column(Integer, nullable = False)
     member_account = Column(String(50), index = True, nullable = False)
     role = Column(Enum('owner', 'manager', 'member', name = 'role'), nullable = False)
     member_logstate = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
