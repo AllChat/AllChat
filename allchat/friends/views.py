@@ -87,19 +87,42 @@ class friends_view(MethodView):
                 except Exception,e:
                     return ("Can't invoke the API before someone request to add you as a friend", 403)
                 else:
+                    message = dict()
+                    message['method'] = "add_friend_resp"
+                    tmp = dict()
+                    tmp['from'] = req_user.username
+                    tmp['to'] = resp_user.username
                     if para['result'] == 'accept':
-                        resp_user.friends.confirmed = True
                         req_user.friends.append(FriendList(para['account'], True))
+                        tmp['msg'] = 'accept'
                     elif para['result'] == 'reject':
-                        resp_user.friends = []
+                        tmp['msg'] = 'reject'
+                    message['para'] = tmp
                     db_session.add(req_user)
-                    db_session.add(resp_user)
                     try:
                         db_session.commit()
                     except:
                         db_session.rollback()
                         return ("DataBase Failed", 503, )
                     else:
-                        return ("You have confirmed to add {account} as your friend".format(resp_user.username), 200)
+                        ret = send_message(req_user.username, resp_user.username, message)
+                        if not ret:
+                            return ("You have confirmed to add {account} as your friend".format(resp_user.username), 200)
+                        else:
+                            return ret
         else:
             return ("Please upload a json data", 403)
+
+
+def send_message(req_user, resp_user, message):
+    cnn = RPC.create_connection()
+    sender = RPC.create_producer(req_user, cnn)
+    try:
+        cast(sender, json.dumps(message), resp_user)
+    except:
+        RPC.release_producer(req_user.username)
+        RPC.release_connection(cnn)
+        return ("Added friend failed due to system error", 500)
+    RPC.release_producer(req_user.username)
+    RPC.release_connection(cnn)
+    return None

@@ -57,9 +57,9 @@ class accounts_view(MethodView):
                     return make_response(("The account {0} is already existed".format(account), 400, ))
                 else:
                     if(password == db_user.password):
-                        db_user.deleted = False
-                        db_session.add(db_user)
                         try:
+                            db_user.deleted = False
+                            db_session.add(db_user)
                             db_session.commit()
                         except:
                             db_session.rollback()
@@ -119,8 +119,8 @@ class accounts_view(MethodView):
                         user.email = email
                 else:
                     return ("Please login first", 401, )
-            db_session.add(user)
             try:
+                db_session.add(user)
                 db_session.commit()
             except:
                 db_session.rollback()
@@ -144,9 +144,9 @@ class accounts_view(MethodView):
                 user = db_session.query(UserInfo).filter(and_(UserInfo.username == name, UserInfo.deleted == False, UserInfo.password == para['password'])).one()
             except Exception, e:
                 return make_response(("The account {0} isn't existed or password is wrong".format(name), 404, ))
-            user.deleted = True
-            db_session.add(user)
             try:
+                user.deleted = True
+                db_session.add(user)
                 db_session.commit()
             except:
                 db_session.rollback()

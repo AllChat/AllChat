@@ -29,9 +29,8 @@ class UserInfo(Base):
     deleted = Column(Boolean, nullable = False, default = False)
     ip = Column(String(15), nullable = False, default = "0.0.0.0")
     port = Column(Integer, nullable = False, default = 0)
-    
-    groups = relationship('GroupMember', backref=backref('user', order_by=id))
-    friends = relationship('FriendList', backref=backref('user', order_by=id))
+
+    friends = relationship('FriendList', cascade="all, delete-orphan", single_parent = True, passive_deletes=True, backref=backref('user', order_by=id))
     
     def __init__(self, username, password, email, nickname = None, state = None, method = None, 
                 getunreadmsg = False, login = None, created = None, updated = None, deleted = False, 
@@ -53,26 +52,6 @@ class UserInfo(Base):
         self.ip = "0.0.0.0" if not ip else ip
         self.port = app.config["CLIENT_PORT"] if not port else port
         
-class GroupMember(Base):
-    __tablename__ = "groupmember"
-    __table_args__ = {
-        'mysql_engine': 'InnoDB',
-        'mysql_charset': 'utf8'
-    }
-    id = Column(Integer, primary_key = True)
-    group_id = Column(Integer, nullable = False, index = True)
-    member_account = Column(String(50), index = True, nullable = False)
-    role = Column(Enum('owner', 'manager', 'member', name = 'role'), nullable = False)
-    member_logstate = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
-    index = Column(Integer, ForeignKey('userinfo.id'))
-    
-    def __init__(self, group_id, member_account, member_logstate, role = "member"):
-        self.group_id = group_id
-        self.member_account = member_account
-        self.member_logstate = member_logstate
-        self.role = role
-        
-        
 class FriendList(Base):
     __tablename__ = "friendlist"
     __table_args__ = {
@@ -82,7 +61,7 @@ class FriendList(Base):
     id = Column(Integer, primary_key = True)
     username = Column(String(50), index = True, unique = True, nullable = False)
     confirmed = Column(Boolean, nullable = False, default = False)
-    index = Column(Integer, ForeignKey('userinfo.id'))
+    index = Column(Integer, ForeignKey('userinfo.id', onupdate="CASCADE", ondelete='CASCADE'), nullable = False)
     
     def __init__(self, username, confirmed):
         self.username = username
@@ -102,6 +81,8 @@ class GroupInfo(Base):
     group_volume = Column(Integer, nullable = False)
     created = Column(DateTime(timezone = True), nullable = False)
     updated = Column(DateTime(timezone = True), nullable = False)
+
+    groupmembers = relationship('GroupMember', cascade="all, delete-orphan", single_parent = True, passive_deletes=True, backref=backref('group', order_by=id))
     
     def __init__(self, group_id, owner, group_name = None, group_size = 1, group_volume = 100, created = None, updated = None):
         self.group_id = group_id
@@ -111,4 +92,22 @@ class GroupInfo(Base):
         self.group_volume = group_volume
         self.created = datetime.datetime.utcnow() if not created else created
         self.updated = self.created if not updated else updated
-        
+
+class GroupMember(Base):
+    __tablename__ = "groupmember"
+    __table_args__ = {
+        'mysql_engine': 'InnoDB',
+        'mysql_charset': 'utf8'
+    }
+    id = Column(Integer, primary_key = True)
+    group_id = Column(Integer, nullable = False, index = True)
+    member_account = Column(String(50), index = True, nullable = False)
+    role = Column(Enum('owner', 'manager', 'member', name = 'role'), nullable = False)
+    member_logstate = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
+    index = Column(Integer, ForeignKey('groupinfo.id', onupdate="CASCADE", ondelete='CASCADE'), nullable = False)
+
+    def __init__(self, group_id, member_account, member_logstate, role = "member"):
+        self.group_id = group_id
+        self.member_account = member_account
+        self.member_logstate = member_logstate
+        self.role = role
