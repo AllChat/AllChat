@@ -92,11 +92,7 @@ class groups_view(MethodView):
             if account != db_group.owner:
                 return ("You don't have the permission to the operation", 405)
             # permission validated, delete the group info from GroupInfo and GroupMember 
-            group_name = db_group.group_name
             db_session.delete(db_group)
-            db_groupmember = db_session.query(GroupMember).filter_by(group_id = groupID).all()
-            for db_member in db_groupmember:
-                db_session.delete(db_member)
             try:
                 db_session.commit()
             except:
