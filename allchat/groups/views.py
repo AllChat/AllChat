@@ -35,9 +35,9 @@ class groups_view(MethodView):
                 group_id = max_group_id[0]+1
             # add users in userlist to group if userlist is not empty
             # update both GroupMember and GroupInfo 
-            user_count = 1
+            members = []
             member = GroupMember(group_id, account, db_user.state, "owner")
-            db_session.add(member)
+            members.append(member)
             illegal_users = set()
             if userlist:
                 for user in {}.fromkeys(userlist).keys(): # eliminate the duplicated account
@@ -48,9 +48,10 @@ class groups_view(MethodView):
                     else:
                         if user != account:
                             member = GroupMember(group_id, user, db_user.state)
-                            db_session.add(member)
-                            user_count += 1
-            group = GroupInfo(group_id, account, group_name,user_count)
+                            members.append(member)
+            group = GroupInfo(group_id, account, group_name,len(members))
+            for member in members:
+                group.groupmembers.append(member)
             db_session.add(group)
             try:
                 db_session.commit()
