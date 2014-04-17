@@ -12,9 +12,11 @@ sys.path.insert(0, possible_topdir)
 
 
 from allchat import app
+from allchat import init
 
 
 if __name__ == '__main__':
+    init()
     app.run(debug = True, use_debugger = False, use_reloader = False)
 #    pool = reactor.getThreadPool()
 #    pool.start()

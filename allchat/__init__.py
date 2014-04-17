@@ -25,8 +25,6 @@ app.register_blueprint(friends.friend, url_prefix = '/v1')
 app.register_blueprint(groups.group, url_prefix = '/v1')
 
 
-
-@app.before_first_request
 def init():
     init_db()
     init_rpc()
