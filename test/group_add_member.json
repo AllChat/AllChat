@@ -1,0 +1,5 @@
+{
+    "account" : "root",
+    "operation": "add",
+    "userlist":["admin"]
+}

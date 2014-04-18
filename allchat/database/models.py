@@ -101,13 +101,15 @@ class GroupMember(Base):
     }
     id = Column(Integer, primary_key = True)
     group_id = Column(Integer, nullable = False)
+    group_name = Column(Unicode(50))
     member_account = Column(String(50), index = True, nullable = False)
     role = Column(Enum('owner', 'manager', 'member', name = 'role'), nullable = False)
     member_logstate = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
     index = Column(Integer, ForeignKey('groupinfo.id', onupdate="CASCADE", ondelete='CASCADE'), nullable = False)
 
-    def __init__(self, group_id, member_account, member_logstate, role = "member"):
+    def __init__(self, group_id, group_name, member_account, member_logstate, role = "member"):
         self.group_id = group_id
+        self.group_name = group_name
         self.member_account = member_account
         self.member_logstate = member_logstate
         self.role = role
