@@ -59,12 +59,19 @@ class FriendList(Base):
         'mysql_charset': 'utf8'
     }
     id = Column(Integer, primary_key = True)
-    username = Column(String(50), index = True, unique = True, nullable = False)
+    username = Column(String(50), index = True, nullable = False)
+    nickname = Column(Unicode(50))
+    state = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
     confirmed = Column(Boolean, nullable = False, default = False)
     index = Column(Integer, ForeignKey('userinfo.id', onupdate="CASCADE", ondelete='CASCADE'), nullable = False)
     
-    def __init__(self, username, confirmed):
+    def __init__(self, username, nickname, state = None, confirmed = False):
         self.username = username
+        self.nickname = nickname
+        if state is None:
+            self.state = 'offline'
+        else:
+            self.state = state
         self.confirmed = confirmed
 
 class GroupInfo(Base):
