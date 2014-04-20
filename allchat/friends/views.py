@@ -5,11 +5,30 @@ from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
 from sqlalchemy import and_
 from allchat.amqp.Impl_kombu import RPC, cast
-from flask import json
+from flask import json, jsonify
 
 class friends_view(MethodView):
-    def get(self):
-        pass
+    def get(self, name):
+        if name is None:
+            return ('URL error', 403)
+        db_session = get_session()
+        try:
+            user = db_session.query(UserInfo).filter(UserInfo.username == name).\
+                        filter(UserInfo.deleted == False).filter(UserInfo.state != 'offline').one()
+        except Exception,e:
+            return ("DataBase Failed", 503, )
+        resp = {}
+        resp['friendlist'] = []
+        for tmp in user.friends:
+            if not tmp.confirmed:
+                continue
+            tmp_user = dict()
+            tmp_user['account'] = tmp.username
+            tmp_user['nickname'] = tmp.nickname
+            tmp_user['state'] = tmp.state
+            resp['friendlist'].append(tmp_user)
+        return jsonify(resp)
+
     def post(self, name):
         if name is None:
             return ("Error in the URL. Please put the account name in the URL.", 403)
