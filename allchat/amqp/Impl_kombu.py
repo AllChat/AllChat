@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from kombu import Exchange, Connection, Consumer, Producer,Queue
+from flask import json
 import allchat
 
 class rpc(object):
@@ -171,5 +172,19 @@ def cast(producer, message, routing_key, delivery_mode = 2):
         producer.publish(message, routing_key, delivery_mode)
     except Exception,e:
         raise e
+
+def send_message(req_user, resp_user, message):
+    cnn = RPC.create_connection()
+    sender = RPC.create_producer(req_user, cnn)
+    try:
+        cast(sender, json.dumps(message), resp_user)
+    except:
+        RPC.release_producer(req_user)
+        RPC.release_connection(cnn)
+        return ("Send message failed due to system error", 500)
+    RPC.release_producer(req_user)
+    RPC.release_connection(cnn)
+    return None
+
 
 RPC = rpc()

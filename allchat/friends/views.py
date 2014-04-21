@@ -4,7 +4,7 @@ from flask import request, make_response, g, session
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
 from sqlalchemy import and_
-from allchat.amqp.Impl_kombu import RPC, cast
+from allchat.amqp.Impl_kombu import RPC, cast, send_message
 from flask import json, jsonify
 
 class friends_view(MethodView):
@@ -216,17 +216,4 @@ class friends_view(MethodView):
         else:
             return ("Please upload a json data", 403)
 
-
-def send_message(req_user, resp_user, message):
-    cnn = RPC.create_connection()
-    sender = RPC.create_producer(req_user, cnn)
-    try:
-        cast(sender, json.dumps(message), resp_user)
-    except:
-        RPC.release_producer(req_user)
-        RPC.release_connection(cnn)
-        return ("Added friend failed due to system error", 500)
-    RPC.release_producer(req_user)
-    RPC.release_connection(cnn)
-    return None
 
