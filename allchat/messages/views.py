@@ -2,7 +2,7 @@
 from flask.views import MethodView
 from flask import request, make_response
 from allchat.database.sql import get_session
-from allchat.database.models import UserInfo, FriendList
+from allchat.database.models import UserInfo, FriendList, GroupInfo, GroupMember
 from allchat.amqp.Impl_kombu import send_message
 from sqlalchemy import and_, or_
 import datetime
@@ -56,16 +56,71 @@ class messages_view(MethodView):
             return ('Forbidden! The recipient is not your friend.', 403)
 
         message = dict()
-        message['from'] = user_from.username
-        message['to'] = user_to.username
-        message['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        message['msg'] = para['msg']
-        ret = send_message(user_from.username, user_to.username, message)
-        if not ret:
-            return ("Send message successfully", 200)
-        else:
-            return ret
+        message['method'] = "send_individual_message"
+        tmp = dict()
+        tmp['from'] = user_from.username
+        tmp['to'] = user_to.username
+        tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        tmp['msg'] = para['msg']
+        message['para'] = tmp
+        ret = None
+        for i in range(0,3):
+            ret = send_message(user_from.username, user_to.username, message)
+            if not ret:
+                return ("Send message successfully", 200)
+            else:
+                continue
+        return ret
 
 
     def group_message(self):
-        pass
+        try:
+            para = request.get_json()
+        except Exception as e:
+            return ("The json data can't be parsed", 403, )
+        sender = request.headers['message_sender']
+        group_id = request.headers['group_id']
+        db_session = get_session()
+        try:
+            user_from = db_session.query(UserInfo).filter(UserInfo.username == sender).\
+                                filter(and_(UserInfo.state != "offline",
+                                UserInfo.deleted == False)).one()
+        except Exception,e:
+            return ('Message send failed due to the sender not exist or offline', 403)
+        try:
+            group_to = db_session.query(GroupInfo).join(GroupMember).filter(
+                                    GroupInfo.id == group_id).one()
+        except Exception,e:
+            return ("Group doesn't exist", 403)
+        message = dict()
+        message['method'] = 'send_group_message'
+        tmp = dict()
+        tmp['from'] = user_from.username
+        tmp['to'] = None
+        tmp['group_id'] = group_id
+        tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        message['para'] = tmp
+        failed = []
+        for user in group_to.groupmembers:
+            if user.member_account == user_from.username:
+                continue
+            message['para']['to'] = user.member_account
+            ret = send_message(user_from.username, user.member_account, message)
+            if ret:
+                failed.append(user.member_account)
+        last = []
+        for user in failed:
+            ret = None
+            for i in range(0, 2):
+                message['para']['to'] = user
+                ret = send_message(user_from.username, user, message)
+                if not ret:
+                    break
+            if ret:
+                last.append(user)
+        if len(last) != 0:
+            return ('Message send partly failed', 206)
+        return ("Send message successfully", 200)
+
+
+
