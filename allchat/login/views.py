@@ -26,6 +26,7 @@ class login_view(MethodView):
             except Exception, e:
                 return make_response(("The user is not registered yet", 403, ))
             if(password == db_user.password):
+                db_session.begin()
                 db_user.state = logstate
                 db_user.login = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
                 db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()

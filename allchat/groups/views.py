@@ -83,6 +83,7 @@ class groups_view(MethodView):
                             member = GroupMember(group_id, group_name, user, db_user.state)
                             members.append(member)
             group = GroupInfo(group_id, account, group_name,len(members))
+            db_session.begin()
             for member in members:
                 group.groupmembers.append(member)
             db_session.add(group)
@@ -143,6 +144,7 @@ class groups_view(MethodView):
                                 old_members.append(user)
                         # for users passed validation, add to GroupMember and update group size in GroupInfo
                         if new_members:
+                            db_session.begin()
                             for member in new_members:
                                 db_group.groupmembers.append(member)
                             db_group.group_size += len(new_members)
@@ -172,6 +174,7 @@ class groups_view(MethodView):
                             for member in db_group.groupmembers:
                                 if member.member_account in user_req_del:
                                     member_to_del.append(member)
+                            db_session.begin()
                             for member in member_to_del:
                                 db_group.groupmembers.remove(member)
                             db_group.group_size -= len(member_to_del)
@@ -206,6 +209,7 @@ class groups_view(MethodView):
                                 if member.member_account == account:
                                     applicant = member
                                     break
+                            db_session.begin()
                             db_group.groupmembers.remove(applicant)
                             db_group.group_size -= 1
                             try:
@@ -237,7 +241,8 @@ class groups_view(MethodView):
                 return ("Group not found", 404)
             if account != db_group.owner:
                 return ("You don't have the permission to the operation", 405)
-            # permission validated, delete the group info from GroupInfo and GroupMember 
+            # permission validated, delete the group info from GroupInfo and GroupMember
+            db_session.begin()
             db_session.delete(db_group)
             try:
                 db_session.commit()
