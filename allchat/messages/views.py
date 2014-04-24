@@ -9,6 +9,8 @@ import datetime
 
 
 class messages_view(MethodView):
+    def get(self):
+        pass
     def post(self, type):
         content_type = request.environ['CONTENT_TYPE'].split(';', 1)[0]
         tmp = content_type.split(';', 1)[0]

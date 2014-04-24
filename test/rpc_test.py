@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*- 
-__author__ = 'Derek Fang'
+# -*- coding: utf-8 -*-
 
 import os, sys
 
@@ -10,13 +8,18 @@ if os.path.exists(os.path.join(possible_topdir, "allchat", "__init__.py")):
     sys.path.insert(0, possible_topdir)
 sys.path.insert(0, possible_topdir)
 
-from allchat import app
 from allchat import amqp
 from allchat.amqp.Impl_kombu import cast,RPC
 
-def func(body, message):
-    print body
-    message.ack()
+class callback(object):
+    def __init__(self):
+        self.s = None
+    def __call__(self, body, message):
+        self.func(body, message)
+        self.s = body
+    def func(self, body, message):
+        print body
+        message.ack()
 
 def test(body, message):
     message.ack()
@@ -29,12 +32,13 @@ if __name__ == '__main__':
     cast(pro,"kakakakakakaka", "test")
     RPC.release_connection(conn)
     RPC.release_producer("pengdong")
-    RPC.register_callbacks("fang", [func])
+    RPC.register_callbacks("fang", [callback()])
 
     queue = RPC.create_queue("fang", "test")
     conn = RPC.create_connection()
     com = RPC.create_consumer("fang", conn, queue)
-    #conn.drain_events()
+    tk = conn.drain_events()
+    print com.callbacks[0].s
     RPC.release_connection(conn)
     RPC.release_consumer("fang")
 
