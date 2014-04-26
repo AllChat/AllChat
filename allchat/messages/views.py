@@ -1,16 +1,31 @@
 # -*- coding: utf-8 -*-
 from flask.views import MethodView
 from flask import request, make_response
+from flask import jsonify
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, FriendList, GroupInfo, GroupMember
-from allchat.amqp.Impl_kombu import send_message
+from allchat.amqp.Impl_kombu import send_message, receive_message
 from sqlalchemy import and_, or_
 import datetime
 
 
 class messages_view(MethodView):
     def get(self):
-        pass
+        try:
+            account = request.headers['account']#这里还需要把这个account和cookie中存的account进行对比
+        except Exception,e:
+            return ("Can't determine account", 400)
+        db_session = get_session()
+        try:
+            user = db_session.query(UserInfo).filter(and_(UserInfo.deleted == False,
+                            UserInfo.state != 'offline', UserInfo.username == account)).one()
+        except Exception,e:
+            return ("Account {0} doesn't exist".format(account), 404)
+        msg = receive_message(user.username)
+        if msg:
+            return jsonify(msg)
+        else:
+            return ("Time out", 404)
     def post(self, type):
         content_type = request.environ['CONTENT_TYPE'].split(';', 1)[0]
         tmp = content_type.split(';', 1)[0]
@@ -33,8 +48,11 @@ class messages_view(MethodView):
             para = request.get_json()
         except Exception as e:
             return ("The json data can't be parsed", 403, )
-        sender = request.headers['message_sender']
-        receiver = request.headers['message_receiver']
+        try:
+            sender = request.headers['message_sender']
+            receiver = request.headers['message_receiver']
+        except Exception,e:
+            return ("HTTP header format error", 403)
         db_session = get_session()
         users = db_session.query(UserInfo).join(FriendList).filter(or_(UserInfo.username == sender,
                                 UserInfo.username == receiver)).filter(and_(UserInfo.state != "offline",

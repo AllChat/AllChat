@@ -29,6 +29,7 @@ class rpc_callbacks(base):
         tmp['method'] = body['method']
         tmp['args'] = dict()
         tmp['args']['account'] = user_from
+        tmp['args']['time'] = para['time']
         tmp['args']['msg'] = msg
         try:
             self.queue.put(tmp, True, self.timeout)

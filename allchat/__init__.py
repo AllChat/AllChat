@@ -6,6 +6,7 @@ app.config.from_pyfile('../conf/allchat.cfg', silent = True)
 
 from allchat.database.sql import get_session
 from allchat.database import init_db
+from allchat import messages
 from allchat.amqp import init_rpc
 from allchat import accounts
 #from allchat import database
@@ -14,7 +15,6 @@ from allchat import friends
 from allchat import groups
 #from allchat import heatbeat
 from allchat import login
-from allchat import messages
 #from allchat import records
 from allchat import versions
 

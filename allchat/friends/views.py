@@ -6,6 +6,7 @@ from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
 from sqlalchemy import and_
 from allchat.amqp.Impl_kombu import RPC, cast, send_message
 from flask import json, jsonify
+import datetime
 
 class friends_view(MethodView):
     def get(self, name):
@@ -16,7 +17,7 @@ class friends_view(MethodView):
             user = db_session.query(UserInfo).filter(UserInfo.username == name).\
                         filter(UserInfo.deleted == False).filter(UserInfo.state != 'offline').one()
         except Exception,e:
-            return ("DataBase Failed", 503, )
+            return ("Account {0} doesn't exist".format(name), 404)
         resp = {}
         resp['friendlist'] = []
         for tmp in user.friends:
@@ -58,6 +59,7 @@ class friends_view(MethodView):
                     tmp = dict()
                     tmp['from'] = req_user.username
                     tmp['to'] = resp_user.username
+                    tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     tmp['msg'] = para['message']
                     message['para'] = tmp
                     cnn = RPC.create_connection()
@@ -152,6 +154,7 @@ class friends_view(MethodView):
                             tmp = dict()
                             tmp['from'] = req_user.username
                             tmp['to'] = para['account']
+                            tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                             db_session.begin()
                             if para['result'] == 'accept':
                                 user.confirmed = True

@@ -3,6 +3,7 @@ from kombu import Exchange, Connection, Consumer, Producer,Queue
 from flask import json
 import socket
 import allchat
+from allchat.messages.handles import rpc_callbacks
 
 class rpc(object):
     def __init__(self):
@@ -96,8 +97,9 @@ class rpc(object):
             try:
                 self.callbacks[name]
             except KeyError,e:
-                raise Exception("Please invoke register_callbacks before")
-            else:
+                self.register_callbacks(name, [rpc_callbacks()])
+                #raise Exception("Please invoke register_callbacks before")
+            finally:
                 self.consumer[name] = Consumer(channel, queues, callbacks = self.callbacks[name])
         self.consumer[name].consume()
         return self.consumer[name]
@@ -192,7 +194,7 @@ def receive_message(user, timeout = 240):
     conn = RPC.create_connection()
     comsumer = RPC.create_consumer(user, conn, queue)
     try:
-        conn.drain_events(timeout)
+        conn.drain_events(timeout = timeout)
     except socket.timeout:
         RPC.release_connection(conn)
         RPC.release_consumer(user)
