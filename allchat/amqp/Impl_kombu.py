@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from kombu import Exchange, Connection, Consumer, Producer,Queue
 from flask import json
-import socket
+import time
 import allchat
 from allchat.messages.handles import rpc_callbacks
 
@@ -101,7 +101,7 @@ class rpc(object):
                 #raise Exception("Please invoke register_callbacks before")
             finally:
                 self.consumer[name] = Consumer(channel, queues, callbacks = self.callbacks[name])
-        self.consumer[name].consume()
+        #self.consumer[name].consume()
         return self.consumer[name]
 
     def release_consumer(self, name):
@@ -193,9 +193,16 @@ def receive_message(user, timeout = 240):
     queue = RPC.create_queue(user, user)
     conn = RPC.create_connection()
     comsumer = RPC.create_consumer(user, conn, queue)
-    try:
-        conn.drain_events(timeout = timeout)
-    except socket.timeout:
+    loop = 0
+    while loop < (timeout / 5):
+        #conn.drain_events(timeout = timeout)
+        msg = comsumer.queues[0].get()
+        if msg:
+            comsumer.receive(msg.payload, msg)
+            break
+        loop += 1
+        time.sleep(5)
+    if loop == (timeout / 5):
         RPC.release_connection(conn)
         RPC.release_consumer(user)
         return None

@@ -16,7 +16,6 @@ class callback(object):
         self.s = None
     def __call__(self, body, message):
         self.func(body, message)
-        self.s = body
     def func(self, body, message):
         print body
         message.ack()
@@ -29,20 +28,24 @@ if __name__ == '__main__':
     amqp.init_rpc()
     conn = RPC.create_connection()
     pro = RPC.create_producer("pengdong", conn)
-    cast(pro,"kakakakakakaka", "test")
-    RPC.release_connection(conn)
-    RPC.release_producer("pengdong")
+    # RPC.release_connection(conn)
+    # RPC.release_producer("pengdong")
     RPC.register_callbacks("fang", [callback()])
 
     queue = RPC.create_queue("fang", "test")
-    conn = RPC.create_connection()
+    #conn = RPC.create_connection()
     com = RPC.create_consumer("fang", conn, queue)
-    tk = conn.drain_events()
-    print com.callbacks[0].s
-    RPC.release_connection(conn)
+    # cast(pro,"kakakakakakaka", "test")
+    # cast(pro,"kakakakakakaka", "test")
+    # cast(pro,"kakakakakakaka", "test")
+    # cast(pro,"kakakakakakaka", "test")
+    # cast(pro,"kakakakakakaka", "test")
+    # cast(pro,"kakakakakakaka", "test")
+    while True:
+        msg = com.queues[0].get(no_ack = True)
+        print msg.payload
     RPC.release_consumer("fang")
 
-    conn = RPC.create_connection()
     RPC.extend_callbacks("fang", [test])
     com = RPC.create_consumer("fang", conn)
     RPC.release_consumer(com)

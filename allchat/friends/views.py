@@ -191,6 +191,7 @@ class friends_view(MethodView):
                     tmp = dict()
                     tmp['from'] = req_user.username
                     tmp['to'] = resp_user.username
+                    tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     if para['result'] == 'accept':
                         req_user.friends.append(FriendList(para['account'], resp_user.nickname, resp_user.state, True))
                         tmp['msg'] = 'accept'
