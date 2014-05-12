@@ -10,7 +10,31 @@ import datetime
 
 
 class messages_view(MethodView):
-    def get(self):
+    def get(self, type, user, file):
+        if type == 'text':
+            user = user #这里还需要把这个user和cookie中存的user进行对比
+            db_session = get_session()
+            try:
+                account = db_session.query(UserInfo).filter(and_(UserInfo.deleted == False,
+                                UserInfo.state != 'offline', UserInfo.username == user)).one()
+            except Exception,e:
+                return ("Account {0} doesn't exist".format(user), 404)
+            if not file:
+                msg = receive_message(account.username)
+                if msg:
+                    return jsonify(msg)
+                else:
+                    return ("Time out", 404)
+            else:
+                return ("URL error", 403)
+        elif type == 'image':
+            pass
+        elif type == 'sound':
+            pass
+        elif type == 'video':
+            pass
+        else:
+            return ('Type {0} is not found'.format(type), 404)
         try:
             account = request.headers['account']#这里还需要把这个account和cookie中存的account进行对比
         except Exception,e:

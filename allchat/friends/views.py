@@ -201,6 +201,13 @@ class friends_view(MethodView):
                     db_session.begin()
                     try:
                         db_session.add(req_user)
+                        for friend in resp_user.friends:
+                            if friend.username == req_user.username:
+                                if tmp['msg'] == 'accept':
+                                    friend.confirmed = True
+                                    db_session.add(resp_user)
+                                else:
+                                    db_session.delete(friend)
                         db_session.commit()
                     except:
                         db_session.rollback()

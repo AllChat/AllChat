@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 from flask import json
 import Queue
+from allchat.database.sql import get_session
+from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
+from sqlalchemy import and_
+
+
 class base(object):
     def __init__(self):
         super(base, self).__init__()
@@ -38,7 +43,60 @@ class rpc_callbacks(base):
         message.ack()
 
     def add_friend_resp(self, body, message):
-        pass
+        para = body['para']
+        user_from = para['from']
+        result = para['msg']
+        if result == 'accept':
+            pass
+            # try:
+            #     user = db_session.query(UserInfo).join(FriendList).with_lockmode('read').filter(and_(
+            #             UserInfo.username == para['to'], UserInfo.deleted == False)).one()
+            # except Exception, e:
+            #     message.ack()
+            #     return None
+            # for tmp in user.friends:
+            #     if tmp == para['from']:
+            #         tmp.confirmed = True
+            #         db_session.begin()
+            #         try:
+            #             db_session.add(user)
+            #             db_session.commit()
+            #         except:
+            #             db_session.rollback()
+            #             message.ack()
+            #             return None
+        elif result == 'reject' or result == 'failed':
+            pass
+            # try:
+            #     user = db_session.query(UserInfo).join(FriendList).with_lockmode('read').filter(and_(
+            #             UserInfo.username == para['to'], UserInfo.deleted == False)).one()
+            # except Exception, e:
+            #     message.ack()
+            #     return None
+            # for tmp in user.friends:
+            #     if tmp == para['from']:
+            #         db_session.begin()
+            #         try:
+            #             db_session.delete(tmp)
+            #             db_session.commit()
+            #         except:
+            #             db_session.rollback()
+            #             message.ack()
+            #             return None
+        else:
+            message.ack()
+            return None
+        tmp = dict()
+        tmp['method'] = body['method']
+        tmp['args'] = dict()
+        tmp['args']['account'] = user_from
+        tmp['args']['time'] = para['time']
+        tmp['args']['msg'] = result
+        try:
+            self.queue.put(tmp, True, self.timeout)
+        except Queue.Full,e:
+            return None
+        message.ack()
     def send_individual_message(self, body, message):
         pass
     def send_group_message(self, body, message):
