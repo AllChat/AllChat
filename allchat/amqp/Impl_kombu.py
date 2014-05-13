@@ -193,6 +193,11 @@ def receive_message(user, timeout = 240):
     queue = RPC.create_queue(user, user)
     conn = RPC.create_connection()
     comsumer = RPC.create_consumer(user, conn, queue)
+    if not comsumer.callbacks[0].empty: #若回调函数消息队列非空，则直接从队列中获取消息
+        msg = comsumer.callbacks[0].get_msg()
+        RPC.release_connection(conn)
+        RPC.release_consumer(user)
+        return msg
     loop = 0
     while loop < (timeout / 5):
         #conn.drain_events(timeout = timeout)

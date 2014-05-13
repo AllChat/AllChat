@@ -140,3 +140,7 @@ class rpc_callbacks(base):
         self.queue.task_done()
         return tmp
 
+    @property
+    def empty(self):
+        return self.queue.empty()
+
