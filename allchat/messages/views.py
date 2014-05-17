@@ -18,7 +18,7 @@ class messages_view(MethodView):
                 account = db_session.query(UserInfo).filter(and_(UserInfo.deleted == False,
                                 UserInfo.state != 'offline', UserInfo.username == user)).one()
             except Exception,e:
-                return ("Account {0} doesn't exist".format(user), 404)
+                return ("Account {0} doesn't exist or logout now".format(user), 404)
             if not file:
                 msg = receive_message(account.username)
                 if msg:
@@ -58,7 +58,7 @@ class messages_view(MethodView):
                 if type == "individual":
                     return self.individual_message()
                 elif type == "group":
-                    return self.individual_message()
+                    return self.group_message()
                 else:
                     return ("Error URL", 403)
             except Exception,e:
@@ -133,7 +133,7 @@ class messages_view(MethodView):
             return ('Message send failed due to the sender not exist or offline', 403)
         try:
             group_to = db_session.query(GroupInfo).join(GroupMember).filter(
-                                    GroupInfo.id == group_id).one()
+                                    GroupInfo.group_id == group_id).one()
         except Exception,e:
             return ("Group doesn't exist", 403)
         message = dict()
@@ -143,6 +143,7 @@ class messages_view(MethodView):
         tmp['to'] = None
         tmp['group_id'] = group_id
         tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        tmp['msg'] = para['msg']
         message['para'] = tmp
         failed = []
         for user in group_to.groupmembers:
