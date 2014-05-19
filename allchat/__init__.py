@@ -1,6 +1,6 @@
-from flask import Flask
+from flask import Flask, render_template, url_for, redirect
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config.from_pyfile('../conf/allchat.cfg', silent = True)
 
 
@@ -35,3 +35,8 @@ def shutdown_session(exception=None):
     db_session = get_session()
     if db_session is not None:
         db_session.remove()
+
+@app.route('/', methods = ['GET'])
+def index():
+    return render_template('index.html')
+    #return redirect(url_for('login.login_view'))
