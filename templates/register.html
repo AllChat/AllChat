@@ -7,53 +7,62 @@
     <title>Register to AllChat</title>
 </head>
 <body>
-    <div id="top"></div>
+    <div id="top">
+        <div id="top-login"><p>已有账号？登录</p></div>
+        <img src="../images/register.gif" width="50" height="50" />
+        <hr />
+    </div>
     <div id="middle">
         <div id="middle-head">
-            <h1>开始AllChat之旅</h1>
+            <p>开启AllChat之旅</p>
         </div>
         <div id="middle-body">
             <form id="middle-form" action="/v1/accounts/" method="POST">
                 <table>
                     <tr>
-                        <td><p>账户名</p></td>
-                        <td><input type="text" name="account" placeholder="数字，字母以及!@#$%^&*_. 长度小于256"></td>
-                        <td></td>
+                        <td class="first-row"><p>账户名</p></td>
+                        <td class="second-row"><input class="text-input" type="text" name="account" placeholder="数字,字母或者!@#$%^&*_. 长度小于256"></td>
+                        <td class="third-row"></td>
                     </tr>
                     <tr>
-                        <td><p>昵称</p></td>
-                        <td><input type="text" name="nickname" placeholder="任何字符，长度小于256"></td>
-                        <td></td>
+                        <td class="first-row"><p>昵称</p></td>
+                        <td class="second-row"><input class="text-input" type="text" name="nickname" placeholder="任何字符,长度小于256"></td>
+                        <td class="third-row"></td>
                     </tr>
                     <tr>
-                        <td><p>密码</p></td>
-                        <td><input type="password" name="password" placeholder="数字，字母以及!@#$%^&*_. 长度小于256"></td>
-                        <td></td>
+                        <td class="first-row"><p>密码</p></td>
+                        <td class="second-row"><input class="text-input" type="password" name="password" placeholder="数字,字母或者!@#$%^&*_. 长度小于256"></td>
+                        <td class="third-row"></td>
                     </tr>
                     <tr>
-                        <td><p>重复密码</p></td>
-                        <td><input type="password" name="password-confirm" placeholder="请再重复一遍密码"></td>
-                        <td></td>
+                        <td class="first-row"><p>重复密码</p></td>
+                        <td class="second-row"><input class="text-input" type="password" name="password-confirm" placeholder="请再重复一遍密码"></td>
+                        <td class="third-row"></td>
                     </tr>
                     <tr>
-                        <td><p>注册邮箱</p></td>
-                        <td><input type="text" name="email"></td>
-                        <td></td>
+                        <td class="first-row"><p>注册邮箱</p></td>
+                        <td class="second-row"><input class="text-input" type="text" name="email"></td>
+                        <td class="third-row"></td>
                     </tr>
                     <tr>
-                        <td><p>验证码</p></td>
-                        <td><input type="text" name="email"></td>
-                        <td></td>
+                        <td class="first-row"><p>验证码</p></td>
+                        <td class="second-row"><input class="text-verify" type="text" name="verify"></td>
+                        <td class="third-row"></td>
                     </tr>
                     <tr>
-                        <td></td>
-                        <td><input type="submit" name="submit-button" value="注册"/></td>
-                        <td></td>
+                        <td class="first-row"></td>
+                        <td class="second-row"><input type="submit" name="submit-button" value="注册"/></td>
+                        <td class="third-row"></td>
                     </tr>
                 </table>
             </form>
+            <div id="footer">
+                <p>
+                    注: 其他用户能根据名字、用户名或邮件地址找到你。
+                    你的邮件地址不会公开显示。你可以随时更改隐私设置。
+                </p>
+            </div>
         </div>
     </div>
-    <div id="footer"></div>
 </body>
 </html>

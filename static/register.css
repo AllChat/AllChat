@@ -1,0 +1,55 @@
+body
+{
+    font-family: Verdana, Geneva, Arial, sans-serif;
+    font-size: 14px;
+}
+
+body div#top-login
+{
+    float:right;
+}
+body div#top hr
+{
+    clear:right;
+}
+
+body div#middle
+{
+    width: 600px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body div#middle-head p
+{
+    font-size: 150%;
+    font-weight: bold;
+}
+
+body td.middle.first-row
+{
+    width: 100px;
+}
+
+body td.middle.second-row
+{
+
+}
+
+body td.middle.second-row
+{
+
+}
+
+
+body div#footer
+{
+    width: 400px;
+}
+
+body input.text-input
+{
+    width: 400px
+}
