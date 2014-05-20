@@ -13,7 +13,45 @@
             <h1>开始AllChat之旅</h1>
         </div>
         <div id="middle-body">
-            <form></form>
+            <form id="middle-form" action="/v1/accounts/" method="POST">
+                <table>
+                    <tr>
+                        <td><p>账户名</p></td>
+                        <td><input type="text" name="account" placeholder="数字，字母以及!@#$%^&*_. 长度小于256"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><p>昵称</p></td>
+                        <td><input type="text" name="nickname" placeholder="任何字符，长度小于256"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><p>密码</p></td>
+                        <td><input type="password" name="password" placeholder="数字，字母以及!@#$%^&*_. 长度小于256"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><p>重复密码</p></td>
+                        <td><input type="password" name="password-confirm" placeholder="请再重复一遍密码"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><p>注册邮箱</p></td>
+                        <td><input type="text" name="email"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><p>验证码</p></td>
+                        <td><input type="text" name="email"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><input type="submit" name="submit-button" value="注册"/></td>
+                        <td></td>
+                    </tr>
+                </table>
+            </form>
         </div>
     </div>
     <div id="footer"></div>
