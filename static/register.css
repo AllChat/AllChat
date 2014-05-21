@@ -8,9 +8,20 @@ body div#top-login
 {
     float:right;
 }
+
+body div#top-login p
+{
+    margin-right: 80px;
+}
+
+body div#top img
+{
+    margin-left: 150px;
+}
+
 body div#top hr
 {
-    clear:right;
+    clear: both;
 }
 
 body div#middle
@@ -28,28 +39,58 @@ body div#middle-head p
     font-weight: bold;
 }
 
-body td.middle.first-row
+body td.first-row
 {
-    width: 100px;
+    width: 78px;
+    height: 20px;
 }
 
-body td.middle.second-row
-{
-
-}
-
-body td.middle.second-row
+body td.second-row
 {
 
 }
 
-
-body div#footer
+body td.third-row
 {
-    width: 400px;
+
+}
+
+
+body div#footer p
+{
+    width: 475px;
+    font-size: 80%;
+    color: #939393;
 }
 
 body input.text-input
 {
-    width: 400px
+    width: 382px;
+    height: 20px;
+    padding: 2px;
+    border:1px solid #e1e8ed;
+    border-radius:5px;
+}
+
+body input.text-verify
+{
+    display: inline-block;
+    width: 70px;
+    height: 20px;
+    padding: 2px;
+    border:1px solid #e1e8ed;
+    border-radius:5px;
+}
+
+body input#submit-button
+{
+    width: 170px;
+    height: 30px;
+    text-align: center;
+    background-color: #fa2;
+    background-repeat: repeat-x;
+    background-image: linear-gradient(#ffec46,#f09600);
+    background-position: 0 0;
+    border-color: #ed9200;
+    border-radius: 3px;
 }

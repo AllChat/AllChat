@@ -21,22 +21,22 @@
                 <table>
                     <tr>
                         <td class="first-row"><p>账户名</p></td>
-                        <td class="second-row"><input class="text-input" type="text" name="account" placeholder="数字,字母或者!@#$%^&*_. 长度小于256"></td>
+                        <td class="second-row"><input class="text-input" type="text" name="account" required="required" placeholder="数字,字母或者!@#$%^&*_. 长度小于256"></td>
                         <td class="third-row"></td>
                     </tr>
                     <tr>
                         <td class="first-row"><p>昵称</p></td>
-                        <td class="second-row"><input class="text-input" type="text" name="nickname" placeholder="任何字符,长度小于256"></td>
+                        <td class="second-row"><input class="text-input" type="text" name="nickname" required="required" placeholder="任何字符,长度小于256"></td>
                         <td class="third-row"></td>
                     </tr>
                     <tr>
                         <td class="first-row"><p>密码</p></td>
-                        <td class="second-row"><input class="text-input" type="password" name="password" placeholder="数字,字母或者!@#$%^&*_. 长度小于256"></td>
+                        <td class="second-row"><input class="text-input" type="password" name="password" required="required" placeholder="数字,字母或者!@#$%^&*_. 长度小于256"></td>
                         <td class="third-row"></td>
                     </tr>
                     <tr>
                         <td class="first-row"><p>重复密码</p></td>
-                        <td class="second-row"><input class="text-input" type="password" name="password-confirm" placeholder="请再重复一遍密码"></td>
+                        <td class="second-row"><input class="text-input" type="password" name="password-confirm" required="required" placeholder="请再重复一遍密码"></td>
                         <td class="third-row"></td>
                     </tr>
                     <tr>
@@ -46,12 +46,15 @@
                     </tr>
                     <tr>
                         <td class="first-row"><p>验证码</p></td>
-                        <td class="second-row"><input class="text-verify" type="text" name="verify"></td>
+                        <td class="second-row"><input class="text-verify" type="text" name="verify" required="required"></td>
                         <td class="third-row"></td>
                     </tr>
                     <tr>
                         <td class="first-row"></td>
-                        <td class="second-row"><input type="submit" name="submit-button" value="注册"/></td>
+                        <td class="second-row">
+                            <br>
+                            <input type="submit" id="submit-button" name="submit-button" value="创建我的帐号"/>
+                        </td>
                         <td class="third-row"></td>
                     </tr>
                 </table>
