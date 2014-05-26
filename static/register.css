@@ -26,11 +26,12 @@ body div#top hr
 
 body div#middle
 {
-    width: 650px;
+    width: 750px;
     padding-top: 5px;
     padding-bottom: 5px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 325px;
+    margin-right: 325px;
+    position: absolute;
 }
 
 body div#middle-head p
@@ -41,18 +42,26 @@ body div#middle-head p
 
 body td.first-row
 {
-    width: 78px;
-    height: 20px;
+    width: 100px;
+    height: 30px;
+    padding-left: 0px;
+    padding-right: 0px;
 }
 
 body td.second-row
 {
     width: 400px;
+    height: 30px;
+    padding-right: 0px;
+    padding-left: 0px;
 }
 
 body td.third-row
 {
     width: 200px;
+    height: 30px;
+    padding-left: 0px;
+    padding-right: 0px;
 }
 
 
@@ -102,7 +111,7 @@ body input#submit-button
     height: 25px;
     font-family:Arial;
     font-style:italic;
-    color:Red;
+    color:blue;
     border:0;
     padding:2px 3px;
     letter-spacing:3px;

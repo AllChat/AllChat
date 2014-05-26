@@ -1,8 +1,57 @@
 /**
  * Created by Derek on 14-5-25.
  */
+
+function inputValidate() {
+    $("#middle-form input").each(function(index, element) {
+        var name = $(element).attr("name");
+        if(name == "account") {
+            $(element).on("keyup blur",function(event) {
+                var pattern = /^[\w!@#$%^&*_.]+$/;
+                var value = $(this).val();
+                var $place = $(this).parent().next();
+                if(event.type == "keyup") {
+                    if (!pattern.test(value)) {
+                        var content = "<p>请使用数字,字母或!@#$%^&*_.</p>";
+                        $(content).appendTo($place.empty()).css({
+                            "color": "red",
+                            "font-size": parseFloat($place.css("font-size")) * 0.8 + "px"
+                        });
+                    }
+                    else if(value.length > 256){
+                        var content = "<p>用户名长度超过256</p>";
+                        $(content).appendTo($place.empty()).css({
+                            "color": "red",
+                            "font-size": parseFloat($place.css("font-size")) * 0.8 + "px"
+                        });
+                    }
+                    else{
+                        var content = "<p>名字很棒</p>";
+                        $(content).appendTo($place.empty()).css({
+                            "color": "green",
+                            "font-size": parseFloat($place.css("font-size")) * 0.8 + "px"
+                        });
+                    }
+                }
+                else{
+                    if (value == ""){
+                        var content = "<p>请输入用户名</p>";
+                        $(content).appendTo($place.empty()).css({
+                            "color": "red",
+                            "font-size": parseFloat($place.css("font-size")) * 0.8 + "px"
+                        });
+                    }
+                }
+
+            });
+        }
+    });
+}
+
+
 $(document).ready(function(){
     var globalCode;
+    var canBeSubmit = false;
     var generateCode = function() {
         var code = "";
         var codeLength = 4;//验证码的长度
@@ -31,6 +80,9 @@ $(document).ready(function(){
         $(this).children("input").val(generateCode());
     });
     $("#checkcode").val(generateCode());
+
+    inputValidate();
+
     $("#middle-form").on("click", "#submit-button",function(event){
         event.preventDefault();
         var pass_tmp = undefined;
@@ -41,7 +93,7 @@ $(document).ready(function(){
                 var pattern = /^[\w!@#$%^&*_.]+$/;
                 if (!pattern.test(value)) {
                     var $place = $(element).parent().next();
-                    content = "<p>用户名中包含非法字符,请使用数字,字母或者!@#$%^&*_.</p>";
+                    content = "<p>请使用数字,字母或者!@#$%^&*_.</p>";
                     $place.html(content).css({
                         "color": "red",
                         "font-size": parseFloat($place.css("font-size")) * 0.8 + "px"
