@@ -26,7 +26,7 @@ body div#top hr
 
 body div#middle
 {
-    width: 600px;
+    width: 650px;
     padding-top: 5px;
     padding-bottom: 5px;
     margin-left: auto;
@@ -47,12 +47,12 @@ body td.first-row
 
 body td.second-row
 {
-
+    width: 400px;
 }
 
 body td.third-row
 {
-
+    width: 200px;
 }
 
 
@@ -75,7 +75,7 @@ body input.text-input
 body input.text-verify
 {
     display: inline-block;
-    width: 70px;
+    width: 80px;
     height: 25px;
     padding: 2px;
     border:1px solid #e1e8ed;
@@ -93,4 +93,24 @@ body input#submit-button
     background-position: 0 0;
     border-color: #ed9200;
     border-radius: 3px;
+}
+
+.code {
+    background-image:url(../images/w1.jpg);
+    font-size: 110%;
+    width: 60px;
+    height: 25px;
+    font-family:Arial;
+    font-style:italic;
+    color:Red;
+    border:0;
+    padding:2px 3px;
+    letter-spacing:3px;
+    font-weight:bolder;
+    text-align: center;
+    user-select: none;
+    -o-user-select:none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
 }

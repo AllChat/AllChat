@@ -47,8 +47,12 @@
                     </tr>
                     <tr>
                         <td class="first-row"><p>验证码</p></td>
-                        <td class="second-row"><input class="text-verify" type="text" name="verify" required="required"></td>
-                        <td class="third-row"></td>
+                        <td class="second-row" colspan="2">
+                            <input class="text-verify" type="text" name="verify" required="required">
+                            <a href="#" id="createcode">
+                                <input type="text" id="checkcode" class="code" readonly="readonly"/>
+                            </a>
+                        </td>
                     </tr>
                     <tr>
                         <td class="first-row"></td>

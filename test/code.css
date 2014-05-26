@@ -1,0 +1,15 @@
+.code{
+background-image:url(../images/w1.jpg);
+font-family:Arial;
+font-style:italic;
+color:Red;
+border:0;
+padding:2px 3px;
+letter-spacing:3px;
+font-weight:bolder;
+user-select: none;
+-o-user-select:none;
+-moz-user-select: none;
+-khtml-user-select: none;
+-webkit-user-select: none;
+}
