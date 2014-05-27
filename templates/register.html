@@ -4,6 +4,7 @@
     <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link type="text/css" rel="stylesheet" href="../static/register.css">
     <script type="text/javascript" src="../static/jquery-1.11.1.js"></script>
+    <script type="text/javascript" src="../static/jquery.json-2.4.min.js"></script>
     <script type="text/javascript" src="../static/register.js"></script>
     <title>Register to AllChat</title>
 </head>
@@ -22,17 +23,17 @@
                 <table>
                     <tr>
                         <td class="first-row"><p>账户名</p></td>
-                        <td class="second-row"><input class="text-input" type="text" name="account" required="required" placeholder="数字,字母或者!@#$%^&*_. 长度小于256"></td>
+                        <td class="second-row"><input class="text-input" type="text" id="account" name="account" required="required" placeholder="数字,字母或者!@#$%^&*_. 长度小于256"></td>
                         <td class="third-row"></td>
                     </tr>
                     <tr>
                         <td class="first-row"><p>昵称</p></td>
-                        <td class="second-row"><input class="text-input" type="text" name="nickname" required="required" placeholder="任何字符,长度小于256"></td>
+                        <td class="second-row"><input class="text-input" type="text" id="nickname" name="nickname" required="required" placeholder="任何字符,长度小于256"></td>
                         <td class="third-row"></td>
                     </tr>
                     <tr>
                         <td class="first-row"><p>密码</p></td>
-                        <td class="second-row"><input class="text-input" type="password" name="password" required="required" placeholder="数字,字母或者!@#$%^&*_. 长度小于256"></td>
+                        <td class="second-row"><input class="text-input" type="password" id="password" name="password" required="required" placeholder="数字,字母或者!@#$%^&*_. 长度小于256"></td>
                         <td class="third-row"></td>
                     </tr>
                     <tr>
@@ -42,7 +43,7 @@
                     </tr>
                     <tr>
                         <td class="first-row"><p>注册邮箱</p></td>
-                        <td class="second-row"><input class="text-input" type="text" name="email"></td>
+                        <td class="second-row"><input class="text-input" type="text" id="email" name="email" required="required"></td>
                         <td class="third-row"></td>
                     </tr>
                     <tr>
