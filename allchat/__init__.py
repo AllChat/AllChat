@@ -37,6 +37,10 @@ def shutdown_session(exception=None):
         db_session.remove()
 
 @app.route('/', methods = ['GET'])
+@app.route('/index.html', methods = ['GET'])
 def index():
     return render_template('index.html')
     #return redirect(url_for('login.login_view'))
+@app.route('/register.html', methods = ['GET'])
+def signup():
+    return render_template('register.html')

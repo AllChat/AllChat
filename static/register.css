@@ -105,7 +105,7 @@ body input#submit-button
 }
 
 .code {
-    background-image:url(../images/w1.jpg);
+    background-image:url(/static/images/w1.jpg);
     font-size: 110%;
     width: 60px;
     height: 25px;
