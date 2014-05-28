@@ -23,7 +23,7 @@ class FileSave(object):
         
     def savePicture(self, pic, pic_format, sender):
         file_name = ''.join(time.strftime("%Y%m%d%H%M%S",time.localtime()),
-                            ,sender,'.',pic_format)
+                            sender,'.',pic_format)
         pic_dir = os.path.abspath(self.current_dir + '/../../Data/picture')
         if not os.path.exists(pic_dir):
             os.makedirs(pic_dir)
