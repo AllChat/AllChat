@@ -69,9 +69,9 @@ function inputValidate() {
                         });
                     }
                     else{
-                        var content = "<p>名字很棒</p>";
+                        var content = "<p>√</p>";
                         if (name == "password") {
-                            content = "<p>密码很棒</p>";
+                            content = "<p>√</p>";
                             passTmp = value;
                             canBeSubmit[2] = 1;
                         }
@@ -80,7 +80,10 @@ function inputValidate() {
                         }
                         $(content).appendTo($place.empty()).css({
                             "color": "green",
-                            "font-size": parseFloat($place.css("font-size")) * 0.8 + "px"
+                            "padding": "0px 2px 0px 2px",
+                            "margin": "5px 0px 5px 0px",
+                            "height": "20px",
+                            "font-size": parseFloat($place.css("font-size")) * 1.2 + "px"
                         });
                     }
                 }
@@ -152,8 +155,16 @@ function inputValidate() {
                     canBeSubmit[3] = 0;
                 }
                 else {
+                    var content = "<p>√</p>";
                     $place.empty();
                     canBeSubmit[3] = 1;
+                    $(content).appendTo($place.empty()).css({
+                        "color": "green",
+                        "padding": "0px 2px 0px 2px",
+                        "margin": "5px 0px 5px 0px",
+                        "height": "20px",
+                        "font-size": parseFloat($place.css("font-size")) * 1.2 + "px"
+                    });
                 }
             });
         }
@@ -180,10 +191,13 @@ function inputValidate() {
                         canBeSubmit[4] = 0;
                     }
                     else{
-                        var content = "<p>邮箱名可用</p>";
+                        var content = "<p>√</p>";
                         $(content).appendTo($place.empty()).css({
                             "color": "green",
-                            "font-size": parseFloat($place.css("font-size")) * 0.8 + "px"
+                            "padding": "0px 2px 0px 2px",
+                            "margin": "5px 0px 5px 0px",
+                            "height": "20px",
+                            "font-size": parseFloat($place.css("font-size")) * 1.2 + "px"
                         });
                         canBeSubmit[4] = 1;
                     }
@@ -276,7 +290,21 @@ $(document).ready(function(){
             }).done(function (data, textStatus, jqXHR) {
                 alert("succeed");
             }).fail(function (jqXHR, textStatus, errorThrown) {
-                alert("failed");
+                var content;
+                var $place = $("#submit-button").parent();
+                if(jqXHR.status == 503) {
+                    content = "<p>数据库故障,请重新提交</p>";
+                }
+                else {
+                    content = "<p>用户名已存在</p>";
+                }
+                $(content).appendTo($place.children("p").remove().end()).css({
+                    "color": "red",
+                    "font-size": parseFloat($place.css("font-size")) * 0.8 + "px",
+                    "display": "inline",
+                    "padding": "0px 4px 0px 4px"
+                });
+                $("#checkcode").val(generateCode());
             });
         }
     });
