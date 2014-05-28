@@ -1,10 +1,10 @@
 # --*-- coding:utf-8 --*--
-import win32com.client
 import os
+from encrypt import Encryptor
 
-class FileExtract(object):
+class FileExtractor(object):
     def __init__(self):
-        self.key = '0x1cd59c152bL'
+        pass
         
     def getFileContent(self, startTime, endTime, option):
         ''' get the file content of required users in the specific time duration.
@@ -15,11 +15,3 @@ class FileExtract(object):
         '''
         pass
         
-    def decrypt(self, content): # key:密钥,content:密文 
-        EncryptedData = win32com.client.Dispatch('CAPICOM.EncryptedData') 
-        EncryptedData.Algorithm.KeyLength = 5 
-        EncryptedData.Algorithm.Name = 2 
-        EncryptedData.SetSecret(self.key) 
-        EncryptedData.Decrypt(content) 
-        str = EncryptedData.Content 
-        return str 
