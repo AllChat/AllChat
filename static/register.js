@@ -312,6 +312,7 @@ $(document).ready(function(){
                     var second = parseInt($("#redirect-timer").text());
                     if(second > 0) {
                         second--;
+                        $("#redirect-timer").html(second.toString());
                     }
                     if(second == 0) {
                         window.clearTimeout(id);
