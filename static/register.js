@@ -41,6 +41,9 @@ function inputValidate() {
                 var value = $(this).val();
                 var $place = $(this).parent().next();
                 if(event.type == "keyup") {
+                    if(value == "") {
+                        return false;
+                    }
                     if (!pattern.test(value)) {
                         var content = "<p>请使用数字,字母或!@#$%^&*_.</p>";
                         $(content).appendTo($place.empty()).css({
@@ -113,6 +116,9 @@ function inputValidate() {
                 var value = $(this).val();
                 var $place = $(this).parent().next();
                 if(event.type == "keyup") {
+                    if(value == "") {
+                        return false;
+                    }
                     if(value.length > 256){
                         var content = "<p>昵称长度超过256</p>";
                         $(content).appendTo($place.empty()).css({
@@ -121,11 +127,14 @@ function inputValidate() {
                         });
                         canBeSubmit[1] = 0;
                     }
-                    else{
-                        var content = "<p>昵称很棒</p>";
+                    else if(value.length != 0){
+                        var content = "<p>√</p>";
                         $(content).appendTo($place.empty()).css({
                             "color": "green",
-                            "font-size": parseFloat($place.css("font-size")) * 0.8 + "px"
+                            "padding": "0px 2px 0px 2px",
+                            "margin": "5px 0px 5px 0px",
+                            "height": "20px",
+                            "font-size": parseFloat($place.css("font-size")) * 1.2 + "px"
                         });
                         canBeSubmit[1] = 1;
                     }
@@ -146,6 +155,9 @@ function inputValidate() {
             $(element).on("keyup blur", function (event) {
                 var value = $(this).val();
                 var $place = $(this).parent().next();
+                if(value == "" && event.type == "keyup") {
+                    return false;
+                }
                 if(passTmp != value) {
                     var content = "<p>两次密码不相同</p>";
                         $(content).appendTo($place.empty()).css({
@@ -154,7 +166,7 @@ function inputValidate() {
                         });
                     canBeSubmit[3] = 0;
                 }
-                else {
+                else if(value != "") {
                     var content = "<p>√</p>";
                     $place.empty();
                     canBeSubmit[3] = 1;
@@ -174,6 +186,9 @@ function inputValidate() {
                 var value = $(this).val();
                 var $place = $(this).parent().next();
                 if(event.type == "keyup") {
+                    if(value == "") {
+                        return false;
+                    }
                     if (!pattern.test(value)) {
                         var content = "<p>邮箱名不可用</p>";
                         $(content).appendTo($place.empty()).css({
@@ -262,7 +277,6 @@ function inputValidate() {
 
 
 $(document).ready(function(){
-
     $("#createcode").click(function(event) {
         event.preventDefault();
         $(this).children("input").val(generateCode());
@@ -288,7 +302,22 @@ $(document).ready(function(){
                 data: $.toJSON(data),
                 dataType: "text"
             }).done(function (data, textStatus, jqXHR) {
-                alert("succeed");
+                $("#middle").hide();
+                var content = "<p>账户注册成功!</p>";
+                if(jqXHR.status == 200) {
+                    content = "<p>账户恢复成功!</p>";
+                }
+                $('#redirect-head').empty().html(content).parent().show();
+                var id = window.setInterval(function(){
+                    var second = parseInt($("#redirect-timer").text());
+                    if(second > 0) {
+                        second--;
+                    }
+                    if(second == 0) {
+                        window.clearTimeout(id);
+                        window.location.href = "index.html";
+                    }
+                }, 1000);
             }).fail(function (jqXHR, textStatus, errorThrown) {
                 var content;
                 var $place = $("#submit-button").parent();
@@ -305,6 +334,8 @@ $(document).ready(function(){
                     "padding": "0px 4px 0px 4px"
                 });
                 $("#checkcode").val(generateCode());
+                canBeSubmit[5] = 0;
+                $("#verify").val("").parent().children('p').remove();
             });
         }
     });

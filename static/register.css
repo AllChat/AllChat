@@ -24,15 +24,45 @@ body div#top hr
     clear: both;
 }
 
-body div#middle
+body div#middle,div#redirect
 {
     width: 750px;
     padding-top: 5px;
     padding-bottom: 5px;
-    margin-left: 325px;
-    margin-right: 325px;
-    position: absolute;
+    margin-left: auto;
+    margin-right: auto;
 }
+
+body div#redirect
+{
+    display: none;
+    margin-top: 30px;
+    background-color: #fffabd;
+    background-image: linear-gradient(#fffec5, #fff686);
+    background-position:center;
+    border:1px solid;
+    border-radius:8px;
+    height: 150px;
+}
+
+body div#redirect-head p
+{
+    font-size: 180%;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+
+body div#redirect-msg p
+{
+    font-size: 120%;
+    margin-bottom: 12px;
+    margin-top: 12px;
+    margin-left: 20px;
+    padding: 0;
+
+}
+
 
 body div#middle-head p
 {
@@ -54,6 +84,11 @@ body td.second-row
     height: 30px;
     padding-right: 0px;
     padding-left: 0px;
+}
+
+body td.second-row a
+{
+    text-decoration: none;
 }
 
 body td.third-row

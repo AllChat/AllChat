@@ -49,7 +49,7 @@
                     <tr>
                         <td class="first-row"><p>验证码</p></td>
                         <td class="second-row" colspan="2">
-                            <input class="text-verify" type="text" name="verify" required="required">
+                            <input class="text-verify" type="text" id="verify" name="verify" required="required">
                             <a href="#" id="createcode">
                                 <input type="text" id="checkcode" class="code" readonly="readonly"/>
                             </a>
@@ -71,6 +71,14 @@
                     你的邮件地址不会公开显示。你可以随时更改隐私设置。
                 </p>
             </div>
+        </div>
+    </div>
+    <div id="redirect">
+        <div id="redirect-head"></div>
+        <div id="redirect-msg">
+            <p>
+                即将跳转至主页......倒计时<span id="redirect-timer">5</span>秒。若无反应，请点击<a id="redirect-link" href="/index.html">链接</a>。
+            </p>
         </div>
     </div>
 </body>
