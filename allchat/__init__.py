@@ -10,7 +10,7 @@ from allchat import messages
 from allchat.amqp import init_rpc
 from allchat import accounts
 #from allchat import database
-#from allchat import filestore
+from allchat import filestore
 from allchat import friends
 from allchat import groups
 #from allchat import heatbeat
@@ -24,6 +24,7 @@ app.register_blueprint(login.login, url_prefix = '/v1')
 app.register_blueprint(friends.friend, url_prefix = '/v1')
 app.register_blueprint(groups.group, url_prefix = '/v1')
 app.register_blueprint(messages.message, url_prefix = '/v1')
+app.register_blueprint(filestore.filestore, url_prefix = '/v1')
 
 
 def init():
