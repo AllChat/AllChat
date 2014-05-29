@@ -14,6 +14,12 @@ body div#top-login p
     margin-right: 80px;
 }
 
+
+body div#top-login p a
+{
+    text-decoration: none;
+}
+
 body div#top img
 {
     margin-left: 150px;
