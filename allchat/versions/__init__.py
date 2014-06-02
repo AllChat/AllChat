@@ -1,5 +1,4 @@
 from flask import Blueprint
-from allchat import app
 from flask import jsonify
 
 version = Blueprint('version', __name__)

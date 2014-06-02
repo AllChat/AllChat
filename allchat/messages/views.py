@@ -6,7 +6,8 @@ from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, FriendList, GroupInfo, GroupMember
 from allchat.amqp.Impl_kombu import send_message, receive_message
 from sqlalchemy import and_, or_
-import datetime
+import time, base64, os
+from allchat.filestore.fileSave import FileSaver
 
 
 class messages_view(MethodView):
@@ -28,7 +29,30 @@ class messages_view(MethodView):
             else:
                 return ("URL error", 403)
         elif type == 'image':
-            pass
+            user = user
+            db_session = get_session()
+            try:
+                account = db_session.query(UserInfo).filter(and_(UserInfo.deleted == False,
+                                UserInfo.state != 'offline', UserInfo.username == user)).one()
+            except Exception,e:
+                return ("Account {0} doesn't exist or logout now".format(user), 404)
+            if file:
+                name, tag = os.path.splitext(file)
+                if tag is None:
+                    return ('file extension is not allowed', 403)
+                path = "../Data/picture/" + file
+                tmp = dict()
+                tmp['type'] = tag.lstrip('.')
+                try:
+                    with open(path, "rb") as fp:
+                        tmp['content'] = base64.b64encode(fp.read())
+                except IOError:
+                    return ('Not found', 404)
+                except Exception,e:
+                    return ('Operation Failed', 500)
+                return jsonify(tmp)
+            else:
+                return ('Not found', 404)
         elif type == 'sound':
             pass
         elif type == 'video':
@@ -104,13 +128,25 @@ class messages_view(MethodView):
         tmp = dict()
         tmp['from'] = user_from.username
         tmp['to'] = user_to.username
-        tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        tmp['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        for pic in para['msg']:
+            if(pic['type'] == "text"):
+                continue
+            elif(pic['type'] in ['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg']):
+                saver = FileSaver()
+                path = saver.savePicture(base64.b64decode(pic['content']), pic['type'], user_from.username)
+                pic_name = path.split('/')[-1]
+                pic['content'] = pic_name
         tmp['msg'] = para['msg']
         message['para'] = tmp
         ret = None
         for i in range(0,3):
             ret = send_message(user_from.username, user_to.username, message)
             if not ret:
+                saver = FileSaver()
+                saver.saveSingleMessage(user_from.username, user_to.username,
+                                        [tmp['time'], tmp['msg']])
+                saver.writeBuffer2File()
                 return ("Send message successfully", 200)
             else:
                 continue
@@ -142,9 +178,21 @@ class messages_view(MethodView):
         tmp['from'] = user_from.username
         tmp['to'] = None
         tmp['group_id'] = group_id
-        tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        tmp['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        for pic in para['msg']:
+            if(pic['type'] == "text"):
+                continue
+            elif(pic['type'] in ['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg']):
+                saver = FileSaver()
+                path = saver.savePicture(base64.b64decode(pic['content']), pic['type'], user_from.username)
+                pic_name = path.split('/')[-1]
+                pic['content'] = pic_name
         tmp['msg'] = para['msg']
         message['para'] = tmp
+        saver = FileSaver()
+        saver.saveGroupMsg(user_from.username, group_to['group_name'],
+                                        [tmp['time'], tmp['msg']])
+        saver.writeBuffer2File()
         failed = []
         for user in group_to.groupmembers:
             if user.member_account == user_from.username:
