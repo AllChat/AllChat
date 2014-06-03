@@ -1,0 +1,29 @@
+#middle
+{
+    width:400px;
+    padding:0px;
+    margin-right: 200px;
+    margin-left: 200px;
+}
+
+#line
+{
+    background: #E6E6E6;
+    width: 1px;
+    height: 356px;
+    display: block;
+    padding: 0px 0px 10px 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    float: left;
+}
+
+#middle-left
+{
+    float: left;
+}
+
+#middle-right
+{
+    float: left;
+}
