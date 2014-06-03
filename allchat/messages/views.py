@@ -40,11 +40,11 @@ class messages_view(MethodView):
                 name, tag = os.path.splitext(file)
                 if tag is None:
                     return ('file extension is not allowed', 403)
-                path = "../Data/picture/" + file
+                path = "/../Data/picture/" + file
                 tmp = dict()
                 tmp['type'] = tag.lstrip('.')
                 try:
-                    with open(path, "rb") as fp:
+                    with open(os.path.normpath("".join([os.getcwd(), path])), "rb") as fp:
                         tmp['content'] = base64.b64encode(fp.read())
                 except IOError:
                     return ('Not found', 404)
@@ -129,14 +129,17 @@ class messages_view(MethodView):
         tmp['from'] = user_from.username
         tmp['to'] = user_to.username
         tmp['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        record = ""
         for pic in para['msg']:
             if(pic['type'] == "text"):
+                record += pic['content']
                 continue
             elif(pic['type'] in ['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg']):
                 saver = FileSaver()
                 path = saver.savePicture(base64.b64decode(pic['content']), pic['type'], user_from.username)
-                pic_name = path.split('/')[-1]
+                pic_name = path.split('\\')[-1]
                 pic['content'] = pic_name
+                record += "@$^*" + path + "@$^*"
         tmp['msg'] = para['msg']
         message['para'] = tmp
         ret = None
@@ -145,7 +148,7 @@ class messages_view(MethodView):
             if not ret:
                 saver = FileSaver()
                 saver.saveSingleMessage(user_from.username, user_to.username,
-                                        [tmp['time'], tmp['msg']])
+                                        [tmp['time'], record])
                 saver.writeBuffer2File()
                 return ("Send message successfully", 200)
             else:
