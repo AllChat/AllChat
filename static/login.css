@@ -1,4 +1,10 @@
-#middle
+body
+{
+    font-family: Verdana, Geneva, Arial, sans-serif;
+    font-size: 14px;
+}
+
+.middle
 {
     width:400px;
     padding:0px;
@@ -18,12 +24,12 @@
     float: left;
 }
 
-#middle-left
+.middle-left
 {
     float: left;
 }
 
-#middle-right
+.middle-right
 {
     float: left;
 }
