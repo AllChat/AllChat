@@ -7,7 +7,7 @@ from allchat.database.models import UserInfo, FriendList, GroupInfo, GroupMember
 from allchat.amqp.Impl_kombu import send_message, receive_message
 from sqlalchemy import and_, or_
 import time, base64, os
-from allchat.filestore.fileSave import FileSaver
+from allchat.filestore import saver
 
 
 class messages_view(MethodView):
@@ -119,7 +119,7 @@ class messages_view(MethodView):
         for friend in user_from.friends:
             if friend.username == user_to.username and friend.confirmed == True:
                 flag = True
-                break;
+                break
         if not flag:
             return ('Forbidden! The recipient is not your friend.', 403)
 
@@ -135,7 +135,6 @@ class messages_view(MethodView):
                 record += pic['content']
                 continue
             elif(pic['type'] in ['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg']):
-                saver = FileSaver()
                 path = saver.savePicture(base64.b64decode(pic['content']), pic['type'], user_from.username)
                 pic_name = path.split('\\')[-1]
                 pic['content'] = pic_name
@@ -146,10 +145,8 @@ class messages_view(MethodView):
         for i in range(0,3):
             ret = send_message(user_from.username, user_to.username, message)
             if not ret:
-                saver = FileSaver()
                 saver.saveSingleMessage(user_from.username, user_to.username,
                                         [tmp['time'], record])
-                saver.writeBuffer2File()
                 return ("Send message successfully", 200)
             else:
                 continue
@@ -186,16 +183,13 @@ class messages_view(MethodView):
             if(pic['type'] == "text"):
                 continue
             elif(pic['type'] in ['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg']):
-                saver = FileSaver()
                 path = saver.savePicture(base64.b64decode(pic['content']), pic['type'], user_from.username)
                 pic_name = path.split('/')[-1]
                 pic['content'] = pic_name
         tmp['msg'] = para['msg']
         message['para'] = tmp
-        saver = FileSaver()
         saver.saveGroupMsg(user_from.username, group_to['group_name'],
                                         [tmp['time'], tmp['msg']])
-        saver.writeBuffer2File()
         failed = []
         for user in group_to.groupmembers:
             if user.member_account == user_from.username:
