@@ -6,7 +6,7 @@ body
 
 .middle
 {
-    width:400px;
+    width:800px;
     padding:0px;
     margin-right: 200px;
     margin-left: 200px;
@@ -29,7 +29,25 @@ body
     float: left;
 }
 
+.middle-left-li img
+{
+    -webkit-box-shadow: 0 0 5px #000;
+    -moz-box-shadow: 0 0 5px #000;
+    box-shadow: 0 0 5px #000;
+    border-radius: 5px;
+}
+
+
 .middle-right
 {
     float: left;
+}
+
+.middle-right-ul
+{
+    list-style-type: none;
+}
+.middle-right-ul li p
+{
+    display: inline-block;
 }
