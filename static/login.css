@@ -27,8 +27,9 @@ body
 .middle-left
 {
     width: 550px;
+    height: 340px;
     padding: 0px;
-    margin: 0px 5px;
+    margin: 5px 5px;
     float: left;
 }
 
@@ -36,10 +37,10 @@ body
 {
     list-style-type: none;
     width: 540px;
+    height: 330px;
     padding: 0px;
-    margin-left: 6px;
-    margin-right: 6px;
-    position: absolute;
+    margin : 0px 6px;
+    position: relative;
 }
 
 .middle-left-image-li
@@ -58,6 +59,7 @@ body
     padding: 0px;
     margin: 0px;
     position: absolute;
+    z-index: -1;
 }
 
 .middle-left-image-li p
@@ -74,18 +76,23 @@ body
     text-shadow: 0px 2px 3px #555
 }
 
-
+.middle-left-button
+{
+    position: absolute;
+    top: 350px;
+    left:650px;
+}
 .middle-right
 {
     width: 300px;
     float: left;
 }
 
-.middle-right-ul
+.middle-right-form-ul
 {
     list-style-type: none;
 }
-.middle-right-ul li p
+.middle-right-form-ul li p
 {
     display: inline-block;
 }
