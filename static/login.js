@@ -4,5 +4,5 @@
 $(document).ready(function(){
     $(".middle-left-image-li").eq(0).hide();
     $(".middle-left-image-li").eq(1).hide();
-    $(".middle-left-image-li").eq(3).hide();
+    $(".middle-left-image-li").eq(2).hide();
 });

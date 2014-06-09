@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link type="text/css" rel="stylesheet" href="../static/login.css">
-    <script type="text/javascript" src="../static/jquery-1.11.1.min.js"></script>
-    <script type="text/javascript" src="../static/jquery.json-2.4.min.js"></script>
-    <script type="text/javascript" src="../static/login.js"></script>
+    <META charset="UTF-8">
+    <link rel="stylesheet" href="../static/login.css">
+    <script src="../static/jquery-1.11.1.min.js"></script>
+    <script src="../static/jquery.json-2.4.min.js"></script>
+    <script src="../static/login.js"></script>
     <title>Login</title>
 </head>
 <body>
-    <div class="top"><p>AllChat</p></div>
+    <div class="top">AllChat</div>
     <div class="middle">
         <div style="clear:both"></div>
         <div class="middle-left">
@@ -42,9 +42,9 @@
             <span id="line"></span>
         </div>
         <div class="middle-right">
-            <form class="middle-right-form">
+            <form class="middle-right-form" method="POST">
                 <ul class="middle-right-form-ul">
-                    <li class="middle-right-form-li">登陆到AllChat</li>
+                    <li class="middle-right-form-li"><p>登陆到AllChat</p></li>
                     <li class="middle-right-form-li">
                         <input type="text" name="name" required="required" placeholder="账户名">
                     </li>
@@ -52,7 +52,15 @@
                         <input type="password" name="password" required="required" placeholder="密码">
                     </li>
                     <li class="middle-right-form-li">
-                        <input type="submit" id="submit-button" name="submit-button" value="登陆"/>
+                        <input type="submit" id="submit-button" name="submit-button" value="登  陆"/>
+                    </li>
+                    <li class="middle-right-form-li">
+                        <select name="status">
+                            <option value="online">在线</option>
+                            <option value="invisible" selected="selected">隐身</option>
+                        </select>
+                    </li>
+                    <li class="middle-right-form-li">
                         <p>没有账户?点击<a href="#">注册</a></p>
                     </li>
                 </ul>
