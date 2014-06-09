@@ -2,6 +2,7 @@ body
 {
     font-family: "Microsoft YaHei", Geneva, Arial, sans-serif;
     font-size: 14px;
+    background-color: #fcfff6;
 }
 
 .top
@@ -11,6 +12,7 @@ body
     text-align: center;
     font-size: 30px;
     width: 500px;
+    height: 45px;
     letter-spacing: 5px;
 }
 
@@ -19,8 +21,8 @@ body
     width:910px;
     height: 500px;
     padding:0px;
-    margin-right: 400px;
-    margin-left: 257px;
+    margin-right: auto;
+    margin-left: auto;
 }
 
 #line
@@ -91,8 +93,8 @@ body
 .middle-left-button
 {
     position: absolute;
-    top: 440px;
-    width: 525px;
+    top: 450px;
+    width: 520px;
     height: 25px;
     padding: 0px;
     padding-right: 15px;
@@ -219,7 +221,7 @@ body
 
 .middle-right-form-ul li a:hover
 {
-    background-color: #ebed8e;
+    background-color: #f09600;
     border-radius: 3px;
     text-decoration: none;
     color: #ffffff;
