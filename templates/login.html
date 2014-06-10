@@ -15,19 +15,19 @@
         <div class="middle-left">
             <ul class="middle-left-image-ul">
                 <li class="middle-left-image-li">
-                    <img src="../static/images/login-1.jpg" width="528px" height="330px">
+                    <img src="/static/images/login-1.jpg" width="528px" height="330px">
                     <p>Welcome to AllChat</p>
                 </li>
                 <li class="middle-left-image-li">
-                    <img src="../static/images/login-2.jpg" width="528px" height="330px">
+                    <img src="/static/images/login-2.jpg" width="528px" height="330px">
                     <p>We believe you're safe here</p>
                 </li>
                 <li class="middle-left-image-li">
-                    <img src="../static/images/login-3.jpg" width="528px" height="330px">
+                    <img src="/static/images/login-3.jpg" width="528px" height="330px">
                     <p>No one will surveil you here</p>
                 </li>
                 <li class="middle-left-image-li">
-                    <img src="../static/images/login-4.jpg" width="528px" height="330px">
+                    <img src="/static/images/login-4.jpg" width="528px" height="330px">
                     <p>Let's make the life better</p>
                 </li>
             </ul>
@@ -42,20 +42,20 @@
             <span id="line"></span>
         </div>
         <div class="middle-right">
-            <form class="middle-right-form" method="POST">
+            <form class="middle-right-form" action="/v1/login/" method="POST">
                 <ul class="middle-right-form-ul">
                     <li class="middle-right-form-li"><p>登陆AllChat</p></li>
                     <li class="middle-right-form-li">
-                        <input type="text" name="name" required="required" placeholder="账户名">
+                        <input type="text" id="account" name="account" required="required" placeholder="账户名">
                     </li>
                     <li class="middle-right-form-li">
-                        <input type="password" name="password" required="required" placeholder="密码">
+                        <input type="password" id="password" name="password" required="required" placeholder="密码">
                     </li>
                     <li class="middle-right-form-li">
                         <input type="submit" id="submit-button" name="submit-button" value="登  陆"/>
                     </li>
                     <li class="middle-right-form-li">
-                        <select name="status">
+                        <select id="state" name="state">
                             <option value="online">在线</option>
                             <option value="invisible" selected="selected">隐身</option>
                         </select>

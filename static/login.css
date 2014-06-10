@@ -2,7 +2,7 @@ body
 {
     font-family: "Microsoft YaHei", Geneva, Arial, sans-serif;
     font-size: 14px;
-    background-color: #fcfff6;
+    background-color: #fffef0;
 }
 
 .top
@@ -110,11 +110,15 @@ body
     display: inline-block;
     border-radius: 10px;
     margin: 0px 1px;
-    background: #999;
+    background-color: #999;
     color: #ffffff;
     text-align: center;
 }
 
+.middle-left-button .span-background
+{
+    background-color: #C20724;
+}
 
 .middle-right
 {
