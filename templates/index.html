@@ -1,13 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>No title</title>
+    <META charset="UTF-8">
+    <link rel="stylesheet" href="../static/index.css">
+    <script src="../static/jquery-1.11.1.min.js"></script>
+    <script src="../static/jquery.json-2.4.min.js"></script>
+    <script src="../static/index.js"></script>
+    <title>AllChat</title>
 </head>
 <body>
-    <p>Hello world!!!</p>
-    <p>
-        <a href="/register.html">注册</a>
-    </p>
+    <div id="layer">
+        <div id="control">
+            <div id="control-setting">
+                <ul id="control-setting-ul"></ul>
+            </div>
+            <div id="control-list">
+                <div id="control-list-top">
+                    <ul>
+                        <li>会话记录</li>
+                        <li>好友</li>
+                        <li>群</li>
+                    </ul>
+                </div>
+                <div id="control-list-middle">
+                    <ul>
+
+                    </ul>
+                </div>
+                <div id="control-list-bottom">
+                    <ul>
+                        <li>设置</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="chat">
+            <div id="chat-list">
+                <ul id="chat-list-ul"></ul>
+            </div>
+            <div id="chat-records">
+
+            </div>
+            <div id="chat-setting">
+                <form id="chat-setting-form">
+                    <select name="font" id="font" class="chat-setting-form-child">
+
+                    </select>
+                    <input type="color" id="color" name="color" class="chat-setting-form-child">
+                    <input type="file" id="image" name="image" class="chat-setting-form-child">
+                </form>
+            </div>
+            <div id="chat-input">
+                <textarea></textarea>
+                <button></button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
