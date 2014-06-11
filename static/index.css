@@ -1,0 +1,117 @@
+body
+{
+    font-family: "Microsoft YaHei", Geneva, Arial, sans-serif;
+    font-size: 14px;
+}
+
+#layer
+{
+    width: 900px;
+    height: 600px;
+    padding: 0px;
+    margin: 80px auto;
+}
+
+#control
+{
+    width:320px;
+    height: 550px;
+    float: left;
+    position: relative;
+    padding: 0px;
+    margin: 0px 15px 0px 0px;
+}
+
+#control-setting
+{
+    width: 150px;
+    height: 200px;
+    left: -150px;
+    top: 320px;
+    position: absolute;
+}
+
+#control-setting-ul
+{
+    list-style-type: none;
+}
+
+#control-list
+{
+    width: 310px;
+    height: 540px;
+}
+
+#control-list  #control-list-top
+{
+    height: 30px;
+    width: 310px;
+}
+
+#control-list  #control-list-top #control-list-top-ul
+{
+    list-style-type: none;
+    padding: 0px;
+}
+
+#control-list #control-list-top #control-list-top-ul .control-list-top-li
+{
+    display: inline-block;
+}
+
+#control-list #control-list-middle
+{
+    width: 310px;
+    height: 470px;
+}
+
+#control-list #control-list-bottom
+{
+    width: 310px;
+    height: 30px;
+}
+
+#control-list #control-list-bottom #control-list-bottom-ul
+{
+    list-style-type: none;
+    padding: 0px;
+}
+
+#control-list #control-list-bottom #control-list-bottom-ul .control-list-bottom-li
+{
+    display: inline-block;
+}
+
+#chat
+{
+    width: 550px;
+    height: 550px;
+    float: left;
+    position: relative;
+    padding: 0px;
+    margin: 0px 0px 0px 15px;
+}
+
+#chat #chat-list
+{
+    width: 550px;
+    height: 45px;
+}
+
+#chat #chat-records
+{
+    width: 550px;
+    height: 335px;
+}
+
+#chat #chat-setting
+{
+    width: 550px;
+    height: 40px;
+}
+
+#chat #chat-input
+{
+    width: 550px;
+    height: 130px;
+}
