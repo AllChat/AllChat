@@ -51,21 +51,30 @@ body
 #control-list  #control-list-top #control-list-top-ul
 {
     list-style-type: none;
+    width: 291px;
+    height: 30px;
     padding: 0px;
     margin: 0px;
-    background: linear-gradient(#555,#222)
+    display: -webkit-box;
+    display: -moz-box;
+    display: box;
+    -webkit-box-orient: horizontal;
+    -moz-box-orient: horizontal;
+    box-orient: horizontal;
 }
 
 #control-list #control-list-top #control-list-top-ul .control-list-top-li
 {
-    display: inline-block;
-    width: 92px;
     height: 30px;
+    width: 97px;
     text-align: center;
     padding: 0px;
     margin: 0px;
     background-image: linear-gradient(#555, #222);
     color: #ffffff;
+    -webkit-box-flex: 1;
+    -moz-box-flex: 1;
+    box-flex: 1;
 }
 
 #control-list #control-list-middle
