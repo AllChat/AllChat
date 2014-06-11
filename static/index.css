@@ -9,17 +9,17 @@ body
     width: 900px;
     height: 600px;
     padding: 0px;
-    margin: 80px auto;
+    margin: 50px auto;
 }
 
 #control
 {
-    width:320px;
+    width:291px;
     height: 550px;
     float: left;
     position: relative;
     padding: 0px;
-    margin: 0px 15px 0px 0px;
+    margin: 0px 10px 0px 0px;
 }
 
 #control-setting
@@ -38,36 +38,45 @@ body
 
 #control-list
 {
-    width: 310px;
+    width: 291px;
     height: 540px;
 }
 
 #control-list  #control-list-top
 {
     height: 30px;
-    width: 310px;
+    width: 291px;
 }
 
 #control-list  #control-list-top #control-list-top-ul
 {
     list-style-type: none;
     padding: 0px;
+    margin: 0px;
+    background: linear-gradient(#555,#222)
 }
 
 #control-list #control-list-top #control-list-top-ul .control-list-top-li
 {
     display: inline-block;
+    width: 92px;
+    height: 30px;
+    text-align: center;
+    padding: 0px;
+    margin: 0px;
+    background-image: linear-gradient(#555, #222);
+    color: #ffffff;
 }
 
 #control-list #control-list-middle
 {
-    width: 310px;
+    width: 291px;
     height: 470px;
 }
 
 #control-list #control-list-bottom
 {
-    width: 310px;
+    width: 291px;
     height: 30px;
 }
 
@@ -89,7 +98,7 @@ body
     float: left;
     position: relative;
     padding: 0px;
-    margin: 0px 0px 0px 15px;
+    margin: 0px 0px 0px 10px;
 }
 
 #chat #chat-list
