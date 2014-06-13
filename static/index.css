@@ -2,11 +2,15 @@ body
 {
     font-family: "Microsoft YaHei", Geneva, Arial, sans-serif;
     font-size: 14px;
+    background: url(../static/images/index-background.jpg);
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
 #layer
 {
-    width: 900px;
+    width: 920px;
     height: 600px;
     padding: 0px;
     margin: 50px auto;
@@ -19,7 +23,7 @@ body
     float: left;
     position: relative;
     padding: 0px;
-    margin: 0px 10px 0px 0px;
+    margin: 0px 20px 0px 0px;
 }
 
 #control-setting
@@ -41,8 +45,9 @@ body
     width: 291px;
     height: 540px;
     border-radius: 10px;
-    border: 1px #b2b2b2 solid;
+    border: 1px #676767 solid;
     border-top: 0;
+    background-color: #ffffff;
 }
 
 #control-list  #control-list-top
@@ -163,10 +168,11 @@ body
     float: left;
     position: relative;
     padding: 0px;
-    margin: 0px 0px 0px 10px;
+    margin: 0px 0px 0px 20px;
     border-radius: 10px;
-    border: 1px #b2b2b2 solid;
+    border: 1px #676767 solid;
     border-top: 0px;
+    background-color: #ffffff;
 }
 
 #chat #chat-list
@@ -199,7 +205,23 @@ body
 #chat #chat-setting
 {
     width: 550px;
-    height: 40px;
+    height: 39px;
+    margin: 0px;
+    padding: 0px;
+    border-top: 1px #b2b2b2 solid;
+}
+
+#chat #chat-setting form
+{
+    margin: 0px;
+    padding: 0px;
+    height: 39px;
+    width: 550px;
+}
+
+#chat #chat-setting form input
+{
+    line-height: 39px;
 }
 
 #chat #chat-input
@@ -214,7 +236,7 @@ body
 #chat #chat-input textarea
 {
     width: 550px;
-    height: 90px;
+    height: 85px;
     font-size: 120%;
     padding: 0px;
     margin: 0px;
@@ -222,4 +244,24 @@ body
     maxlength: 1024;
     resize:none;
     outline:none;
+}
+
+#chat #chat-input button
+{
+    width: 70px;
+    height: 25px;
+    padding: 0;
+    margin: 0;
+    border-radius: 5px;
+    background: linear-gradient(#5f9cc5, #396b9e);
+    text-shadow: 0 1px 1px #194b7e;
+    border: 1px #044062 solid;
+    color: #fff;
+    cursor: pointer;
+}
+
+#chat #chat-input button:nth-child(2)
+{
+    margin-right: 10px;
+    margin-left: 375px;
 }
