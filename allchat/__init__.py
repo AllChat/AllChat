@@ -41,7 +41,8 @@ def shutdown_session(exception=None):
 @app.route('/', methods = ['GET'])
 @app.route('/index.html', methods = ['GET'])
 def index():
-    if 'account' in request.cookies and request.cookies['account'] is not None:
+    if 'account' in request.cookies and 'account' in session \
+            and session['account'] == request.cookies['account']:
         return render_template('index.html')
     else:
         return render_template('login.html')
