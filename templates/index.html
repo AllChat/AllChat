@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="../static/index.css">
     <script src="../static/jquery-1.11.1.min.js"></script>
     <script src="../static/jquery.json-2.4.min.js"></script>
+    <script src="../static/jquery.cookie.js"></script>
     <script src="../static/index.js"></script>
     <title>AllChat</title>
 </head>
@@ -30,13 +31,22 @@
                     </div>
                     <div id="control-list-middle-accounts">
                         <ul>
-
+                            <li id="" class="friends">
+                                <img class="icon" src="/static/images/user1-icon.jpg"/>
+                                <p class="nickname">拓拔野</p>
+                                <p class="state">[在线]</p>
+                            </li>
+                            <li id="" class="friends">
+                                <img class="icon" src="/static/images/user1-icon.jpg"/>
+                                <p class="nickname">拓拔野</p>
+                                <p class="state">[在线]</p>
+                            </li>
                         </ul>
                     </div>
                 </div>
                 <div id="control-list-bottom">
                     <div class="control-list-bottom-icon">
-                        <img src="../static/images/setup.png">
+                        <img src="/static/images/setup.png">
                     </div>
                 </div>
             </div>
@@ -44,7 +54,14 @@
         <div id="chat">
             <div id="chat-list">
                 <p>×</p>
-                <ul></ul>
+                <ul>
+                    <li id="" class="chat-friends chat-focus">
+                        拓拔野
+                    </li>
+                    <li id="" class="chat-friends ">
+                        龙神大神大神
+                    </li>
+                </ul>
             </div>
             <div id="chat-records">
 
@@ -57,9 +74,9 @@
                     <select name="font-size" id="font-size" class="chat-setting-form-child">
 
                     </select>
-                    <img src="../static/images/color_click.jpg" />
+                    <img src="/static/images/color_click.jpg" />
                     <input style="visibility:hidden; position: absolute;" type="color" id="color" name="color" class="chat-setting-form-child" />
-                    <img src="../static/images/image_click.jpg"/>
+                    <img src="/static/images/image_click.jpg"/>
                     <input style="visibility:hidden; position: absolute;" type="file" id="image" name="image" class="chat-setting-form-child" accept="image/gif, image/jpeg, image/jpg, image/png, image/bmp" />
                 </form>
             </div>

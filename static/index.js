@@ -8,3 +8,6 @@ $(document).ready(function() {
         $(this).next().trigger("click");
     });
 });
+$(window).unload(function(){
+    $.removeCookie("account");
+});

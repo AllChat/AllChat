@@ -26,7 +26,7 @@ class friends_view(MethodView):
             tmp_user = dict()
             tmp_user['account'] = tmp.username
             tmp_user['nickname'] = tmp.nickname
-            tmp_user['state'] = tmp.state
+            tmp_user['state'] = "offline" if tmp.state != "online" else "online"
             resp['friendlist'].append(tmp_user)
         return jsonify(resp)
 

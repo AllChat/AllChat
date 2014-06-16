@@ -53,13 +53,13 @@ body
     box-shadow: 0 0 20px #000;
 }
 
-#control-list  #control-list-top
+#control-list-top
 {
     height: 40px;
     width: 291px;
 }
 
-#control-list  #control-list-top ul
+#control-list-top ul
 {
     list-style-type: none;
     width: 291px;
@@ -75,7 +75,7 @@ body
 }
 
 
-#control-list #control-list-top ul .control-list-top-li
+#control-list-top ul .control-list-top-li
 {
     height: 40px;
     width: 96px;
@@ -97,24 +97,24 @@ body
     box-shadow: inset 0 0 10px transparent;
 }
 
-#control-list #control-list-top ul li:nth-child(1)
+#control-list-top ul li:nth-child(1)
 {
     border-top-left-radius: 10px;
     border-left: 0;
 }
 
-#control-list #control-list-top ul li:nth-child(2)
+#control-list-top ul li:nth-child(2)
 {
     width: 95px;
 }
 
-#control-list #control-list-top ul li:nth-child(3)
+#control-list-top ul li:nth-child(3)
 {
     border-top-right-radius: 10px;
     border-right: 0;
 }
 
-#control-list #control-list-top ul .selected
+#control-list-top ul .selected
 {
     background: #535353;
     border-left-color: #222;
@@ -125,7 +125,7 @@ body
     box-shadow: inset 0 0 10px #111;
 }
 
-#control-list #control-list-middle
+#control-list-middle
 {
     width: 291px;
     height: 460px;
@@ -135,7 +135,7 @@ body
     background-color: #fffbe2;
 }
 
-#control-list #control-list-middle #control-list-middle-search
+#control-list-middle-search
 {
     margin: 0px;
     padding: 0px;
@@ -143,9 +143,9 @@ body
     width: 291px;
 }
 
-#control-list #control-list-middle #control-list-middle-search input
+#control-list-middle-search input
 {
-    height: 23px;
+    height: 22px;
     width: 291px;
     padding: 0px;
     margin: 0px;
@@ -154,7 +154,76 @@ body
     border-bottom: 1px #d2d2d2 solid;
 }
 
-#control-list #control-list-bottom
+#control-list-middle-accounts
+{
+    height: 435px;
+    width: 291px;
+    margin: 0px;
+    padding: 0px;
+    overflow: auto;
+}
+
+#control-list-middle-accounts ul
+{
+    height: 435px;
+    width: 291px;
+    margin: 0px;
+    padding: 0px;
+    overflow-y: auto;
+    overflow-x:hidden;
+    position: relative;
+    list-style-type: none;
+}
+
+
+.friends
+{
+    width: 289px;
+    height: 56px;
+    margin: 2px  1px  2px  1px;
+    position: relative;
+    border-bottom: 1px solid #e3e3e3;
+    padding: 2px 1px;
+    line-height: 100%;
+    cursor: pointer;
+}
+
+.icon
+{
+    float: left;
+    margin: 8px;
+    margin-right: 12px;
+    width: 40px;
+    height: 40px;
+}
+
+.nickname
+{
+    width: 220px;
+    height: 22px;
+    margin: 0px;
+    padding: 0px;
+    line-height: 23px;
+    overflow: hidden;
+    font-size: 120%;
+    display: block;
+}
+
+.state
+{
+    width: 40px;
+    height: 28px;
+    margin: 0px;
+    padding: 0px;
+    overflow: hidden;
+    font-size: 12px;
+    color: #aaa;
+    line-height: 28px;
+    padding-left: 5px;
+    display: inline-block;
+}
+
+#control-list-bottom
 {
     width: 291px;
     height: 40px;
@@ -168,13 +237,13 @@ body
     box-shadow: inset 0 0 10px transparent;
 }
 
-#control-list .control-list-bottom-icon
+.control-list-bottom-icon
 {
     padding: 0px;
     margin: 0px;
 }
 
-#control-list .control-list-bottom-icon img
+.control-list-bottom-icon img
 {
     cursor: pointer;
     width: 37px;
@@ -198,7 +267,7 @@ body
     position: relative;
 }
 
-#chat #chat-list
+#chat-list
 {
     width: 550px;
     height: 45px;
@@ -214,7 +283,7 @@ body
     position: relative;
 }
 
-#chat #chat-list p
+#chat-list p
 {
     width: 30px;
     height: 25px;
@@ -238,7 +307,7 @@ body
     cursor: pointer;
 }
 
-#chat #chat-list p:hover
+#chat-list p:hover
 {
     background-color: #9e3038;
     -moz-box-shadow: inset 0 0 5px #c02e33;
@@ -246,21 +315,58 @@ body
     box-shadow: inset 0 0 5px #c02e33;
 }
 
-#chat #chat-list ul
+#chat-list ul
 {
+    width: 550px;
+    height: 45px;
     padding: 0px;
     margin: 0px;
     list-style-type: none;
+    overflow: hidden;
 }
 
-#chat #chat-records
+.chat-friends
+{
+    height: 20px;
+    width: auto;
+    padding: 0px;
+    padding-top: 2px;
+    margin: 16px 5px 5px 5px;
+    font-size: 10px;
+    line-height: 170%;
+    display: inline-block;
+    color: #fffef0;
+    text-align: center;
+    border-radius: 3px;
+    cursor: default;
+}
+
+
+.chat-focus
+{
+    height: 20px;
+    padding: 2px 5px 7px 5px;
+    margin: 0;
+    margin-top: 16px;
+    margin-left: 2px;
+    border-radius: 0;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    background-color: #9f9f9f;
+    -moz-box-shadow: inset 0 0 5px #c5c7c6;
+    -webkit-box-shadow: inset 0 0 5px #c5c7c6;
+    box-shadow: inset 0 0 5px #c5c7c6;
+}
+
+
+#chat-records
 {
     width: 550px;
     height: 335px;
     background-color: #fffbe2;
 }
 
-#chat #chat-setting
+#chat-setting
 {
     width: 550px;
     height: 39px;
@@ -273,7 +379,7 @@ body
     box-shadow: inset 0 0 10px transparent;
 }
 
-#chat #chat-setting form
+#chat-setting form
 {
     margin: 0px;
     padding: 0px;
@@ -282,19 +388,20 @@ body
     line-height: 37px;
 }
 
-#chat #chat-setting form select
+#chat-setting form select
 {
     width: 60px;
     height: 21px;
     padding: 0px;
     margin: 0px;
     margin-right: 5px;
+    margin-left: 2px;
     display: inline-block;
     overflow: hidden;
     border-radius: 3px;
 }
 
-#chat #chat-setting form input
+#chat-setting form input
 {
     padding: 0px;
     margin: 0px;
@@ -303,26 +410,24 @@ body
     border-radius: 3px;
 }
 
-#chat #chat-setting form input:nth-child(3)
+#chat-setting form input:nth-child(3)
 {
     width: 24px;
     height: 21px;
 }
 
-#chat #chat-setting form img
+#chat-setting form img
 {
     width: 24px;
     height: 24px;
     padding: 0px;
-    margin: 0px;
-    margin-bottom: 2px;
-    margin-right: 5px;
+    margin: 0px 5px 2px 2px;
     vertical-align: middle;
     display: inline-block;
     cursor: pointer;
 }
 
-#chat #chat-input
+#chat-input
 {
     width: 550px;
     height: 121px;
@@ -331,7 +436,7 @@ body
     background-color: #fffbe2;
 }
 
-#chat #chat-input textarea
+#chat-input textarea
 {
     width: 550px;
     height: 85px;
@@ -344,7 +449,7 @@ body
     background-color: #fffbe2;
 }
 
-#chat #chat-input button
+#chat-input button
 {
     width: 70px;
     height: 25px;
@@ -358,7 +463,7 @@ body
     cursor: pointer;
 }
 
-#chat #chat-input button:nth-child(2)
+#chat-input button:nth-child(2)
 {
     margin-right: 10px;
     margin-left: 375px;

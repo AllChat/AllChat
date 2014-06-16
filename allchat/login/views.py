@@ -38,7 +38,11 @@ class login_view(MethodView):
                     db_session.rollback()
                     return ("DataBase Failed", 503, )
                 #render_template to new page or stay at current page?
-                return make_response(("Successful logged in", 200, ))
+                # session.permanent = False
+                # session['account'] = name
+                resp = make_response(("Successful logged in", 200, ))
+                resp.set_cookie("account", value=name)
+                return resp
             else:
                 return make_response(("Password is wrong, please check out", 403, ))
         else:
