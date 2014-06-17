@@ -7,7 +7,18 @@ var Account = {
         var account = {};
         var user = $.cookie('account');
         account.load_friend = function(friend) {
-            $("#control-list-middle-accounts ul");
+            var tmp = null;
+            var $li = $("<li></li>").attr("id", 'user-' + friend['account']).addClass(".friends");
+            var $img = $("<img/>").attr("src", "/static/images/user1-icon.jpg").addClass(".icon");
+            var $nickname = $("<p></p>").addClass(".nickname").text(friend['nickname']);
+            if (friend['state'] === "online") {
+                tmp = "[在线]";
+            }
+            else{
+                tmp = "[离线]";
+            }
+            var $state = $("<p></p>").addClass(".state").text(tmp);
+            $li.append($img).append($nickname).append($state).appendTo($("#control-list-middle-accounts ul"));
         };
         account.order_friends = function(list) {
             var online = new Array();
