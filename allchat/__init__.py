@@ -45,11 +45,15 @@ def index():
             and session['account'] == request.cookies['account']:
         return render_template('index.html')
     else:
-        return render_template('login.html')
+        return redirect(url_for('login'))
 
 @app.route('/login.html', methods = ['GET'])
 def login():
-    return redirect(url_for('index'))
+    if 'account' in request.cookies and 'account' in session \
+            and session['account'] == request.cookies['account']:
+        return redirect(url_for('index'))
+    else:
+        return render_template('login.html')
 
     #return redirect(url_for('login.login_view'))
 @app.route('/register.html', methods = ['GET'])
