@@ -9,15 +9,53 @@ class login_view(MethodView):
     def get(self):
         return make_response(("This is the login page", 200, ))
     def post(self,name):
+        if("flush" in request.headers and request.headers['flush'] == "1"):
+            if 'account' in request.cookies and 'account' in session \
+                    and session['account'] == request.cookies['account']:
+                db_session = get_session()
+                try:
+                    db_user = db_session.query(UserInfo).filter_by(username = name).one()
+                except Exception, e:
+                    return make_response(("The user is not registered yet", 403, ))
+                db_session.begin()
+                db_user.state = db_user.last_state if db_user.last_state != "offline" else "invisible"
+                db_user.last_state = db_user.state
+                try:
+                    db_session.commit()
+                except:
+                    db_session.rollback()
+                    return ("DataBase Failed", 503, )
+                else:
+                    return make_response(("Flush successfully", 200, ))
+            else:
+                return make_response(("Failed to flush", 403, ))
         if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
             try:
                 para = request.get_json()
             except Exception as e:
                 resp = make_response(("The json data can't be parsed", 403, ))
                 return resp
-            
-            password = para['password']
             logstate = para['state']
+            if logstate == "offline":
+                if 'account' in request.cookies and 'account' in session \
+                        and session['account'] == request.cookies['account']:
+                    db_session = get_session()
+                    try:
+                        db_user = db_session.query(UserInfo).filter_by(username = name).one()
+                    except Exception, e:
+                        return make_response(("The user is not registered yet", 403, ))
+                    db_session.begin()
+                    db_user.state = "offline"
+                    try:
+                        db_session.commit()
+                    except:
+                        db_session.rollback()
+                        return ("DataBase Failed", 503, )
+                    else:
+                        return make_response(("Logout successfully", 200, ))
+                else:
+                    return make_response(("Failed to logout", 403, ))
+            password = para['password']
             if(logstate not in ['online', 'invisible']):
                 return make_response(("The login state is illegal", 403, ))
             db_session = get_session()
@@ -28,6 +66,7 @@ class login_view(MethodView):
             if(password == db_user.password):
                 db_session.begin()
                 db_user.state = logstate
+                db_user.last_state = logstate
                 db_user.login = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
                 db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
                 for db_member in db_groupmember:

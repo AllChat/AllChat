@@ -85,6 +85,8 @@ class accounts_view(MethodView):
             new_password = None
             nickname = None
             email = None
+            icon = None
+            state = None
             if(('new_password' in para) and ('old_password' in para)):
                 old_password = para['old_password']
                 new_password = para['new_password']
@@ -92,7 +94,11 @@ class accounts_view(MethodView):
                 nickname = para['nickname']
             if('email' in para):
                 email = para['email']
-            if(not any((old_password, new_password, nickname, email))):
+            if('icon' in para):
+                icon = int(para['icon'])
+            if('state' in para):
+                state = para['state']
+            if(not any((old_password, new_password, nickname, email, icon, state))):
                 return ("No content in request", 202)
             db_session = get_session()
             try:
@@ -121,6 +127,20 @@ class accounts_view(MethodView):
                         user.email = email
                 else:
                     return ("Please login first", 401, )
+            if(icon):
+                if(user.state != 'offline'):
+                    if(icon > 255 or icon < 0):
+                        return make_response(("The icon number {0} is unacceptable".format(icon), 400, ))
+                    else:
+                        user.icon = icon
+                else:
+                    return ("Please login first", 401, )
+            if(state and state in ("online", "offline", "invisible") and state != user.state):
+                if user.state == "offline":
+                    return ("Please login first", 401, )
+                else:
+                    user.state = state
+                    user.last_state = state
             db_session.begin()
             try:
                 db_session.add(user)

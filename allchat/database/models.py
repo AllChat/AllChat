@@ -21,6 +21,7 @@ class UserInfo(Base):
     password = Column(String(50), nullable = False)
     email = Column(String(100), nullable = False)
     state = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
+    last_state = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False, default="offline")
     method = Column(Enum('web', 'mobile', 'desktop', name = 'method'))
     getunreadmsg = Column(Boolean, nullable = False, default = False)
     login = Column(DateTime(timezone = True))
@@ -29,6 +30,7 @@ class UserInfo(Base):
     deleted = Column(Boolean, nullable = False, default = False)
     ip = Column(String(15), nullable = False, default = "0.0.0.0")
     port = Column(Integer, nullable = False, default = 0)
+    icon = Column(Integer, nullable = False, default = 0)
 
     friends = relationship('FriendList', cascade="all, delete-orphan", single_parent = True, passive_deletes=True, backref=backref('user', order_by=id))
     
