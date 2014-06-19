@@ -1,7 +1,7 @@
 from flask.views import MethodView
 from flask import request, make_response
 from allchat.database.sql import get_session
-from allchat.database.models import UserInfo
+from allchat.database.models import UserInfo, GroupMember, FriendList
 from sqlalchemy import and_
 from allchat.amqp.Impl_kombu import RPC
 from allchat.messages.handles import rpc_callbacks
@@ -142,6 +142,16 @@ class accounts_view(MethodView):
                     user.state = state
                     user.last_state = state
             db_session.begin()
+            if icon or state :
+                db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
+                for db_member in db_groupmember:
+                    db_member.member_logstate = user.state
+                    db_session.add(db_member)
+                db_friendlist = db_session.query(FriendList).filter_by(username = name).all()
+                for db_friend in db_friendlist:
+                    db_friend.state = user.state
+                    db_friend.icon = user.icon
+                    db_session.add(db_friend)
             try:
                 db_session.add(user)
                 db_session.commit()

@@ -27,6 +27,7 @@ class friends_view(MethodView):
             tmp_user['account'] = tmp.username
             tmp_user['nickname'] = tmp.nickname
             tmp_user['state'] = "offline" if tmp.state != "online" else "online"
+            tmp_user['icon'] = tmp.icon
             resp['friendlist'].append(tmp_user)
         return jsonify(resp)
 
@@ -73,7 +74,7 @@ class friends_view(MethodView):
                         return ("Added friend failed due to system error", 500)
                     RPC.release_producer(req_user.username)
                     RPC.release_connection(cnn)
-                    friend = FriendList(resp_user.username, resp_user.nickname, resp_user.state, False)
+                    friend = FriendList(resp_user.username, resp_user.nickname, resp_user.state, False, resp_user.icon)
                     req_user.friends.append(friend)
                     db_session.begin()
                     try:
@@ -193,7 +194,7 @@ class friends_view(MethodView):
                     tmp['to'] = resp_user.username
                     tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     if para['result'] == 'accept':
-                        req_user.friends.append(FriendList(para['account'], resp_user.nickname, resp_user.state, True))
+                        req_user.friends.append(FriendList(para['account'], resp_user.nickname, resp_user.state, True, resp_user.icon))
                         tmp['msg'] = 'accept'
                     elif para['result'] == 'reject':
                         tmp['msg'] = 'reject'
@@ -206,6 +207,8 @@ class friends_view(MethodView):
                             if friend.username == req_user.username:
                                 if tmp['msg'] == 'accept':
                                     friend.confirmed = True
+                                    friend.state = req_user.state
+                                    friend.icon = req_user.icon
                                     db_session.add(resp_user)
                                 else:
                                     db_session.delete(friend)

@@ -36,7 +36,7 @@ class UserInfo(Base):
     
     def __init__(self, username, password, email, nickname = None, state = None, method = None, 
                 getunreadmsg = False, login = None, created = None, updated = None, deleted = False, 
-                ip = None, port = None):
+                ip = None, port = None, icon = None):
         self.username = username
         self.nickname = nickname
         self.email = email
@@ -53,6 +53,7 @@ class UserInfo(Base):
         self.deleted = deleted
         self.ip = "0.0.0.0" if not ip else ip
         self.port = app.config["CLIENT_PORT"] if not port else port
+        self.icon = int(icon) if (type(icon) == int) and (int(icon) >= 0) else 0
         
 class FriendList(Base):
     __tablename__ = "friendlist"
@@ -64,16 +65,18 @@ class FriendList(Base):
     username = Column(String(50), index = True, nullable = False)
     nickname = Column(Unicode(50))
     state = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
+    icon = Column(Integer, nullable = False, default = 0)
     confirmed = Column(Boolean, nullable = False, default = False)
     index = Column(Integer, ForeignKey('userinfo.id', onupdate="CASCADE", ondelete='CASCADE'), nullable = False)
     
-    def __init__(self, username, nickname, state = None, confirmed = False):
+    def __init__(self, username, nickname, state = None, confirmed = False, icon = None):
         self.username = username
         self.nickname = nickname
         if state is None:
             self.state = 'offline'
         else:
             self.state = state
+        self.icon = int(icon) if (type(icon) == int) and (int(icon) >= 0) else 0
         self.confirmed = confirmed
 
 class GroupInfo(Base):

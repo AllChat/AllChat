@@ -1,7 +1,7 @@
 from flask.views import MethodView
 from flask import request, make_response, g, session
 from allchat.database.sql import get_session
-from allchat.database.models import UserInfo, GroupMember
+from allchat.database.models import UserInfo, GroupMember, FriendList
 from sqlalchemy import and_
 import time, string
 
@@ -20,6 +20,13 @@ class login_view(MethodView):
                 db_session.begin()
                 db_user.state = db_user.last_state if db_user.last_state != "offline" else "invisible"
                 db_user.last_state = db_user.state
+                tmp_state = db_user.state if db_user.state == "online" else "offline"
+                db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
+                for db_member in db_groupmember:
+                    db_member.member_logstate = tmp_state
+                db_friendlist = db_session.query(FriendList).filter_by(username = name).all()
+                for db_friend in db_friendlist:
+                    db_friend.state = tmp_state
                 try:
                     db_session.commit()
                 except:
@@ -46,6 +53,12 @@ class login_view(MethodView):
                         return make_response(("The user is not registered yet", 403, ))
                     db_session.begin()
                     db_user.state = "offline"
+                    db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
+                    for db_member in db_groupmember:
+                        db_member.member_logstate = "offline"
+                    db_friendlist = db_session.query(FriendList).filter_by(username = name).all()
+                    for db_friend in db_friendlist:
+                        db_friend.state = "offline"
                     try:
                         db_session.commit()
                     except:
@@ -68,9 +81,13 @@ class login_view(MethodView):
                 db_user.state = logstate
                 db_user.last_state = logstate
                 db_user.login = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                tmp_state = db_user.state if db_user.state == "online" else "offline"
                 db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
                 for db_member in db_groupmember:
-                    db_member.member_logstate = logstate
+                    db_member.member_logstate = tmp_state
+                db_friendlist = db_session.query(FriendList).filter_by(username = name).all()
+                for db_friend in db_friendlist:
+                    db_friend.state = tmp_state
                 try:
                     db_session.commit()
                 except:
