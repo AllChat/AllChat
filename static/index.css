@@ -154,16 +154,17 @@ body
     border-bottom: 1px #d2d2d2 solid;
 }
 
-#control-list-middle-accounts
+#control-list-middle-rest, #control-list-middle-accounts, #control-list-middle-records, #control-list-middle-groups
 {
     height: 435px;
     width: 291px;
     margin: 0px;
     padding: 0px;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x:hidden;
 }
 
-#control-list-middle-accounts ul
+#control-list-middle-accounts ul, #control-list-middle-records ul, #control-list-middle-groups ul
 {
     height: 435px;
     width: 291px;

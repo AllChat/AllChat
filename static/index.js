@@ -6,6 +6,10 @@ var Account = {
     createNew: function() {
         var account = {};
         var user;
+        account.init = function() {
+            account.controlListTopSetting();
+            account.get_friends();
+        };
         account.load_friend = function(friend) {
             var tmp = null;
             var $li = $("<li></li>").attr("id", 'user-' + friend['account']).addClass("friends");
@@ -86,26 +90,21 @@ var Account = {
                     return;
                 }
                 var text = $select.text();
-                var childrens = $("#control-list-middle").children();
-                for(var tmp = 1; tmp < childrens.length; tmp++) {
+                var childrens = $("#control-list-middle-rest").children();
+                for(var tmp = 0; tmp < childrens.length; tmp++) {
                     if(!$(childrens[tmp]).filter(":hidden").length) {
-                        $(childrens[tmp]).stop().hide("fast");
+                        $(childrens[tmp]).css("display", "none");
                         break;
                     }
                 }
-                $("#control-list-middle").children().each(function(index, e) {
-                    if(index != 0 && !$(e).filter(":hidden").length) {
-                        $(e).stop().hide("fast");
-                    }
-                });
                 if(text == "会话记录") {
-                    $("#control-list-middle-records").stop().show("fast");
+                    $("#control-list-middle-records").css("display", "block");
                 }
                 else if(text == "好友") {
-                    $("#control-list-middle-accounts").stop().show("fast");
+                    $("#control-list-middle-accounts").css("display", "block");
                 }
                 else {
-                    $("#control-list-middle-groups").stop().show("fast");
+                    $("#control-list-middle-groups").css("display", "block");
                 }
                 $select.siblings().removeClass("selected");
                 $select.addClass("selected");
@@ -133,8 +132,7 @@ $(document).ready(function() {
         window.location.href = "login.html";
     }
     user = Account.createNew();
-    user.controlListTopSetting();
-    user.get_friends();
+    user.init();
 });
 
 $(window).unload(function(){
