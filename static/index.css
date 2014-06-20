@@ -75,7 +75,7 @@ body
 }
 
 
-#control-list-top ul .control-list-top-li
+.control-list-top-li
 {
     height: 40px;
     width: 96px;
@@ -114,7 +114,7 @@ body
     border-right: 0;
 }
 
-#control-list-top ul .selected
+.selected
 {
     background: #535353;
     border-left-color: #222;
@@ -180,10 +180,10 @@ body
 {
     width: 289px;
     height: 56px;
-    margin: 2px  1px  2px  1px;
+    padding: 0px;
+    margin: 0px  1px  0px  1px;
     position: relative;
     border-bottom: 1px solid #e3e3e3;
-    padding: 2px 1px;
     line-height: 100%;
     cursor: pointer;
 }
@@ -201,9 +201,9 @@ body
 {
     width: 220px;
     height: 26px;
-    margin: 3px 0px 0px 0px;
+    margin: 0px;
     padding: 0px;
-    line-height: 26px;
+    line-height: 32px;
     overflow: hidden;
     font-size: 120%;
     display: block;
@@ -212,7 +212,7 @@ body
 .state
 {
     width: 40px;
-    height: 24px;
+    height: 31px;
     margin: 0px;
     padding: 0px;
     overflow: hidden;

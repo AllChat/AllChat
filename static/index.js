@@ -9,6 +9,14 @@ var Account = {
         account.load_friend = function(friend) {
             var tmp = null;
             var $li = $("<li></li>").attr("id", 'user-' + friend['account']).addClass("friends");
+            $li.on("mouseenter mouseleave", function(event) {
+                if(event.type == "mouseenter") {
+                    $(this).css("background", "rgb(203, 231, 252)");
+                }
+                else {
+                    $(this).css("background", "none");
+                }
+            });
             var $img = $("<img/>").attr("src", "/static/images/user" + friend['icon'] +"-icon.jpg").addClass("icon");
             var $nickname = $("<p></p>").addClass("nickname").text(friend['nickname']);
             if (friend['state'] === "online") {
@@ -71,6 +79,38 @@ var Account = {
                 $.removeCookie("account");
             });
         };
+        account.controlListTopSetting = function() {
+            $("#control-list-top").on("click", "ul li", function(event) {
+                var $select = $(this);
+                if($select.hasClass("selected")) {
+                    return;
+                }
+                var text = $select.text();
+                var childrens = $("#control-list-middle").children();
+                for(var tmp = 1; tmp < childrens.length; tmp++) {
+                    if(!$(childrens[tmp]).filter(":hidden").length) {
+                        $(childrens[tmp]).stop().hide("fast");
+                        break;
+                    }
+                }
+                $("#control-list-middle").children().each(function(index, e) {
+                    if(index != 0 && !$(e).filter(":hidden").length) {
+                        $(e).stop().hide("fast");
+                    }
+                });
+                if(text == "会话记录") {
+                    $("#control-list-middle-records").stop().show("fast");
+                }
+                else if(text == "好友") {
+                    $("#control-list-middle-accounts").stop().show("fast");
+                }
+                else {
+                    $("#control-list-middle-groups").stop().show("fast");
+                }
+                $select.siblings().removeClass("selected");
+                $select.addClass("selected");
+            });
+        };
         return account;
     }
 };
@@ -93,6 +133,7 @@ $(document).ready(function() {
         window.location.href = "login.html";
     }
     user = Account.createNew();
+    user.controlListTopSetting();
     user.get_friends();
 });
 
