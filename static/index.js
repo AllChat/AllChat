@@ -9,6 +9,7 @@ var Account = {
         account.init = function() {
             account.controlListTopSetting();
             account.get_friends();
+            account.openChat();
         };
         account.load_friend = function(friend) {
             var tmp = null;
@@ -31,6 +32,7 @@ var Account = {
             }
             var $state = $("<p></p>").addClass("state").text(tmp);
             $li.append($img).append($nickname).append($state).appendTo($("#control-list-middle-accounts ul"));
+            account.bindChat($li);
         };
         account.order_friends = function(list) {
             var online = new Array();
@@ -59,7 +61,9 @@ var Account = {
             return online.concat(offline);
         };
         account.get_friends = function() {
-            user = $.cookie('account');
+            if(typeof(user) == "undefined") {
+                user = $.cookie('account');
+            }
             var url = "/v1/friends/" + user;
             $.ajax({
                 url: url,
@@ -82,6 +86,9 @@ var Account = {
                 }
                 $.removeCookie("account");
             });
+        };
+        account.get_groups = function() {
+            var url = "/v1/groups/";
         };
         account.controlListTopSetting = function() {
             $("#control-list-top").on("click", "ul li", function(event) {
@@ -108,6 +115,14 @@ var Account = {
                 }
                 $select.siblings().removeClass("selected");
                 $select.addClass("selected");
+            });
+        };
+        account.bindChat = function($li) {
+            $li.on("dblclick", function(event) {
+                $this = $(this)
+                id = $this.attr("id");
+                nickname = $this.children(".nickname").text();
+                
             });
         };
         return account;
