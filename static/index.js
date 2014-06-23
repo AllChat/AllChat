@@ -8,8 +8,9 @@ var Account = {
         var user;
         account.init = function() {
             account.controlListTopSetting();
+            account.closeChat();
+            account.closeCard();
             account.get_friends();
-            account.openChat();
         };
         account.load_friend = function(friend) {
             var tmp = null;
@@ -120,9 +121,43 @@ var Account = {
         account.bindChat = function($li) {
             $li.on("dblclick", function(event) {
                 $this = $(this)
+                $chat = $("#chat")
                 id = $this.attr("id");
                 nickname = $this.children(".nickname").text();
-                
+                if($chat.css("visibility") == "hidden") {
+                    $chat.stop().queue(function(next) {
+                        $(this).css("visibility", "visible");
+                        next();
+                    });
+                }
+            });
+        };
+        account.closeChat = function() {
+            $("#chat-list > p").click(function(event) {
+                $chat = $("#chat")
+                if($chat.css("visibility") == "visible") {
+                    $chat.stop().queue(function(next) {
+                        $(this).css("visibility", "hidden");
+                        next();
+                    });
+                }
+            });
+        };
+        account.closeCard = function($li) {
+            $("#chat-list ul li").on("mouseenter mouseleave", function(event) {
+                if(event.type == "mouseenter") {
+                    $(this).children("p").stop().show();
+                }
+                else {
+                    $(this).children("p").stop().hide();
+                }
+            });
+            
+            $("#chat-list ul li > p").click(function(event) {
+                $tmp = $(this).closest("li");
+                if($tmp.css("display") != "none") {
+                    $tmp.css("display", "none");
+                }
             });
         };
         return account;
