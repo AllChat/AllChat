@@ -9,7 +9,6 @@ var Account = {
         account.init = function() {
             account.controlListTopSetting();
             account.closeChat();
-            account.closeCard();
             account.get_friends();
         };
         account.load_friend = function(friend) {
@@ -121,30 +120,65 @@ var Account = {
         account.bindChat = function($li) {
             $li.on("dblclick", function(event) {
                 $this = $(this)
-                $chat = $("#chat")
-                id = $this.attr("id");
-                nickname = $this.children(".nickname").text();
+                var $chat = $("#chat")
+                var id = $this.attr("id");
+                var nickname = $this.children(".nickname").text();
+                var user = id.substr(5);
+                if(id.split("-", 1)[0] != "user") {
+                    return false;
+                }
                 if($chat.css("visibility") == "hidden") {
                     $chat.stop().queue(function(next) {
                         $(this).css("visibility", "visible");
                         next();
                     });
                 }
+                var $ul = $("#chat-list ul");
+                var create = true;
+                $ul.children("li").each(function(index, element) {
+                    var $element = $(element);
+                    if($element.attr("id") == "list-" + user) {
+                        if($element.css("display") == "none") {
+                            $element.stop().show().addClass("chat-focus");
+                        }
+                        else {
+                            if(!$element.hasClass("chat-focus")) {
+                                $element.addClass("chat-focus");
+                            }
+                        }
+                        create = false;
+                    }
+                    else {
+                        if($element.hasClass("chat-focus")) {
+                            $element.removeClass("chat-focus");
+                        }
+                    }
+                });
+                if(create == true) {
+                    var $li = $("<li></li>").attr("id", "list-" + user).addClass("chat-friends chat-focus");
+                    var $p = $("<p></p>").css("display", "none").text("×");
+                    var $span = $("<span></span>").text(nickname);
+                    $li.append($p).append($span).appendTo($ul);
+                    account.closeCard($li);
+                }   
             });
         };
         account.closeChat = function() {
             $("#chat-list > p").click(function(event) {
-                $chat = $("#chat")
+                var $chat = $("#chat");
                 if($chat.css("visibility") == "visible") {
                     $chat.stop().queue(function(next) {
                         $(this).css("visibility", "hidden");
                         next();
                     });
                 }
+                $(this).next("ul").children("li").each(function() {
+                    $(this).stop().hide();
+                });
             });
         };
         account.closeCard = function($li) {
-            $("#chat-list ul li").on("mouseenter mouseleave", function(event) {
+            $li.on("mouseenter mouseleave", function(event) {
                 if(event.type == "mouseenter") {
                     $(this).children("p").stop().show();
                 }
@@ -152,14 +186,26 @@ var Account = {
                     $(this).children("p").stop().hide();
                 }
             });
-            
-            $("#chat-list ul li > p").click(function(event) {
-                $tmp = $(this).closest("li");
+            $li.children("p").click(function(event) {
+                var $tmp = $(this).closest("li");
                 if($tmp.css("display") != "none") {
-                    $tmp.css("display", "none");
+                    $tmp.stop().hide();
+                }
+                var $ul = $tmp.closest("ul");
+                if($ul.children("li").length == $ul.children("li").filter(":hidden").length) {
+                    if($tmp.hasClass("chat-focus")) {
+                        $tmp.removeClass("chat-focus");
+                    }
+                    $("#chat-list > p").trigger("click");
+                    return false;
+                }
+                if($tmp.hasClass("chat-focus")) {
+                    $tmp.removeClass("chat-focus");
+                    $ul.children("li").not(":hidden").last().addClass("chat-focus");
                 }
             });
         };
+        
         return account;
     }
 };

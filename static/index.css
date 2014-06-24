@@ -286,6 +286,7 @@ body
     -webkit-box-shadow: 0 0 20px #000;
     box-shadow: 0 0 20px #000;
     position: relative;
+    z-index: 0;
 }
 
 #chat-list
@@ -302,6 +303,7 @@ body
     box-shadow: inset 0 0 10px transparent;
     background-color: #ffffff;
     position: relative;
+    z-index: 1;
 }
 
 #chat-list > p
@@ -326,6 +328,7 @@ body
     -khtml-user-select: none;
     -webkit-user-select: none;
     cursor: pointer;
+    z-index: 2;
 }
 
 #chat-list > p:hover
