@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+<meta charset=utf-8>
+<link rel=stylesheet href="../static/init_reset.css">
+<link rel=stylesheet href="../static/chat.css">
+<script type=text/javascript src="../static/jquery-1.11.1.min.js"></script>
+<script type=text/javascript src="../static/jquery-ui-1.10.4.min.js"></script>
+<script type=text/javascript src="../static/chat.js"></script>
+</head>
+<body>
+<div id="desktop">
+    <div id="friendBox" class=draggable>
+        <div id="personalInfo">
+            <img id="self-head" width="60px" height="60px" src='../static/images/self.jpg' />
+			<img id="min" src="../static/images/icon/min.png">
+            <img id="max" src="../static/images/icon/max.png">
+            <img id="close" src="../static/images/icon/close.png">
+        </div>
+        <div id="friendList">
+            <ul>
+                <li class=friendInfo><img class=friendhead src='../static/images/head/01.jpg' />
+                    <p class=friendname>好友1</p></li>
+                <li class=friendInfo><img class=friendhead src='../static/images/head/02.jpg' />
+                    <p class=friendname>好友2</p></li>
+                <li class=friendInfo><img class=friendhead src='../static/images/head/03.jpg' />
+                    <p class=friendname>好友3</p></li>
+                <li class=friendInfo><img class=friendhead src='../static/images/head/04.jpg' />
+                    <p class=friendname>好友4</p></li>
+                <li class=friendInfo><img class=friendhead src='../static/images/head/05.jpg' />
+                    <p class=friendname>好友5</p></li>
+            </ul>
+        </div>
+    </div>
+    
+</div>
+<script>
+$('.draggable').draggable({ containment: "parent" });
+</script>
+</body>
+</html>

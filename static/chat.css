@@ -1,0 +1,173 @@
+#desktop
+{
+    width:100%;
+    min-width:1280px;
+    height:100%;
+    min-height:720px;
+    background-image:url('../static/images/desktop2.jpg');
+    background-size:cover;
+    overflow:hidden;
+}
+#chatWindow
+{
+    width:540px;
+    height: 560px;
+    position:absolute;
+    top:40px;
+    left:40%;
+/*    background-image: linear-gradient(#BAFFFF, #0CFAFA);*/
+    background-image: linear-gradient(#36C6FF,#4FB6FF);
+    border:1px solid #777;
+    border-radius:10px;
+    box-shadow: 10px 10px 7px rgba(0,0,0,0.3);
+}
+#friendBox
+{
+    width:260px;
+    height:560px;
+    float:left;
+    position:relative;
+    top:40px;
+    left:50px;
+    border-radius:6px;
+    box-shadow: 10px 10px 7px rgba(0,0,0,0.3);
+    background-image: linear-gradient(rgba(171,194,170,0.9),rgba(220,255,255,0.7));
+}
+#personalInfo
+{
+    width:260px;
+    height:100px;
+    margin: 0;
+    border-radius:3px;
+    position: relative;
+}
+#self-head
+{
+    position: absolute;
+    top: 20px;
+    left: 10px;
+}
+#close,#max,#min
+{
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    top: 0;
+}
+#close
+{
+    right: 5px;
+}
+#max
+{
+    right: 25px;
+}
+#min
+{
+    right: 45px;
+}
+#close:hover,#max:hover,#min:hover
+{
+    cursor: pointer;
+}
+#close:hover
+{
+    background-color: red;
+}
+#max:hover,#min:hover
+{
+    background-color: #ccc;
+}
+#friendList
+{
+    width:240px;
+    height:440px;
+    background-color:#FFF;
+    margin:0px auto;
+    border-radius:3px;
+}
+.friendInfo
+{
+    height:30px;
+    padding:5px;
+}
+.friendInfo:hover
+{
+    cursor:pointer;
+    background-color:#F0F0F0;
+}
+.friendhead
+{
+    width:30px;
+    height:30px;
+    margin:0 10px;
+}
+#self-head:hover,#chathead:hover
+{
+    cursor:pointer;
+}
+p
+{
+    font-size:18px;
+    display:inline;
+    position:relative;
+    top:-10px;
+}
+#pic
+{
+    position: relative;
+    height:100px;
+}
+#chathead
+{
+    width:60px;
+    height:60px;
+	margin: 20px 30px;
+}
+#msgWindow
+{
+    width:500px;
+    height:280px;
+    background-color:#FFF;
+    margin:0 auto;
+    border: 2px solid #BAFFFF;
+    border-radius:5px;
+}
+#optionArea
+{
+	height:32px;
+	margin: 6px 0;
+}
+#inputArea
+{
+	width:504px;
+	height:104px;
+	margin:0 auto;
+}
+#inputBox
+{
+	width:500px;
+	height:90px;
+	background-color:#FFF;
+	border: 2px solid #BAFFFF;
+	border-radius:5px;
+}
+textarea
+{
+    width:500px;
+    height:90px;
+    resize:none;
+    font:18px sans-serif;
+    padding:0;
+    border:none;
+}
+input[type="button"]
+{
+	width:80px;
+	height:24px;
+	float:right;
+	font: 18px bold;
+	border-radius:5px;
+	margin: 6px 0;
+    background-image: linear-gradient( #9CFAFA, #BAFFFF);
+}
