@@ -499,7 +499,7 @@ body
 
 #chat-setting form select
 {
-    width: 60px;
+    width: 80px;
     height: 21px;
     padding: 0px;
     margin: 0px;
@@ -509,6 +509,12 @@ body
     overflow: hidden;
     border-radius: 3px;
 }
+
+#chat-setting form select:nth-child(2)
+{
+    width: 50px;
+}
+
 
 #chat-setting form input
 {

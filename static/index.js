@@ -10,6 +10,7 @@ var Account = {
             account.controlListTopSetting();
             account.closeChat();
             account.get_friends();
+            account.setFontAndSize();
         };
         account.load_friend = function(friend) {
             var tmp = null;
@@ -242,6 +243,19 @@ var Account = {
             if($div.is(":hidden")) {
                 $div.css("display", "block");
             }
+        };
+        account.setFontAndSize = function() {
+            $("#font").change(function(event) {
+                var value = $(this).val();
+                $("#chat-records").css("font", value);
+                $("#chat-input textarea").css("font", value);
+                
+            });
+            $("#font-size").change(function(event) {
+                var value = $(this).val();
+                $("#chat-records").css("font-size", value + "px");
+                $("#chat-input textarea").css("font-size", value + "px");
+            });
         };
         return account;
     }
