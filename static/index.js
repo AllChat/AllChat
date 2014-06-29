@@ -123,7 +123,7 @@ var Account = {
                 var $chat = $("#chat")
                 var id = $this.attr("id");
                 var nickname = $this.children(".nickname").text();
-                var user = id.substr(5);
+                var chatUser = id.substr(5);
                 if(id.split("-", 1)[0] != "user") {
                     return false;
                 }
@@ -137,7 +137,7 @@ var Account = {
                 var create = true;
                 $ul.children("li").each(function(index, element) {
                     var $element = $(element);
-                    if($element.attr("id") == "list-" + user) {
+                    if($element.attr("id") == "list-" + chatUser) {
                         if($element.css("display") == "none") {
                             $element.stop().show().addClass("chat-focus");
                         }
@@ -151,16 +151,21 @@ var Account = {
                     else {
                         if($element.hasClass("chat-focus")) {
                             $element.removeClass("chat-focus");
+                            account.closeChatWindow($element.attr("id").substr(5));
                         }
                     }
                 });
                 if(create == true) {
-                    var $li = $("<li></li>").attr("id", "list-" + user).addClass("chat-friends chat-focus");
+                    var $li = $("<li></li>").attr("id", "list-" + chatUser).addClass("chat-friends chat-focus");
                     var $p = $("<p></p>").css("display", "none").text("×");
                     var $span = $("<span></span>").text(nickname);
                     $li.append($p).append($span).appendTo($ul);
                     account.closeCard($li);
-                }   
+                    account.addChatWindow(chatUser);
+                }
+                else {
+                    account.openChatWindow(chatUser);
+                }
             });
         };
         account.closeChat = function() {
@@ -174,6 +179,7 @@ var Account = {
                 }
                 $(this).next("ul").children("li").each(function() {
                     $(this).stop().hide();
+                    account.closeChatWindow($(this).attr("id").substr(5));
                 });
             });
         };
@@ -190,6 +196,7 @@ var Account = {
                 var $tmp = $(this).closest("li");
                 if($tmp.css("display") != "none") {
                     $tmp.stop().hide();
+                    account.closeChatWindow($tmp.attr("id").substr(5));
                 }
                 var $ul = $tmp.closest("ul");
                 if($ul.children("li").length == $ul.children("li").filter(":hidden").length) {
@@ -201,11 +208,41 @@ var Account = {
                 }
                 if($tmp.hasClass("chat-focus")) {
                     $tmp.removeClass("chat-focus");
-                    $ul.children("li").not(":hidden").last().addClass("chat-focus");
+                    var id = $ul.children("li").not(":hidden").last().addClass("chat-focus").attr("id");
+                    account.openChatWindow(id.substr(5));
+                }
+            });
+            $li.children("span").click(function(event) {
+                var $li = $(this).closest("li");
+                $li.siblings("li").each(function(index, element) {
+                    var $element = $(element);
+                    if($element.hasClass("chat-focus")) {
+                        var id = $element.removeClass("chat-focus").attr("id");
+                        account.closeChatWindow(id.substr(5));
+                    }
+                });
+                if(!$li.hasClass("chat-focus")) {
+                    var id = $li.addClass("chat-focus").attr("id");
+                    account.openChatWindow(id.substr(5));
                 }
             });
         };
-        
+        account.addChatWindow = function(id) {
+            var $div = $("<div></div>").addClass("chat-records-setting").attr("id", "records-" + id).appendTo("#chat-records");
+            $div.siblings().not(":hidden").css("display", "none");
+        };
+        account.closeChatWindow = function(id) {
+            var $div = $("#records-" + id);
+            if($div.not(":hidden")) {
+                $div.css("display", "none");
+            }
+        };
+        account.openChatWindow = function(id) {
+            var $div = $("#records-" + id);
+            if($div.is(":hidden")) {
+                $div.css("display", "block");
+            }
+        };
         return account;
     }
 };
