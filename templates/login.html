@@ -1,10 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title></title>
+    <META charset="UTF-8">
+    <link rel="stylesheet" href="../static/login.css">
+    <script src="../static/jquery-1.11.1.min.js"></script>
+    <script src="../static/jquery.json-2.4.min.js"></script>
+    <script src="../static/login.js"></script>
+    <title>Login</title>
 </head>
 <body>
-    <p>Login</p>
+    <div class="top"></div>
+    <div class="middle">
+        <div style="clear:both"></div>
+        <div class="middle-left">
+            <ul class="middle-left-image-ul">
+                <li class="middle-left-image-li">
+                    <img src="/static/images/login-1.jpg" width="528px" height="330px">
+                    <p>Welcome to AllChat</p>
+                </li>
+                <li class="middle-left-image-li">
+                    <img src="/static/images/login-2.jpg" width="528px" height="330px">
+                    <p>We believe you're safe here</p>
+                </li>
+                <li class="middle-left-image-li">
+                    <img src="/static/images/login-3.jpg" width="528px" height="330px">
+                    <p>No one will surveil you here</p>
+                </li>
+                <li class="middle-left-image-li">
+                    <img src="/static/images/login-4.jpg" width="528px" height="330px">
+                    <p>Let's make the life better</p>
+                </li>
+            </ul>
+            <div class="middle-left-button">
+                <span>1</span>
+                <span>2</span>
+                <span>3</span>
+                <span>4</span>
+            </div>
+        </div>
+        <div class="middle-line">
+            <span id="line"></span>
+        </div>
+        <div class="middle-right">
+            <form class="middle-right-form" action="/v1/login/" method="POST">
+                <ul class="middle-right-form-ul">
+                    <li class="middle-right-form-li"><p>登陆AllChat</p></li>
+                    <li class="middle-right-form-li">
+                        <input type="text" id="account" name="account" required="required" placeholder="账户名">
+                    </li>
+                    <li class="middle-right-form-li">
+                        <input type="password" id="password" name="password" required="required" placeholder="密码">
+                    </li>
+                    <li class="middle-right-form-li">
+                        <input type="submit" id="submit-button" name="submit-button" value="登  陆"/>
+                    </li>
+                    <li class="middle-right-form-li">
+                        <select id="state" name="state">
+                            <option value="online">在线</option>
+                            <option value="invisible" selected="selected">隐身</option>
+                        </select>
+                    </li>
+                    <li class="middle-right-form-li">
+                        <p>没有账户?点击<a href="/register.html">注册</a></p>
+                    </li>
+                </ul>
+            </form>
+        </div>
+    </div>
+    <div style="clear:both"></div>
+    <div class="footer"></div>
 </body>
 </html>

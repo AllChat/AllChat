@@ -1,0 +1,232 @@
+body
+{
+    font-family: "Microsoft YaHei", Geneva, Arial, sans-serif;
+    font-size: 14px;
+    background-color: #fffef0;
+}
+
+.top
+{
+    position: relative;
+    margin: 62px 500px 40px 560px;
+    text-align: center;
+    font-size: 30px;
+    width: 500px;
+    height: 45px;
+    letter-spacing: 5px;
+}
+
+.middle
+{
+    width:910px;
+    height: 500px;
+    padding:0px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+#line
+{
+    background: #E6E6E6;
+    width: 1px;
+    height: 355px;
+    display: block;
+    padding: 0px 0px 5px 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    float: left;
+}
+
+.middle-left
+{
+    width: 550px;
+    height: 335px;
+    padding: 0px;
+    margin: 5px 10px 5px 0px;
+    float: left;
+}
+
+.middle-left-image-ul
+{
+    list-style-type: none;
+    width: 540px;
+    height: 330px;
+    padding: 0px;
+    margin : 0px 0px 0px 5px;
+    position: relative;
+}
+
+.middle-left-image-li
+{
+    width: 528px;
+    padding: 0px;
+    margin: 0px;
+}
+
+.middle-left-image-li img
+{
+    -webkit-box-shadow: 0 0 5px #000;
+    -moz-box-shadow: 0 0 5px #000;
+    box-shadow: 0 0 5px #000;
+    border-radius: 5px;
+    padding: 0px;
+    margin: 0px;
+    position: absolute;
+    z-index: -1;
+    left: 5px;
+}
+
+.middle-left-image-li p
+{
+    position: absolute;
+    width: 528px;
+    padding: 0px;
+    margin: 0px;;
+    color: #ffffff;
+    top: 120px;
+    text-align: center;
+    font-size: 40px;
+    font-family: 'Lobster', helvetica, arial;
+    text-shadow: 0px 2px 3px #555
+}
+
+.middle-left-button
+{
+    position: absolute;
+    top: 450px;
+    width: 520px;
+    height: 25px;
+    padding: 0px;
+    padding-right: 15px;
+    margin : 0px 0px 0px 5px;
+    text-align: right;
+}
+
+.middle-left-button span
+{
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    display: inline-block;
+    border-radius: 10px;
+    margin: 0px 1px;
+    background-color: #999;
+    color: #ffffff;
+    text-align: center;
+}
+
+.middle-left-button .span-background
+{
+    background-color: #C20724;
+}
+
+.middle-right
+{
+    width: 320px;
+    float: left;
+    padding: 0px;
+    margin: 0px 0px 0px 15px;
+}
+
+.middle-right-form-ul
+{
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px 5px;
+}
+
+.middle-right-form-ul li
+{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.middle-right-form-ul li:nth-child(1) p
+{
+    font-size: 25px;
+    padding: 0px;
+    margin: 0px;
+    letter-spacing: 3px;
+}
+
+.middle-right-form-ul li:nth-child(4)
+{
+    display: inline-block;
+    width: 140px;
+    height: 40px;
+
+}
+
+.middle-right-form-ul li:nth-child(5)
+{
+    display: inline-block;
+    font-size: 16px;
+}
+
+
+.middle-right-form-ul li input[type = "text"],input[type = "password"]
+{
+    width: 290px;
+    height: 40px;
+    padding: 2px;
+    font-size: 18px;
+    border-radius: 5px;
+    border:1px solid #e1e8ed;
+}
+
+.middle-right-form-ul li input[type = "text"]
+{
+    margin:35px 0px 5px 0px;
+}
+
+.middle-right-form-ul li input[type = "password"]
+{
+    margin:0px 0px 20px 0px;
+}
+
+
+.middle-right-form-ul li input[type = "submit"]
+{
+    width: 130px;
+    height: 35px;
+    font-size: 18px;
+    text-align: center;
+    background-color: #fa2;
+    background-repeat: repeat-x;
+    background-image: linear-gradient(#ffec46,#f09600);
+    background-position: 0 0;
+    border-color: #ed9200;
+    border-radius: 3px;
+    margin-left: 1px;
+}
+
+.middle-right-form-ul li select
+{
+    width: 65px;
+    height: 25px;
+    font-size: 15px;
+    margin-left: 15px;
+    padding: 2px;
+    border:1px solid #e1e8ed;
+    border-radius: 5px;
+}
+
+.middle-right-form-ul li:nth-child(6) p
+{
+    font-size: 14px;
+    margin-top: 20px;
+}
+
+.middle-right-form-ul li a
+{
+    text-decoration: none;
+    color: #0025ff;
+}
+
+.middle-right-form-ul li a:hover
+{
+    background-color: #f09600;
+    border-radius: 3px;
+    text-decoration: none;
+    color: #ffffff;
+}
