@@ -128,7 +128,7 @@ class messages_view(MethodView):
         tmp = dict()
         tmp['from'] = user_from.username
         tmp['to'] = user_to.username
-        tmp['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        tmp['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
         record = ""
         for pic in para['msg']:
             if(pic['type'] == "text"):
@@ -178,7 +178,7 @@ class messages_view(MethodView):
         tmp['from'] = user_from.username
         tmp['to'] = None
         tmp['group_id'] = group_id
-        tmp['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        tmp['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
         for pic in para['msg']:
             if(pic['type'] == "text"):
                 continue

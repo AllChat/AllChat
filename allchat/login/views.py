@@ -80,7 +80,7 @@ class login_view(MethodView):
                 db_session.begin()
                 db_user.state = logstate
                 db_user.last_state = logstate
-                db_user.login = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                db_user.login = time.strftime('%Y-%m-%d %H:%M:%S',time.gmtime(time.time()))
                 tmp_state = db_user.state if db_user.state == "online" else "offline"
                 db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
                 for db_member in db_groupmember:
