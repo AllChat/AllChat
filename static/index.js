@@ -247,14 +247,23 @@ var Account = {
         account.setFontAndSize = function() {
             $("#font").change(function(event) {
                 var value = $(this).val();
-                $("#chat-records").css("font", value);
+                $(".chatBox dd").css("font", value);
                 $("#chat-input textarea").css("font", value);
                 
             });
             $("#font-size").change(function(event) {
                 var value = $(this).val();
-                $("#chat-records").css("font-size", value + "px");
+                $(".chatBox dd").css("font-size", value + "px");
                 $("#chat-input textarea").css("font-size", value + "px");
+            });
+        };
+        account.textareaSubmmit = function() {
+            $("#chat-input").children("button").eq(1).on("click", function(event) {
+                var content = $(this).siblings("textarea").val();
+                if(content.length) {
+                    if($("#chat-list ul").children())
+                    var url = 
+                }
             });
         };
         return account;
