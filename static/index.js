@@ -138,7 +138,7 @@ var Account = {
                 var create = true;
                 $ul.children("li").each(function(index, element) {
                     var $element = $(element);
-                    if($element.attr("id") == "list-" + chatUser) {
+                    if($element.attr("id") == "list-user-" + chatUser) {
                         if($element.css("display") == "none") {
                             $element.stop().show().addClass("chat-focus");
                         }
@@ -152,12 +152,18 @@ var Account = {
                     else {
                         if($element.hasClass("chat-focus")) {
                             $element.removeClass("chat-focus");
-                            account.closeChatWindow($element.attr("id").substr(5));
+                            var id = $element.attr("id");
+                            if(id.substring(0,10) == "list-user-") {
+                                account.closeChatWindow(id.substr(10));
+                            }
+                            else if(id.substring(0,11) == "list-group-") {
+                                
+                            }
                         }
                     }
                 });
                 if(create == true) {
-                    var $li = $("<li></li>").attr("id", "list-" + chatUser).addClass("chat-friends chat-focus");
+                    var $li = $("<li></li>").attr("id", "list-user-" + chatUser).addClass("chat-friends chat-focus");
                     var $p = $("<p></p>").css("display", "none").text("×");
                     var $span = $("<span></span>").text(nickname);
                     $li.append($p).append($span).appendTo($ul);
@@ -180,7 +186,13 @@ var Account = {
                 }
                 $(this).next("ul").children("li").each(function() {
                     $(this).stop().hide();
-                    account.closeChatWindow($(this).attr("id").substr(5));
+                    var id = $(this).attr("id");
+                    if(id.substring(0,10) == "list-user-") {
+                        account.closeChatWindow(id.substr(10));
+                    }
+                    else if(id.substring(0,11) == "list-group-") {
+                        
+                    }
                 });
             });
         };
@@ -197,7 +209,13 @@ var Account = {
                 var $tmp = $(this).closest("li");
                 if($tmp.css("display") != "none") {
                     $tmp.stop().hide();
-                    account.closeChatWindow($tmp.attr("id").substr(5));
+                    var id = $tmp.attr("id");
+                    if(id.substring(0,10) == "list-user-") {
+                        account.closeChatWindow(id.substr(10));
+                    }
+                    else if(id.substring(0,11) == "list-group-") {
+                        
+                    }
                 }
                 var $ul = $tmp.closest("ul");
                 if($ul.children("li").length == $ul.children("li").filter(":hidden").length) {
@@ -210,7 +228,12 @@ var Account = {
                 if($tmp.hasClass("chat-focus")) {
                     $tmp.removeClass("chat-focus");
                     var id = $ul.children("li").not(":hidden").last().addClass("chat-focus").attr("id");
-                    account.openChatWindow(id.substr(5));
+                    if(id.substring(0,10) == "list-user-") {
+                        account.openChatWindow(id.substr(10));
+                    }
+                    else if(id.substring(0,11) == "list-group-") {
+                        
+                    }
                 }
             });
             $li.children("span").click(function(event) {
@@ -219,27 +242,37 @@ var Account = {
                     var $element = $(element);
                     if($element.hasClass("chat-focus")) {
                         var id = $element.removeClass("chat-focus").attr("id");
-                        account.closeChatWindow(id.substr(5));
+                        if(id.substring(0,10) == "list-user-") {
+                            account.openChatWindow(id.substr(10));
+                        }
+                        else if(id.substring(0,11) == "list-group-") {
+                            
+                        }
                     }
                 });
                 if(!$li.hasClass("chat-focus")) {
                     var id = $li.addClass("chat-focus").attr("id");
-                    account.openChatWindow(id.substr(5));
+                    if(id.substring(0,10) == "list-user-") {
+                        account.openChatWindow(id.substr(10));
+                    }
+                    else if(id.substring(0,11) == "list-group-") {
+                        
+                    }
                 }
             });
         };
         account.addChatWindow = function(id) {
-            var $div = $("<div></div>").addClass("chat-records-setting").attr("id", "records-" + id).appendTo("#chat-records");
+            var $div = $("<div></div>").addClass("chat-records-setting").attr("id", "records-user-" + id).appendTo("#chat-records");
             $div.siblings().not(":hidden").css("display", "none");
         };
         account.closeChatWindow = function(id) {
-            var $div = $("#records-" + id);
+            var $div = $("#records-user-" + id);
             if($div.not(":hidden")) {
                 $div.css("display", "none");
             }
         };
         account.openChatWindow = function(id) {
-            var $div = $("#records-" + id);
+            var $div = $("#records-user-" + id);
             if($div.is(":hidden")) {
                 $div.css("display", "block");
             }
@@ -257,12 +290,22 @@ var Account = {
                 $("#chat-input textarea").css("font-size", value + "px");
             });
         };
-        account.textareaSubmmit = function() {
+        account.textareaSubmit = function() {
             $("#chat-input").children("button").eq(1).on("click", function(event) {
                 var content = $(this).siblings("textarea").val();
                 if(content.length) {
-                    if($("#chat-list ul").children())
-                    var url = 
+                    var $receiver = $("#chat-list ul").children(".chat-focus");
+                    if($receiver.length != 0) {
+                        var id = $receiver.attr("id");
+                        if(id.substring(0,10) == "list-user-") {
+                            var account_to = id.substr(10);
+                            var url = /messages/individual;
+                        }
+                        else if(id.substring(0,11) == "list-group-") {
+                            var group_to = id.substr(11);
+                            var url = /messages/group;
+                        }
+                    }
                 }
             });
         };
