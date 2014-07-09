@@ -101,10 +101,12 @@ class messages_view(MethodView):
             receiver = request.headers['message_receiver']
         except Exception,e:
             return ("HTTP header format error", 403)
+        users = []
         db_session = get_session()
-        users = db_session.query(UserInfo).join(FriendList).filter(or_(UserInfo.username == sender,
-                                UserInfo.username == receiver)).filter(and_(UserInfo.state != "offline",
-                                UserInfo.deleted == False)).all()
+        users.extend(db_session.query(UserInfo).join(FriendList).filter(UserInfo.username == sender)
+                     .filter(and_(UserInfo.state != "offline", UserInfo.deleted == False)).all())
+        users.extend(db_session.query(UserInfo).join(FriendList)
+                    .filter(and_(UserInfo.username == receiver, UserInfo.deleted == False)).all())
         if len(users) != 2:
             return ('Message send failed due to account not exist or offline', 403)
         user_from = None

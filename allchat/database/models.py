@@ -12,7 +12,8 @@ class UserInfo(Base):
     __tablename__ = "userinfo"
     __table_args__ = {
         'mysql_engine': 'InnoDB',
-        'mysql_charset': 'utf8'
+        'mysql_charset': 'utf8',
+        'mysql_collate': 'utf8_bin'
     }
     
     id = Column(Integer, primary_key = True)
@@ -59,7 +60,8 @@ class FriendList(Base):
     __tablename__ = "friendlist"
     __table_args__ = {
         'mysql_engine': 'InnoDB',
-        'mysql_charset': 'utf8'
+        'mysql_charset': 'utf8',
+        'mysql_collate': 'utf8_bin'
     }
     id = Column(Integer, primary_key = True)
     username = Column(String(50), index = True, nullable = False)
@@ -83,7 +85,8 @@ class GroupInfo(Base):
     __tablename__ = "groupinfo"
     __table_args__ = {
         'mysql_engine': 'InnoDB',
-        'mysql_charset': 'utf8'
+        'mysql_charset': 'utf8',
+        'mysql_collate': 'utf8_bin'
     }
     id = Column(Integer, primary_key = True)
     group_id = Column(Integer, nullable = False, index = True, unique = True)
@@ -109,7 +112,8 @@ class GroupMember(Base):
     __tablename__ = "groupmember"
     __table_args__ = {
         'mysql_engine': 'InnoDB',
-        'mysql_charset': 'utf8'
+        'mysql_charset': 'utf8',
+        'mysql_collate': 'utf8_bin'
     }
     id = Column(Integer, primary_key = True)
     group_id = Column(Integer, nullable = False)
