@@ -98,6 +98,7 @@ class login_view(MethodView):
                 session['account'] = name
                 resp = make_response(("Successful logged in", 200, ))
                 resp.set_cookie("account", value=name)
+                resp.set_cookie("nickname", value=db_user.nickname)
                 return resp
             else:
                 return make_response(("Password is wrong, please check out", 403, ))

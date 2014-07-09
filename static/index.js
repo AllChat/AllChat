@@ -6,6 +6,7 @@ var Account = {
     createNew: function() {
         var account = {};
         var user;
+        var nickname;
         account.init = function() {
             account.controlListTopSetting();
             account.closeChat();
@@ -64,6 +65,7 @@ var Account = {
         account.get_friends = function() {
             if(typeof(user) == "undefined") {
                 user = $.cookie('account');
+                nickname = $.cookie("nickname");
             }
             var url = "/v1/friends/" + user;
             $.ajax({
@@ -300,6 +302,17 @@ var Account = {
                         if(id.substring(0,10) == "list-user-") {
                             var account_to = id.substr(10);
                             var url = /messages/individual;
+                            account.addContent(nickname, content);
+//                          var data = {};
+//                          $.ajax({
+//                              url: url,
+//                              contentType: "application/json; charset=UTF-8",
+//                              type: "POST",
+//                              data: $.toJSON(data),
+//                              dataType: "text"
+//                          }).done(function (data, textStatus, jqXHR) {
+//                          }).fail(function (jqXHR, textStatus, errorThrown) {
+//                          });
                         }
                         else if(id.substring(0,11) == "list-group-") {
                             var group_to = id.substr(11);
@@ -308,6 +321,14 @@ var Account = {
                     }
                 }
             });
+        };
+        account.addContent = function(name, content) {
+            var now = new Date();
+            var timestr = now.toLocaleDateString() + " " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+            var $dl = $("<dl></dl>").addClass("chatBox");
+            var $dt = $("<dt></dt>").addClass("chatBox-head").attr("title", name).text(name).append($("<span></span>").css("margin-left", "5px").text(timestr));
+            var $dd = $("<dd></dd>").addClass("charBox-msg").html(content);
+            $dl.append($dt).append($dd);
         };
         return account;
     }
