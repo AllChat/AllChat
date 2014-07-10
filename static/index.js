@@ -8,10 +8,13 @@ var Account = {
         var user;
         var nickname;
         account.init = function() {
+            $.base64.utf8encode = true;
+            $.base64.utf8decode = true;
             account.controlListTopSetting();
             account.closeChat();
             account.get_friends();
             account.setFontAndSize();
+            account.textareaSubmit();
         };
         account.load_friend = function(friend) {
             var tmp = null;
@@ -65,7 +68,7 @@ var Account = {
         account.get_friends = function() {
             if(typeof(user) == "undefined") {
                 user = $.cookie('account');
-                nickname = $.cookie("nickname");
+                nickname = $.base64.decode($.cookie("nickname"));
             }
             var url = "/v1/friends/" + user;
             $.ajax({
@@ -122,8 +125,8 @@ var Account = {
         };
         account.bindChat = function($li) {
             $li.on("dblclick", function(event) {
-                $this = $(this)
-                var $chat = $("#chat")
+                $this = $(this);
+                var $chat = $("#chat");
                 var id = $this.attr("id");
                 var nickname = $this.children(".nickname").text();
                 var chatUser = id.substr(5);
@@ -245,7 +248,7 @@ var Account = {
                     if($element.hasClass("chat-focus")) {
                         var id = $element.removeClass("chat-focus").attr("id");
                         if(id.substring(0,10) == "list-user-") {
-                            account.openChatWindow(id.substr(10));
+                            account.closeChatWindow(id.substr(10));
                         }
                         else if(id.substring(0,11) == "list-group-") {
                             
@@ -301,9 +304,10 @@ var Account = {
                         var id = $receiver.attr("id");
                         if(id.substring(0,10) == "list-user-") {
                             var account_to = id.substr(10);
-                            var url = /messages/individual;
-                            account.addContent(nickname, content);
-//                          var data = {};
+                            var url = "/messages/individual";
+                            var data = {};
+                            $(this).siblings("textarea").val("");
+                            account.addContent(account_to, nickname, content);
 //                          $.ajax({
 //                              url: url,
 //                              contentType: "application/json; charset=UTF-8",
@@ -316,19 +320,19 @@ var Account = {
                         }
                         else if(id.substring(0,11) == "list-group-") {
                             var group_to = id.substr(11);
-                            var url = /messages/group;
+                            var url = "/messages/group";
                         }
                     }
                 }
             });
         };
-        account.addContent = function(name, content) {
+        account.addContent = function(id, name, content) {
             var now = new Date();
             var timestr = now.toLocaleDateString() + " " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
             var $dl = $("<dl></dl>").addClass("chatBox");
             var $dt = $("<dt></dt>").addClass("chatBox-head").attr("title", name).text(name).append($("<span></span>").css("margin-left", "5px").text(timestr));
             var $dd = $("<dd></dd>").addClass("charBox-msg").html(content);
-            $dl.append($dt).append($dd);
+            $dl.append($dt).append($dd).appendTo($("#records-user-" + id));
         };
         return account;
     }

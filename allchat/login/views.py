@@ -3,7 +3,7 @@ from flask import request, make_response, g, session
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, GroupMember, FriendList
 from sqlalchemy import and_
-import time, string
+import time, string, base64
 
 class login_view(MethodView):
     def get(self):
@@ -98,7 +98,7 @@ class login_view(MethodView):
                 session['account'] = name
                 resp = make_response(("Successful logged in", 200, ))
                 resp.set_cookie("account", value=name)
-                resp.set_cookie("nickname", value=db_user.nickname)
+                resp.set_cookie("nickname", value=base64.b64encode(db_user.nickname.encode("utf8")))
                 return resp
             else:
                 return make_response(("Password is wrong, please check out", 403, ))

@@ -142,7 +142,7 @@ class accounts_view(MethodView):
                     user.state = state
                     user.last_state = state
             db_session.begin()
-            if icon or state :
+            if any([icon, state, nickname]):
                 db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
                 for db_member in db_groupmember:
                     db_member.member_logstate = user.state
@@ -151,6 +151,7 @@ class accounts_view(MethodView):
                 for db_friend in db_friendlist:
                     db_friend.state = user.state
                     db_friend.icon = user.icon
+                    db_friend.nickname = user.nickname
                     db_session.add(db_friend)
             try:
                 db_session.add(user)
