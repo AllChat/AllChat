@@ -14,6 +14,7 @@ var Account = {
             account.closeChat();
             account.get_friends();
             account.setFontAndSize();
+            account.uploadImage();
             account.textareaSubmit();
         };
         account.load_friend = function(friend) {
@@ -283,16 +284,66 @@ var Account = {
             }
         };
         account.setFontAndSize = function() {
+            $("#chat-input textarea").css("font-size", $("#font-size").val());
+            $(".chatBox dd").css("font-size", $("#font-size").val());
             $("#font").change(function(event) {
                 var value = $(this).val();
-                $(".chatBox dd").css("font", value);
-                $("#chat-input textarea").css("font", value);
+                $(".chatBox dd").css("font-family", value);
+                $("#chat-input textarea").css("font-family", value);
                 
             });
             $("#font-size").change(function(event) {
                 var value = $(this).val();
                 $(".chatBox dd").css("font-size", value + "px");
                 $("#chat-input textarea").css("font-size", value + "px");
+            });
+        };
+        account.uploadImage = function() {
+            $("#image").change(function(event) {
+                var reader = new FileReader();
+                var file = this.files[0];
+                if(file["type"].substring(0, 5) != "image") {
+                    $(this).val("");
+                    delete file;
+                    return false;
+                }
+                reader.onload = function(e) {
+                    var ret = e.target.result
+                    var image_type;
+                    var content;
+                    if((ret.substring(0, 5) == "data:")) {
+                        var i = 5;
+                        while(ret[i++] != ";");
+                        image_type = ret.substring(10, i-1);
+                        content = ret.substr(i+7);
+                    }
+                    else {
+                        $("#image").val("");
+                        delete file;
+                        return false;
+                    }
+                    var img =  "<img src=\"" + ret + "\" />";
+                    var $receiverId = $("#chat-list ul").children(".chat-focus").attr("id");
+                    if($receiverId.substring(0,10) == "list-user-") {
+                        var account_to = $receiverId.substr(10);
+                        var url = "/messages/individual";
+                        var msg = new Array();
+                        msg[0] = {
+                            "content": content,
+                            "type": image_type
+                        };
+                        var data = {
+                            "msg": msg
+                        };
+                        account.addContent(account_to, nickname, img);
+                    }
+                    else if($receiverId.substring(0,11) == "list-group-") {
+
+                    }
+                    $("#image").val("");
+                    delete file;
+                }
+                reader.readAsDataURL(file);
             });
         };
         account.textareaSubmit = function() {
@@ -333,6 +384,7 @@ var Account = {
             var $dt = $("<dt></dt>").addClass("chatBox-head").attr("title", name).text(name).append($("<span></span>").css("margin-left", "5px").text(timestr));
             var $dd = $("<dd></dd>").addClass("charBox-msg").html(content);
             $dl.append($dt).append($dd).appendTo($("#records-user-" + id));
+            $("#records-user-" + id).get(0).scrollTop = $("#records-user-" + id).get(0).scrollHeight;
         };
         return account;
     }
@@ -355,7 +407,7 @@ $(document).ready(function() {
     else {
         window.location.href = "login.html";
     }
-    user = Account.createNew();
+    var user = Account.createNew();
     user.init();
 });
 
