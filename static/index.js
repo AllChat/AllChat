@@ -398,6 +398,21 @@ var Account = {
                     }
                 }
             });
+            $("#chat-input textarea").on("focus blur", function(event) {
+                enter = function(event) {
+                    if(event.keyCode == 13) {
+                        $(this).parent().children("button").eq(1).trigger("click");
+                    }
+                };
+                if(event.type == "focus") {
+                    if(!$._data(this, "events")["keyup"]) {
+                        $(this).on("keyup.enter", enter);
+                    }
+                }
+                else {
+                    $(this).off(".enter");
+                }
+            });
         };
         account.addContent = function(id, name, content) {
             var now = new Date();
