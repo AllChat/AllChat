@@ -314,7 +314,7 @@ var Account = {
                     if((ret.substring(0, 5) == "data:")) {
                         var i = 5;
                         while(ret[i++] != ";");
-                        image_type = ret.substring(10, i-1);
+                        image_type = ret.substring(11, i-1);
                         content = ret.substr(i+7);
                     }
                     else {
@@ -326,7 +326,7 @@ var Account = {
                     var $receiverId = $("#chat-list ul").children(".chat-focus").attr("id");
                     if($receiverId.substring(0,10) == "list-user-") {
                         var account_to = $receiverId.substr(10);
-                        var url = "/messages/individual";
+                        var url = "/v1/messages/individual";
                         var msg = new Array();
                         msg[0] = {
                             "content": content,
@@ -336,6 +336,18 @@ var Account = {
                             "msg": msg
                         };
                         account.addContent(account_to, nickname, img);
+                        $.ajax({
+                            url: url,
+                            contentType: "application/json; charset=UTF-8",
+                            type: "POST",
+                            data: $.toJSON(data),
+                            headers: {"message_sender": user, "message_receiver": account_to},
+                            dataType: "text"
+                        }).done(function (data, textStatus, jqXHR) {
+                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                            $("#records-user-" + account_to).children("dl").last().children("dt").append($("<span>发送失败</span>")
+                            .css({"color": "red", "padding": "0px 2px", "margin": "0px 0px 0px 10px", "background-color": "red"}));
+                        });
                     }
                     else if($receiverId.substring(0,11) == "list-group-") {
 
@@ -355,23 +367,33 @@ var Account = {
                         var id = $receiver.attr("id");
                         if(id.substring(0,10) == "list-user-") {
                             var account_to = id.substr(10);
-                            var url = "/messages/individual";
-                            var data = {};
+                            var url = "/v1/messages/individual";
+                            var msg = new Array();
+                            msg[0] = {
+                                "content": content,
+                                "type": "text"
+                            };
+                            var data = {
+                                "msg": msg
+                            };
                             $(this).siblings("textarea").val("");
                             account.addContent(account_to, nickname, content);
-//                          $.ajax({
-//                              url: url,
-//                              contentType: "application/json; charset=UTF-8",
-//                              type: "POST",
-//                              data: $.toJSON(data),
-//                              dataType: "text"
-//                          }).done(function (data, textStatus, jqXHR) {
-//                          }).fail(function (jqXHR, textStatus, errorThrown) {
-//                          });
+                            $.ajax({
+                                url: url,
+                                contentType: "application/json; charset=UTF-8",
+                                type: "POST",
+                                data: $.toJSON(data),
+                                headers: {"message_sender": user, "message_receiver": account_to},
+                                dataType: "text"
+                            }).done(function (data, textStatus, jqXHR) {
+                            }).fail(function (jqXHR, textStatus, errorThrown) {
+                                $("#records-user-" + account_to).children("dl").last().children("dt").append($("<span>发送失败</span>")
+                                .css({"color": "red", "padding": "0px 2px", "margin": "0px 0px 0px 10px", "background-color": "red"}));
+                            });
                         }
                         else if(id.substring(0,11) == "list-group-") {
                             var group_to = id.substr(11);
-                            var url = "/messages/group";
+                            var url = "/v1/messages/group";
                         }
                     }
                 }
