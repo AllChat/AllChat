@@ -423,6 +423,28 @@ var Account = {
             $dl.append($dt).append($dd).appendTo($("#records-user-" + id));
             $("#records-user-" + id).get(0).scrollTop = $("#records-user-" + id).get(0).scrollHeight;
         };
+        account.getMsg = function() {
+            if(typeof(Worker)!=="undefined") {
+                var worker =new Worker("getmsg.js");
+                worker.onmessage = function(event) {
+                var msg = $.evalJSON(event.data);
+                var method = msg["method"];
+                switch(method) {
+                    case "send_group_message":
+                        break;
+                    case "send_individual_message":
+
+                        break;
+                    case "add_friend_resp":
+                        break;
+                    case "add_friend_req":
+                        break;
+                    default:
+                        break;
+            }
+                };
+            }
+        }
         return account;
     }
 };

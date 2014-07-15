@@ -59,21 +59,6 @@ class messages_view(MethodView):
             pass
         else:
             return ('Type {0} is not found'.format(type), 404)
-        try:
-            account = request.headers['account']#这里还需要把这个account和cookie中存的account进行对比
-        except Exception,e:
-            return ("Can't determine account", 400)
-        db_session = get_session()
-        try:
-            user = db_session.query(UserInfo).filter(and_(UserInfo.deleted == False,
-                            UserInfo.state != 'offline', UserInfo.username == account)).one()
-        except Exception,e:
-            return ("Account {0} doesn't exist".format(account), 404)
-        msg = receive_message(user.username)
-        if msg:
-            return jsonify(msg)
-        else:
-            return ("Time out", 404)
     def post(self, type):
         content_type = request.environ['CONTENT_TYPE'].split(';', 1)[0]
         tmp = content_type.split(';', 1)[0]
