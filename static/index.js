@@ -16,6 +16,7 @@ var Account = {
             account.setFontAndSize();
             account.uploadImage();
             account.textareaSubmit();
+            account.getMsg();
         };
         account.load_friend = function(friend) {
             var tmp = null;
@@ -425,24 +426,27 @@ var Account = {
         };
         account.getMsg = function() {
             if(typeof(Worker)!=="undefined") {
-                var worker =new Worker("getmsg.js");
+                var worker =new Worker("/static/getmsg.js");
                 worker.onmessage = function(event) {
-                var msg = $.evalJSON(event.data);
-                var method = msg["method"];
-                switch(method) {
-                    case "send_group_message":
-                        break;
-                    case "send_individual_message":
-
-                        break;
-                    case "add_friend_resp":
-                        break;
-                    case "add_friend_req":
-                        break;
-                    default:
-                        break;
-            }
+                    var msg = $.evalJSON(event.data);
+                    var method = msg["method"];
+                    switch(method) {
+                        case "send_group_message":
+                            break;
+                        case "send_individual_message":
+                            break;
+                        case "add_friend_resp":
+                            break;
+                        case "add_friend_req":
+                            break;
+                        default:
+                            break;
+                    }
                 };
+                worker.onerror = function(event) {
+                    throw event.data;
+                }
+                worker.postMessage(user);
             }
         }
         return account;

@@ -1,8 +1,8 @@
 import os
 import sys
-#from twisted.web.wsgi import WSGIResource
-#from twisted.internet import reactor
-#from twisted.web.server import Site
+from twisted.web.wsgi import WSGIResource
+from twisted.internet import reactor
+from twisted.web.server import Site
 
 possible_topdir = os.path.normpath(os.path.join(os.path.abspath(
         sys.argv[0]), os.pardir, os.pardir))
@@ -17,9 +17,9 @@ from allchat import init
 
 if __name__ == '__main__':
     init()
-    app.run(debug = True, use_debugger = False, use_reloader = False)
-#    pool = reactor.getThreadPool()
-#    pool.start()
-#    resource = WSGIResource(reactor, pool, app)
-#    reactor.listenTCP(5000, Site(resource))
-#    reactor.run()
+    # app.run(debug = True, use_debugger = False, use_reloader = False)
+    pool = reactor.getThreadPool()
+    pool.start()
+    resource = WSGIResource(reactor, pool, app)
+    reactor.listenTCP(8080, Site(resource))
+    reactor.run()
