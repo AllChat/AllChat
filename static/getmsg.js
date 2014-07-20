@@ -16,6 +16,9 @@ self.onmessage = function (event) {
             {
                 postMessage(xmlhttp.response);
             }
+            else {
+                return false;
+            }
         }
     };
 

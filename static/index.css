@@ -11,7 +11,7 @@ body
 #layer
 {
     width: 920px;
-    height: 600px;
+    height: 500px;
     padding: 0px;
     margin: 50px auto;
 }
@@ -395,8 +395,7 @@ body
 {
     height: 20px;
     width: auto;
-    padding: 0px;
-    padding-top: 2px;
+    padding: 2px;
     margin: 16px 5px 5px 5px;
     font-size: 10px;
     line-height: 170%;
@@ -425,6 +424,10 @@ body
     text-shadow: 1px 1px 1px #000;
 }
 
+.chat-newmsg
+{
+    background-color: #ffa10e;
+}
 
 #chat-records
 {
@@ -472,7 +475,7 @@ body
     margin: 0 0 0 13px;
     word-wrap: break-word;
     padding: 0;
-    overflow: hidden;
+    overflow: visible;
 }
 
 #chat-setting

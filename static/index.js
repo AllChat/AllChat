@@ -75,12 +75,11 @@ var Account = {
             var url = "/v1/friends/" + user;
             $.ajax({
                 url: url,
-                contentType: "application/json; charset=UTF-8",
                 type: "GET",
-                dataType: "text"
+                dataType: "json"
             }).done(function (data, textStatus, jqXHR) {
                 $("#control-list-middle-accounts ul").empty();
-                var list = $.evalJSON(data).friendlist;
+                var list = data.friendlist;
                 list = account.order_friends(list);
                 for(var tmp = 0; tmp < list.length; tmp++) {
                     account.load_friend(list[tmp]);
@@ -135,6 +134,7 @@ var Account = {
                 if(id.split("-", 1)[0] != "user") {
                     return false;
                 }
+                $this.children("img").filter(function(index, event) {return $(event).attr("title") == "msg-reminder";}).remove();
                 if($chat.css("visibility") == "hidden") {
                     $chat.stop().queue(function(next) {
                         $(this).css("visibility", "visible");
@@ -261,11 +261,14 @@ var Account = {
                     var id = $li.addClass("chat-focus").attr("id");
                     if(id.substring(0,10) == "list-user-") {
                         account.openChatWindow(id.substr(10));
+                        $("#user-" + id.substr(10)).children("img").filter(function(index, event) {
+                            return $(event).attr("title") == "msg-reminder";}).remove();
                     }
                     else if(id.substring(0,11) == "list-group-") {
                         
                     }
                 }
+
             });
         };
         account.addChatWindow = function(id) {
@@ -320,7 +323,6 @@ var Account = {
                     }
                     else {
                         $("#image").val("");
-                        delete file;
                         return false;
                     }
                     var img =  "<img src=\"" + ret + "\" />";
@@ -354,7 +356,6 @@ var Account = {
 
                     }
                     $("#image").val("");
-                    delete file;
                 }
                 reader.readAsDataURL(file);
             });
@@ -415,9 +416,11 @@ var Account = {
                 }
             });
         };
-        account.addContent = function(id, name, content) {
-            var now = new Date();
-            var timestr = now.toLocaleDateString() + " " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+        account.addContent = function(id, name, content, timestr) {
+            if(typeof(timestr) == "undefined") {
+                var now = new Date();
+                timestr = now.toLocaleDateString() + " " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+            }
             var $dl = $("<dl></dl>").addClass("chatBox");
             var $dt = $("<dt></dt>").addClass("chatBox-head").attr("title", name).text(name).append($("<span></span>").css("margin-left", "5px").text(timestr));
             var $dd = $("<dd></dd>").addClass("charBox-msg").html(content);
@@ -434,6 +437,10 @@ var Account = {
                         case "send_group_message":
                             break;
                         case "send_individual_message":
+                            var from = msg['args']['account'];
+                            var time = msg['args']['time'];
+                            var message = msg['args']['msg'];
+                            account.get_individual_message(from, time, message);
                             break;
                         case "add_friend_resp":
                             break;
@@ -449,6 +456,69 @@ var Account = {
                 worker.postMessage(user);
             }
         }
+        account.get_individual_message = function(from, time, msg) {
+            var exist = false;
+            var $listUser = $("#list-user-" + from);
+            if($("#user-" + from).length != 0) {
+                if(!($listUser.length != 0 && $listUser.hasClass("chat-focus"))
+                    &&($("#user-" + from).children("img").filter(function(index, event) {return $(event).attr("title") == "msg-reminder";}).length == 0)) {
+                    $("<img src='/static/images/msg-reminder.png'/>").css({
+                        "position": "absolute",
+                        "padding": "0",
+                        "margin": "0",
+                        "width": "8px",
+                        "height": "8px",
+                        "left": "48px",
+                        "top": "1px"
+                    }).attr("title", "msg-reminder").prependTo($("#user-" + from));
+                }
+                exist = true;
+            }
+            if(!exist) {
+                return false;
+            }
+            if($listUser.length == 0) {
+                var $li = $("<li></li>").attr("id", "list-user-" + from)
+                    .css("display", "none").addClass("chat-friends");
+                var $p = $("<p></p>").css("display", "none").text("×");
+                var $span = $("<span></span>").text(nickname);
+                $li.append($p).append($span).appendTo($("#chat-list ul"));
+                account.closeCard($li);
+                $("<div></div>").addClass("chat-records-setting").css("display", "none")
+                    .attr("id", "records-user-" + from).appendTo("#chat-records");
+            }
+            var timeTmp = new Date();
+            timeTmp = new Date(Date.parse(time.replace(/[-]/g, "/")) - timeTmp.getTimezoneOffset()*60000);
+            time = timeTmp.toLocaleDateString() + " " + timeTmp.getHours() + ":" + timeTmp.getMinutes() + ":" + timeTmp.getSeconds();
+            var content = "";
+            var img = new Array();
+            for(var i=0; i<msg.length; i++) {
+                if(msg[i]['type'] == "text") {
+                    content += msg[i]['content'];
+                }
+                else if(['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg'].indexOf(msg[i]['type'])) {
+                    content += "<img src='/static/images/loading.gif' id='" + msg[i]['content'].split(".", 2)[0] + "'/>";
+                    img.push(msg[i]['content']);
+                }
+            }
+            account.addContent(from, $("#user-" + from).find(".nickname").eq(0).text(), content, time);
+            for(var i=0; i<img.length; i++) {
+                var callback = function(name) {
+                    var url = "/v1/messages/image/" + user + "/" + name;
+                    $.ajax({
+                        url: url,
+                        type: "GET",
+                        dataType: "json"
+                    }).done(function (data, textStatus, jqXHR) {
+                        var src = "data:image/" + data['type'] + ";base64," + data['content'];
+                        $("#" + name.split(".", 2)[0]).attr("src", src);
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        $("#"+img[i]).attr("src", "/static/images/failed.jpg");
+                    });
+                };
+                setTimeout(callback(img[i]), 0);
+            }
+        };
         return account;
     }
 };
