@@ -14,12 +14,16 @@
 <body>
     <div id="layer">
         <div id="control">
-            <div id="control-setting"  style="display:none">
-                <ul id="control-setting-ul">
-                    <li>聊天记录</li>
-                </ul>
-            </div>
             <div id="control-list">
+                <div id="control-list-self">
+                    <img src="/static/images/user0-icon.jpg" id="icon-self"/>
+                    <p id="account-self">root</p>
+                    <select id="state-self" name="state-self">
+                        <option value="online">在线</option>
+                        <option value="invisible" selected="selected">隐身</option>
+                        <option value="invisible">离线</option>
+                    </select>
+                </div>
                 <div id="control-list-top">
                     <ul>
                         <li class="control-list-top-li">会话记录</li>
