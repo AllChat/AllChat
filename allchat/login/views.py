@@ -78,8 +78,8 @@ class login_view(MethodView):
                 return make_response(("The user is not registered yet", 403, ))
             if(password == db_user.password):
                 db_session.begin()
+                db_user.last_state = db_user.state
                 db_user.state = logstate
-                db_user.last_state = logstate
                 db_user.login = time.strftime('%Y-%m-%d %H:%M:%S',time.gmtime(time.time()))
                 tmp_state = db_user.state if db_user.state == "online" else "offline"
                 db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
@@ -97,8 +97,9 @@ class login_view(MethodView):
                 session.permanent = False
                 session['account'] = name
                 resp = make_response(("Successful logged in", 200, ))
-                resp.set_cookie("account", value=name)
-                resp.set_cookie("nickname", value=base64.b64encode(db_user.nickname.encode("utf8")))
+                resp.set_cookie("account", value = name)
+                resp.set_cookie("nickname", value = base64.b64encode(db_user.nickname.encode("utf8")))
+                resp.set_cookie("icon", value = str(db_user.icon));
                 return resp
             else:
                 return make_response(("Password is wrong, please check out", 403, ))

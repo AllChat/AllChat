@@ -7,9 +7,11 @@ var Account = {
         var account = {};
         var user;
         var nickname;
+        var icon;
         account.init = function() {
             $.base64.utf8encode = true;
             $.base64.utf8decode = true;
+            account.getSelf();
             account.controlListTopSetting();
             account.closeChat();
             account.get_friends();
@@ -17,6 +19,34 @@ var Account = {
             account.uploadImage();
             account.textareaSubmit();
             account.getMsg();
+        };
+        account.getSelf = function() {
+            if(typeof(user) == "undefined") {
+                user = $.cookie('account');
+                nickname = $.base64.decode($.cookie("nickname"));
+                icon = $.cookie('icon');
+            }
+            $("#icon-self").attr("src", "/static/images/user" + icon + "-icon.jpg");
+            $("#account-self").html(user);
+            $("#state-self").change(function(event) {
+                var $this = $(this);
+                var url = "/v1/accounts/" + user;
+                var data = {
+                    "state": $this.val()
+                };
+                $.ajax({
+                    url: url,
+                    contentType: "application/json; charset=UTF-8",
+                    type: "PUT",
+                    data: $.toJSON(data),
+                    dataType: "text"
+                }).done(function (data, textStatus, jqXHR) {
+                    sessionStorage.setItem("state", $this.val());
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    alert("Failed to change user state");
+                    $this.val(sessionStorage.getItem("state"));
+                });
+            }).val(sessionStorage.getItem("state"));
         };
         account.load_friend = function(friend) {
             var tmp = null;
@@ -68,10 +98,6 @@ var Account = {
             return online.concat(offline);
         };
         account.get_friends = function() {
-            if(typeof(user) == "undefined") {
-                user = $.cookie('account');
-                nickname = $.base64.decode($.cookie("nickname"));
-            }
             var url = "/v1/friends/" + user;
             $.ajax({
                 url: url,
@@ -403,6 +429,8 @@ var Account = {
             $("#chat-input textarea").on("focus blur", function(event) {
                 enter = function(event) {
                     if(event.keyCode == 13) {
+                        var content = $("#chat-input textarea").val();
+                        $("#chat-input textarea").val(content.substring(0, content.length - 1));
                         $(this).parent().children("button").eq(1).trigger("click");
                     }
                 };

@@ -139,8 +139,8 @@ class accounts_view(MethodView):
                 if user.state == "offline":
                     return ("Please login first", 401, )
                 else:
+                    user.last_state = user.state
                     user.state = state
-                    user.last_state = state
             db_session.begin()
             if any([icon, state, nickname]):
                 db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
