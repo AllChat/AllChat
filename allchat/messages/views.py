@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask.views import MethodView
-from flask import request, make_response
+from flask import request, make_response, session
 from flask import jsonify
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, FriendList, GroupInfo, GroupMember
@@ -8,12 +8,23 @@ from allchat.amqp.Impl_kombu import send_message, receive_message
 from sqlalchemy import and_, or_
 import time, base64, os
 from allchat.filestore import saver
+from allchat.login import views
 
 
 class messages_view(MethodView):
     def get(self, type, user, file):
+        if 'account' in request.cookies and 'account' in session \
+            and session['account'] == request.cookies['account'] \
+            and session['account'] == user:
+            if user in views.login_timer:
+                try:
+                    views.login_timer[user].cancel()
+                except:
+                    pass
+                del views.login_timer[user]
+        else:
+            return make_response("Please login first", 404)
         if type == 'text':
-            user = user #这里还需要把这个user和cookie中存的user进行对比
             db_session = get_session()
             try:
                 account = db_session.query(UserInfo).filter(and_(UserInfo.deleted == False,

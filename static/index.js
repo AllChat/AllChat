@@ -573,7 +573,23 @@ $(document).ready(function() {
 });
 
 $(window).unload(function(){
-    $.removeCookie("account");
+    var data = {
+        "state":"offline"
+    };
+    $.ajax({
+        url: "/v1/login/" + $.cookie('account'),
+        contentType: "application/json; charset=UTF-8",
+        type: "POST",
+        async:false,
+        timeout: 2000,
+        data: $.toJSON(data),
+        dataType: "text"
+    }).done(function (data, textStatus, jqXHR) {
+
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+
+    });
+    $.removeCookie('account');
 });
 
 

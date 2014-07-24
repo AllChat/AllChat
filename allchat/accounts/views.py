@@ -145,11 +145,17 @@ class accounts_view(MethodView):
             if any([icon, state, nickname]):
                 db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
                 for db_member in db_groupmember:
-                    db_member.member_logstate = user.state
+                    if user.state == "online":
+                        db_member.member_logstate = user.state
+                    else:
+                        db_member.member_logstate = "offline"
                     db_session.add(db_member)
                 db_friendlist = db_session.query(FriendList).filter_by(username = name).all()
                 for db_friend in db_friendlist:
-                    db_friend.state = user.state
+                    if user.state == "online":
+                        db_friend.state = user.state
+                    else:
+                        db_friend.state = "offline"
                     db_friend.icon = user.icon
                     db_friend.nickname = user.nickname
                     db_session.add(db_friend)
