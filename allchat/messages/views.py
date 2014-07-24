@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask.views import MethodView
-from flask import request, make_response
+from flask import request, make_response, session
 from flask import jsonify
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, FriendList, GroupInfo, GroupMember
@@ -8,12 +8,23 @@ from allchat.amqp.Impl_kombu import send_message, receive_message
 from sqlalchemy import and_, or_
 import time, base64, os
 from allchat.filestore import saver
+from allchat.login import views
 
 
 class messages_view(MethodView):
     def get(self, type, user, file):
+        if 'account' in request.cookies and 'account' in session \
+            and session['account'] == request.cookies['account'] \
+            and session['account'] == user:
+            if user in views.login_timer:
+                try:
+                    views.login_timer[user].cancel()
+                except:
+                    pass
+                del views.login_timer[user]
+        else:
+            return make_response("Please login first", 404)
         if type == 'text':
-            user = user #这里还需要把这个user和cookie中存的user进行对比
             db_session = get_session()
             try:
                 account = db_session.query(UserInfo).filter(and_(UserInfo.deleted == False,
@@ -59,21 +70,6 @@ class messages_view(MethodView):
             pass
         else:
             return ('Type {0} is not found'.format(type), 404)
-        try:
-            account = request.headers['account']#这里还需要把这个account和cookie中存的account进行对比
-        except Exception,e:
-            return ("Can't determine account", 400)
-        db_session = get_session()
-        try:
-            user = db_session.query(UserInfo).filter(and_(UserInfo.deleted == False,
-                            UserInfo.state != 'offline', UserInfo.username == account)).one()
-        except Exception,e:
-            return ("Account {0} doesn't exist".format(account), 404)
-        msg = receive_message(user.username)
-        if msg:
-            return jsonify(msg)
-        else:
-            return ("Time out", 404)
     def post(self, type):
         content_type = request.environ['CONTENT_TYPE'].split(';', 1)[0]
         tmp = content_type.split(';', 1)[0]
@@ -101,10 +97,12 @@ class messages_view(MethodView):
             receiver = request.headers['message_receiver']
         except Exception,e:
             return ("HTTP header format error", 403)
+        users = []
         db_session = get_session()
-        users = db_session.query(UserInfo).join(FriendList).filter(or_(UserInfo.username == sender,
-                                UserInfo.username == receiver)).filter(and_(UserInfo.state != "offline",
-                                UserInfo.deleted == False)).all()
+        users.extend(db_session.query(UserInfo).join(FriendList).filter(UserInfo.username == sender)
+                     .filter(and_(UserInfo.state != "offline", UserInfo.deleted == False)).all())
+        users.extend(db_session.query(UserInfo).join(FriendList)
+                    .filter(and_(UserInfo.username == receiver, UserInfo.deleted == False)).all())
         if len(users) != 2:
             return ('Message send failed due to account not exist or offline', 403)
         user_from = None
@@ -128,7 +126,7 @@ class messages_view(MethodView):
         tmp = dict()
         tmp['from'] = user_from.username
         tmp['to'] = user_to.username
-        tmp['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        tmp['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
         record = ""
         for pic in para['msg']:
             if(pic['type'] == "text"):
@@ -178,7 +176,7 @@ class messages_view(MethodView):
         tmp['from'] = user_from.username
         tmp['to'] = None
         tmp['group_id'] = group_id
-        tmp['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        tmp['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
         for pic in para['msg']:
             if(pic['type'] == "text"):
                 continue

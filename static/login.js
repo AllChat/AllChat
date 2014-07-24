@@ -17,6 +17,10 @@ function timer() {
 }
 
 $(document).ready(function(){
+    if(typeof window.sessionStorage == 'undefined'){
+        alert("浏览暂不支持localStorage, 请使用Chrome或者Firefox");
+        return false;
+    }
     $(".middle-left-image-li").eq(1).hide().end().eq(2).hide().end().eq(3).hide();
     $(".middle-left-button span").eq(0).addClass("span-background");
     var tmpTimer = setInterval("timer()", 3000);
@@ -51,6 +55,7 @@ $(document).ready(function(){
             data: $.toJSON(data),
             dataType: "text"
         }).done(function (data, textStatus, jqXHR) {
+            sessionStorage.setItem("state", $("#state").val());
             window.location.href = "index.html";
         }).fail(function (jqXHR, textStatus, errorThrown) {
             alert("账户名或密码有误，请重新输入");

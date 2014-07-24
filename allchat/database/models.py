@@ -12,7 +12,8 @@ class UserInfo(Base):
     __tablename__ = "userinfo"
     __table_args__ = {
         'mysql_engine': 'InnoDB',
-        'mysql_charset': 'utf8'
+        'mysql_charset': 'utf8',
+        'mysql_collate': 'utf8_bin'
     }
     
     id = Column(Integer, primary_key = True)
@@ -21,6 +22,7 @@ class UserInfo(Base):
     password = Column(String(50), nullable = False)
     email = Column(String(100), nullable = False)
     state = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
+    last_state = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False, default="offline")
     method = Column(Enum('web', 'mobile', 'desktop', name = 'method'))
     getunreadmsg = Column(Boolean, nullable = False, default = False)
     login = Column(DateTime(timezone = True))
@@ -29,12 +31,13 @@ class UserInfo(Base):
     deleted = Column(Boolean, nullable = False, default = False)
     ip = Column(String(15), nullable = False, default = "0.0.0.0")
     port = Column(Integer, nullable = False, default = 0)
+    icon = Column(Integer, nullable = False, default = 0)
 
     friends = relationship('FriendList', cascade="all, delete-orphan", single_parent = True, passive_deletes=True, backref=backref('user', order_by=id))
     
     def __init__(self, username, password, email, nickname = None, state = None, method = None, 
                 getunreadmsg = False, login = None, created = None, updated = None, deleted = False, 
-                ip = None, port = None):
+                ip = None, port = None, icon = None):
         self.username = username
         self.nickname = nickname
         self.email = email
@@ -51,34 +54,39 @@ class UserInfo(Base):
         self.deleted = deleted
         self.ip = "0.0.0.0" if not ip else ip
         self.port = app.config["CLIENT_PORT"] if not port else port
+        self.icon = int(icon) if (type(icon) == int) and (int(icon) >= 0) else 0
         
 class FriendList(Base):
     __tablename__ = "friendlist"
     __table_args__ = {
         'mysql_engine': 'InnoDB',
-        'mysql_charset': 'utf8'
+        'mysql_charset': 'utf8',
+        'mysql_collate': 'utf8_bin'
     }
     id = Column(Integer, primary_key = True)
     username = Column(String(50), index = True, nullable = False)
     nickname = Column(Unicode(50))
     state = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
+    icon = Column(Integer, nullable = False, default = 0)
     confirmed = Column(Boolean, nullable = False, default = False)
     index = Column(Integer, ForeignKey('userinfo.id', onupdate="CASCADE", ondelete='CASCADE'), nullable = False)
     
-    def __init__(self, username, nickname, state = None, confirmed = False):
+    def __init__(self, username, nickname, state = None, confirmed = False, icon = None):
         self.username = username
         self.nickname = nickname
         if state is None:
             self.state = 'offline'
         else:
             self.state = state
+        self.icon = int(icon) if (type(icon) == int) and (int(icon) >= 0) else 0
         self.confirmed = confirmed
 
 class GroupInfo(Base):
     __tablename__ = "groupinfo"
     __table_args__ = {
         'mysql_engine': 'InnoDB',
-        'mysql_charset': 'utf8'
+        'mysql_charset': 'utf8',
+        'mysql_collate': 'utf8_bin'
     }
     id = Column(Integer, primary_key = True)
     group_id = Column(Integer, nullable = False, index = True, unique = True)
@@ -104,7 +112,8 @@ class GroupMember(Base):
     __tablename__ = "groupmember"
     __table_args__ = {
         'mysql_engine': 'InnoDB',
-        'mysql_charset': 'utf8'
+        'mysql_charset': 'utf8',
+        'mysql_collate': 'utf8_bin'
     }
     id = Column(Integer, primary_key = True)
     group_id = Column(Integer, nullable = False)

@@ -1,13 +1,129 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>No title</title>
+    <META charset="UTF-8">
+    <link rel="stylesheet" href="../static/index.css">
+    <script src="../static/jquery-1.11.1.min.js"></script>
+    <script src="../static/jquery.json-2.4.min.js"></script>
+    <script src="../static/jquery.cookie.js"></script>
+    <script src="../static/jquery.base64.js"></script>
+    <script src="../static/getmsg.js"></script>
+    <script src="../static/index.js"></script>
+    <title>AllChat</title>
 </head>
 <body>
-    <p>Hello world!!!</p>
-    <p>
-        <a href="/register.html">注册</a>
-    </p>
+    <div id="layer">
+        <div id="control">
+            <div id="control-list">
+                <div id="control-list-self">
+                    <img src="" id="icon-self"/>
+                    <p id="account-self">root</p>
+                    <select id="state-self" name="state-self">
+                        <option value="online">在线</option>
+                        <option value="invisible" selected="selected">隐身</option>
+                        <option value="offline">离线</option>
+                    </select>
+                </div>
+                <div id="control-list-top">
+                    <ul>
+                        <li class="control-list-top-li">会话记录</li>
+                        <li class="control-list-top-li selected">好友</li>
+                        <li class="control-list-top-li">群</li>
+                    </ul>
+                </div>
+                <div id="control-list-middle">
+                    <div id="control-list-middle-search">
+                        <input results=5 type="search" autocomplete="on" />
+                    </div>
+                    <div id="control-list-middle-rest">
+                        <div id="control-list-middle-records" style="display: none">
+                            <ul>
+                            </ul>
+                        </div>
+                        <div id="control-list-middle-accounts">
+                            <ul>
+                            </ul>
+                        </div>
+                        <div id="control-list-middle-groups" style="display: none">
+                            <ul>
+    
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div id="control-list-bottom">
+                    <div class="control-list-bottom-icon">
+                        <img src="/static/images/setup.png">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="chat" style="visibility: hidden;">
+            <div id="chat-list">
+                <p>×</p>
+                <ul>
+                </ul>
+            </div>
+            <div id="chat-records">
+                <!--<div id="" class="chat-records-setting" style="display: none;">-->
+                    <!--<dl class="chatBox">-->
+                        <!--<dt class="chatBox-head" title="拓拔野">-->
+                                                                <!--拓拔野  <span style="margin-left:5px">2014-06-26 21:01:44</span>-->
+                        <!--</dt>-->
+                        <!--<dd class="charBox-msg">-->
+                                                                <!--方彭东人才-->
+                        <!--</dd>-->
+                    <!--</dl>-->
+                    <!--<dl class="chatBox">-->
+                        <!--<dt class="chatBox-head" title="龙神">-->
+                                                                <!--龙神 <span style="margin-left:5px">2014-06-26 21:01:44</span>-->
+                        <!--</dt>-->
+                        <!--<dd class="charBox-msg">-->
+                                                                <!--用白话讲解就是zoom:后面的数字即放大的倍数，可以是数值，也可以是百分比。如：zoom:1，zoom:120%。-->
+                        <!--</dd>-->
+                    <!--</dl>-->
+                <!--</div>-->
+            </div>
+            <div id="chat-setting">
+                <form>
+                    <select name="font" id="font" class="chat-setting-form-child">
+                        <option value="宋体">宋体</option>
+                        <option value="黑体">黑体</option>
+                        <option value="隶书">隶书</option>
+                        <option value="微软雅黑" selected="selected">微软雅黑</option>
+                        <option value="楷体_GB2312">楷体_GB2312</option>
+                        <option value="幼圆">幼圆</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Arial Black">Arial Black</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Verdana">Verdana</option>
+                    </select>
+                    <select name="font-size" id="font-size" class="chat-setting-form-child">
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12" selected="selected">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                        <option value="16">16</option>
+                        <option value="17">17</option>
+                        <option value="18">18</option>
+                    </select>
+                    <img src="/static/images/color_click.jpg" />
+                    <input style="visibility:hidden; position: absolute;" type="color" id="color" name="color" class="chat-setting-form-child" />
+                    <img src="/static/images/image_click.jpg"/>
+                    <input style="visibility:hidden; position: absolute;" type="file" id="image" name="image" class="chat-setting-form-child" accept="image/gif, image/jpeg, image/jpg, image/png, image/bmp" />
+                </form>
+            </div>
+            <div id="chat-input">
+                <textarea></textarea>
+                <button>取消</button>
+                <button>发送</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

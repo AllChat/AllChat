@@ -1,9 +1,9 @@
 from flask.views import MethodView
 from flask import request, make_response, g, session
 from allchat.database.sql import get_session
-from allchat.database.models import UserInfo, GroupMember
+from allchat.database.models import UserInfo, GroupMember, FriendList
 from sqlalchemy import and_
-import time, string
+import time, string, base64, threading
 
 class login_view(MethodView):
     def get(self):
@@ -15,9 +15,42 @@ class login_view(MethodView):
             except Exception as e:
                 resp = make_response(("The json data can't be parsed", 403, ))
                 return resp
-            
-            password = para['password']
             logstate = para['state']
+            if logstate == "offline":
+                if 'account' in request.cookies and 'account' in session \
+                        and session['account'] == request.cookies['account']:
+                    def callback(name):
+                        db_session = get_session()
+                        try:
+                            db_user = db_session.query(UserInfo).filter_by(username = name).one()
+                        except Exception, e:
+                            return make_response(("The user is not registered yet", 403, ))
+                        db_session.begin()
+                        db_user.state = "offline"
+                        db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
+                        for db_member in db_groupmember:
+                            db_member.member_logstate = "offline"
+                        db_friendlist = db_session.query(FriendList).filter_by(username = name).all()
+                        for db_friend in db_friendlist:
+                            db_friend.state = "offline"
+                        try:
+                            db_session.commit()
+                        except:
+                            db_session.rollback()
+                        else:
+                            pass
+                    if name in login_timer:
+                        try:
+                            login_timer[name].cancel()
+                        except:
+                            pass
+                        del login_timer[name]
+                    login_timer[name] = threading.Timer(120.0, callback, args = [name])
+                    login_timer[name].start()
+                    return make_response("Succeed to logout", 200)
+                else:
+                    return make_response(("Failed to logout", 403, ))
+            password = para['password']
             if(logstate not in ['online', 'invisible']):
                 return make_response(("The login state is illegal", 403, ))
             db_session = get_session()
@@ -27,19 +60,32 @@ class login_view(MethodView):
                 return make_response(("The user is not registered yet", 403, ))
             if(password == db_user.password):
                 db_session.begin()
+                db_user.last_state = db_user.state
                 db_user.state = logstate
-                db_user.login = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
+                db_user.login = time.strftime('%Y-%m-%d %H:%M:%S',time.gmtime(time.time()))
+                tmp_state = db_user.state if db_user.state == "online" else "offline"
                 db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
                 for db_member in db_groupmember:
-                    db_member.member_logstate = logstate
+                    db_member.member_logstate = tmp_state
+                db_friendlist = db_session.query(FriendList).filter_by(username = name).all()
+                for db_friend in db_friendlist:
+                    db_friend.state = tmp_state
                 try:
                     db_session.commit()
                 except:
                     db_session.rollback()
                     return ("DataBase Failed", 503, )
                 #render_template to new page or stay at current page?
-                return make_response(("Successful logged in", 200, ))
+                session.permanent = False
+                session['account'] = name
+                resp = make_response(("Successful logged in", 200, ))
+                resp.set_cookie("account", value = name)
+                resp.set_cookie("nickname", value = base64.b64encode(db_user.nickname.encode("utf8")))
+                resp.set_cookie("icon", value = str(db_user.icon));
+                return resp
             else:
                 return make_response(("Password is wrong, please check out", 403, ))
         else:
             return make_response(("Please upload a json data", 403, ))
+
+login_timer = {}
