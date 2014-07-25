@@ -584,12 +584,10 @@ $(window).unload(function(){
         timeout: 2000,
         data: $.toJSON(data),
         dataType: "text"
-    }).done(function (data, textStatus, jqXHR) {
-
-    }).fail(function (jqXHR, textStatus, errorThrown) {
-
+    }).always(function (jqXHR, textStatus, errorThrown) {
+        $.removeCookie('account');
     });
-    $.removeCookie('account');
+
 });
 
 

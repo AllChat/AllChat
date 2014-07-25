@@ -99,6 +99,7 @@ class rpc_callbacks(base):
             message.reject()
             return None
         message.ack()
+
     def send_individual_message(self, body, message):
         para = body['para']
         user_from = para['from']
@@ -115,6 +116,7 @@ class rpc_callbacks(base):
             message.reject()
             return None
         message.ack()
+
     def send_group_message(self, body, message):
         para = body['para']
         user_from = para['from']
@@ -132,6 +134,42 @@ class rpc_callbacks(base):
             message.reject()
             return None
         message.ack()
+
+    def friendlist_update_status(self, body, message):
+        para = body['para']
+        user_from = para['from']
+        msg = para['msg']
+        tmp = dict()
+        tmp['method'] = body['method']
+        tmp['args'] = dict()
+        tmp['args']['account'] = user_from
+        tmp['args']['time'] = para['time']
+        tmp['args']['msg'] = msg
+        try:
+            self.queue.put(tmp, True, self.timeout)
+        except Queue.Full,e:
+            message.reject()
+            return None
+        message.ack()
+
+    def group_update_status(self, body, message):
+        para = body['para']
+        user_from = para['from']
+        msg = para['msg']
+        tmp = dict()
+        tmp['method'] = body['method']
+        tmp['args'] = dict()
+        tmp['args']['account'] = user_from
+        tmp['args']['group_id'] = para['group_id']
+        tmp['args']['time'] = para['time']
+        tmp['args']['msg'] = msg
+        try:
+            self.queue.put(tmp, True, self.timeout)
+        except Queue.Full,e:
+            message.reject()
+            return None
+        message.ack()
+
     def get_msg(self):
         try:
             tmp = self.queue.get(True, self.timeout)
