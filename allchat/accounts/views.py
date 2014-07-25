@@ -5,6 +5,7 @@ from allchat.database.models import UserInfo, GroupMember, FriendList
 from sqlalchemy import and_
 from allchat.amqp.Impl_kombu import RPC
 from allchat.messages.handles import rpc_callbacks
+from allchat.login.views import friendlist_update_status, group_update_status
 import re
 
 tmp_str = "^[\w!@#$%^&*_.]+$"
@@ -145,20 +146,22 @@ class accounts_view(MethodView):
             if any([icon, state, nickname]):
                 db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
                 for db_member in db_groupmember:
-                    if user.state == "online":
-                        db_member.member_logstate = user.state
-                    else:
-                        db_member.member_logstate = "offline"
+                    prev_state = "offline" if db_member.member_logstate != "online" else "online"
+                    now_state = "offline" if user.state != "online" else "online"
+                    db_member.member_logstate = user.state
                     db_session.add(db_member)
+                    if prev_state != now_state:
+                        group_update_status(name, db_member.member_account, now_state)
                 db_friendlist = db_session.query(FriendList).filter_by(username = name).all()
                 for db_friend in db_friendlist:
-                    if user.state == "online":
-                        db_friend.state = user.state
-                    else:
-                        db_friend.state = "offline"
+                    prev_state = "offline" if db_friend.state != "online" else "online"
+                    now_state = "offline" if user.state != "online" else "online"
+                    db_friend.state = user.state
                     db_friend.icon = user.icon
                     db_friend.nickname = user.nickname
                     db_session.add(db_friend)
+                    if db_friend.user.state != "offline" and prev_state != now_state:
+                        friendlist_update_status(name, db_friend.user.username, now_state)
             try:
                 db_session.add(user)
                 db_session.commit()
