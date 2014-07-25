@@ -16,7 +16,7 @@ from allchat import friends
 from allchat import groups
 #from allchat import heatbeat
 from allchat import login
-#from allchat import records
+from allchat import records
 from allchat import versions
 
 app.register_blueprint(versions.version)
@@ -26,6 +26,7 @@ app.register_blueprint(friends.friend, url_prefix = '/v1')
 app.register_blueprint(groups.group, url_prefix = '/v1')
 app.register_blueprint(messages.message, url_prefix = '/v1')
 app.register_blueprint(filestore.filestore, url_prefix = '/v1')
+app.register_blueprint(records.record, url_prefix = '/v1')
 
 
 def init():
