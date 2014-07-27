@@ -30,7 +30,7 @@ var Account = {
             $("#account-self").html(user);
             $("#state-self").change(function(event) {
                 var $this = $(this);
-                var url = "/v1/accounts/" + user;
+                var url = "/v1/accounts/" + user + "/";
                 var data = {
                     "state": $this.val()
                 };
