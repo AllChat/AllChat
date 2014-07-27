@@ -46,10 +46,10 @@ class groups_view(MethodView):
             else:
                 return ("Missing critical information.", 403)
         elif method == 'search':
-            ## dongzai updated in 2014-07-26
+            ## dongzai updated in 2014-07-26, revised in 2014-07-27
             # def searchGroup(self):
             header = request.headers
-            response_chunk_size = 10
+            response_chunk_size = 5
             if 'keyword' in header and 'account' in header and 'type' in header:
                 keyword = header['keyword']
                 account = header['account']
@@ -60,10 +60,21 @@ class groups_view(MethodView):
                 except:
                     return ("Invalid user.", 404)
                 if search_type == 'uncertain':
-                    try:
-                        groups = db_session.query(GroupInfo).filter(GroupInfo.group_name.like('%'+keyword+'%')).all()
-                    except:
-                        return ("Database Error.", 500)
+                    if 'offset' in header:
+                        offsets = int(header['offset'])*response_chunk_size
+                        if not offsets:
+                            try:
+                                result_size = db_session.query(GroupInfo).filter(GroupInfo.group_name.like\
+                                    ('%'+keyword+'%')).count()
+                            except:
+                                return ("Database Error.", 500)
+                        try:
+                            groups = db_session.query(GroupInfo).filter(GroupInfo.group_name.like\
+                                ('%'+keyword+'%')).offset(offsets).limit(response_chunk_size).all()
+                        except:
+                            return ("Database Error.", 500)
+                    else:
+                        return ("Missing critical information.", 403)
                 elif search_type == 'certain':
                     try:
                         groups = db_session.query(GroupInfo).filter_by(group_name = keyword).one()
@@ -71,13 +82,15 @@ class groups_view(MethodView):
                         return ("Group not found.", 404)
                 else:
                     return ("Search type unsupported.", 403)
+                group_info = dict()
                 if hasattr(groups,'__iter__'):
-                    result = [group for i,group in enumerate(groups) if i<response_chunk_size]
+                    result = groups
+                    if not offsets:
+                        group_info['result_size'] = result_size
+                        group_info['chunk_size'] = response_chunk_size
                 else:
                     result = [groups]
-                group_info = dict()
-                group_info['result_size'] = len(result)
-                group_info['chunk_size'] = response_chunk_size
+                    group_info['result_size'] = len(result)
                 group_info['groups'] = list()
                 for group in result:
                     temp = dict()

@@ -42,10 +42,23 @@ class records_view(MethodView):
 		else:
 			return make_response(('Chattype wrong.',403))
 
+		## revised by dongzai on 2014-07-27, use segment records result to response
+		response_chunk_size = 20
 		extractor = FileExtractor()
 		if chattype == 'group':
 			option = {'type':'group','groupName':chatname,'userName':account}
 		elif chattype == 'user':
 			option = {'type':'user','chatFrom':account,'chatTo':chatname}
 		record = extractor.getChatRecord(starttime,endtime,option)
-		return make_response((json.dumps(record),200))
+		if 'offset' not in header:
+			offsets = 0
+		elif int(header['offset'])*response_chunk_size > len(record):
+			return ('offset exceed length of search result.', 501)
+		else:
+			offsets = int(header['offset'])*response_chunk_size
+		result = record[offsets:min(offsets+response_chunk_size,len(record))]
+		chat_record = dict()
+		chat_record['records'] = [list(item) for item in result]
+		chat_record['result_size'] = len(record)
+		chat_record['current_offset'] = offsets
+		return jsonify(chat_record)
