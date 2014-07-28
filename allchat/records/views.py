@@ -9,12 +9,13 @@ import json
 class records_view(MethodView):
 	def get(self):
 		header = request.headers
-		for item in ['account', 'starttime', 'endtime', 'chattype', 'chatname']:
+		for item in ['account', 'starttime', 'offset', 'reverse', 'chattype', 'chatname']:
 			if item not in header:
 				return make_response(("Missing critical information.", 403))
 		account = header['account']
 		starttime = header['starttime']
-		endtime = header['endtime']
+		offset = header['offset']
+		reverse = header['reverse']
 		chattype = header['chattype']
 		chatname = header['chatname']
 		db_session = get_session()
@@ -26,7 +27,10 @@ class records_view(MethodView):
 		# 	return make_response(("Username not match to currently logged in user.", 404))
 
 		starttime = starttime.replace('-','').replace('/','')
-		endtime = endtime.replace('-','').replace('/','')
+		try:
+			offset = int(offset)
+		except:
+			return make_response(("Invalid offset value.", 501))
 
 		if chattype == 'group':
 			try:
@@ -43,22 +47,14 @@ class records_view(MethodView):
 			return make_response(('Chattype wrong.',403))
 
 		## revised by dongzai on 2014-07-27, use segment records result to response
-		response_chunk_size = 20
 		extractor = FileExtractor()
 		if chattype == 'group':
 			option = {'type':'group','groupName':chatname,'userName':account}
 		elif chattype == 'user':
 			option = {'type':'user','chatFrom':account,'chatTo':chatname}
-		record = extractor.getChatRecord(starttime,endtime,option)
-		if 'offset' not in header:
-			offsets = 0
-		elif int(header['offset'])*response_chunk_size > len(record):
-			return ('offset exceed length of search result.', 501)
-		else:
-			offsets = int(header['offset'])*response_chunk_size
-		result = record[offsets:min(offsets+response_chunk_size,len(record))]
+		last_msg_date,last_msg_offset,records = extractor.getChatRecord(starttime,offset,reverse,option)
 		chat_record = dict()
-		chat_record['records'] = [list(item) for item in result]
-		chat_record['result_size'] = len(record)
-		chat_record['current_offset'] = offsets
+		chat_record['records'] = records
+		chat_record['current_date'] = last_msg_date
+		chat_record['current_offset'] = last_msg_offset
 		return jsonify(chat_record)

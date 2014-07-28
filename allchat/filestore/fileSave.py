@@ -8,13 +8,13 @@ from encrypt import Encryptor
 class FileSaver(object):
     def __init__(self):
         self.msgBuffer = dict()
-        self.writeInterval = 900.0 
+        self.writeInterval = 600.0 
         self.writeBuffer2File()
         self.current_dir = os.path.dirname(os.path.abspath(__file__))
         
     def saveSingleMessage(self, Sender, Receiver, msgStruct):
         ## msgStruct consist of [time,content],one msg at a time
-        message = '\t'.join(msgStruct)
+        message = '&:'.join(msgStruct)
         if '::'.join([Sender,Receiver]) in self.msgBuffer:
             self.msgBuffer['::'.join([Sender,Receiver])].append('&:'.join([Sender,message]))
         elif '::'.join([Receiver,Sender]) in self.msgBuffer:
@@ -24,7 +24,7 @@ class FileSaver(object):
 
     def saveGroupMsg(self, Sender, GroupName, msgStruct):
         ## msgStruct consist of [time,content],one msg at a time
-        message = '\t'.join(msgStruct)
+        message = '&:'.join(msgStruct)
         if GroupName in self.msgBuffer:
             self.msgBuffer[GroupName].append('&:'.join([Sender,message]))
         else:
@@ -81,3 +81,6 @@ class FileSaver(object):
         output_file = open(target_path,'wb')
         output_file.write(content)
         output_file.close()
+
+    def getMsgBuffer(self):
+        return self.msgBuffer
