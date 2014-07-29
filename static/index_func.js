@@ -22,12 +22,12 @@ function addFriendRequest(){
 			type: 'POST',
 			url: '/v1/friends/'+user+'/',
 			contentType: "application/json; charset=UTF-8",
-			data: {'account':username},
+			data: $.toJSON({'account':username}),
 			dataType: 'text',
-		}).done(function (data, textStatus){
-			alert(data);
+		}).done(function (data, textStatus, jqXHR ){
+			alert(data.responseText);
 		}).fail(function (data, textStatus){
-			alert(textStatus);
+			alert(data.responseText);
 		});
 	}
 }
