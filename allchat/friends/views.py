@@ -44,7 +44,7 @@ class friends_view(MethodView):
                 return ("Can't add yourself as a friend", 403)
             db_session = get_session()
             try:
-                req_user = db_session.query(UserInfo).with_lockmode('read').filter(and_(UserInfo.username == name,
+                req_user = db_session.query(UserInfo).join(FriendList).with_lockmode('read').filter(and_(UserInfo.username == name,
                                     UserInfo.deleted == False, UserInfo.state != 'offline')).one()
             except Exception, e:
                 return ("The account {account} is not exist or offline".format(account = name), 404)
@@ -55,6 +55,9 @@ class friends_view(MethodView):
                 except Exception,e:
                     return ("The user {account} being added doesn't exist".format(account = para['account']), 404)
                 else:
+                    for friend in req_user.friends:
+                        if friend.username == resp_user.username and friend.comfirmed == True:
+                            return ("The user {account} is already your friend".format(account = para['account']), 404)
                     message = dict()
                     message['method'] = "add_friend_req"
                     tmp = dict()

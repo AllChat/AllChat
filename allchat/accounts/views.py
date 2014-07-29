@@ -208,7 +208,7 @@ class accounts_view(MethodView):
                     and session['account'] == request.cookies['account']:
                 db_session = get_session()
                 try:
-                    users = db_session.query(UserInfo).filter(and_(UserInfo.username.like(name + "%"),
+                    users = db_session.query(UserInfo).filter(and_(UserInfo.username.like("%" + name + "%"),
                             UserInfo.deleted != True)).all()
                 except:
                     return ("Database Error", 500)
