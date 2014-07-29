@@ -4,20 +4,25 @@ from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
 from sqlalchemy import and_
 from allchat.filestore.fileExtract import FileExtractor
-import json
 
 class records_view(MethodView):
 	def get(self):
 		header = request.headers
-		for item in ['account', 'starttime', 'offset', 'reverse', 'chattype', 'chatname']:
+		for item in ['account', 'starttime', 'chattype', 'chatname']:
 			if item not in header:
 				return make_response(("Missing critical information.", 403))
 		account = header['account']
 		starttime = header['starttime']
-		offset = header['offset']
-		reverse = header['reverse']
 		chattype = header['chattype']
 		chatname = header['chatname']
+		try:
+			offset = header['offset']
+		except:
+			offset = ''
+		try:
+			reverse = header['reverse']
+		except:
+			reverse = ''
 		db_session = get_session()
 		try:
 		    db_user = db_session.query(UserInfo).filter_by(username = account).one()
@@ -27,10 +32,6 @@ class records_view(MethodView):
 		# 	return make_response(("Username not match to currently logged in user.", 404))
 
 		starttime = starttime.replace('-','').replace('/','')
-		try:
-			offset = int(offset)
-		except:
-			return make_response(("Invalid offset value.", 501))
 
 		if chattype == 'group':
 			try:
@@ -52,9 +53,11 @@ class records_view(MethodView):
 			option = {'type':'group','groupName':chatname,'userName':account}
 		elif chattype == 'user':
 			option = {'type':'user','chatFrom':account,'chatTo':chatname}
-		last_msg_date,last_msg_offset,records = extractor.getChatRecord(starttime,offset,reverse,option)
+		last_msg_date,records = extractor.getChatRecord(starttime,offset,reverse,option)
+		if reverse:
+			records = records[::-1]
+		records = [item.split('&:') for item in records]
 		chat_record = dict()
 		chat_record['records'] = records
 		chat_record['current_date'] = last_msg_date
-		chat_record['current_offset'] = last_msg_offset
 		return jsonify(chat_record)
