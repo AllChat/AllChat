@@ -26,7 +26,7 @@ function addFriendRequest(){
 			type: 'POST',
 			url: '/v1/friends/'+user+'/',
 			contentType: "application/json; charset=UTF-8",
-			data: $.toJSON({'account':username,'message':'this is '+username}),
+			data: $.toJSON({'account':username,'message':'this is '+user}),
 			dataType: 'text',
 		}).done(function (data){
 			alert(data);
@@ -44,7 +44,7 @@ function searchUser(){
 			type: 'GET',
 			url: '/v1/accounts/'+keyword+'/',
 			dataType: 'json',
-			headers:{'mysql_like':'1'},
+			headers:{'mysql_like':1},
 		}).done(function (data){
 			if(data.accounts.length==0){
 				alert('很遗憾，没有找到匹配的结果，换个关键字试试吧～');
