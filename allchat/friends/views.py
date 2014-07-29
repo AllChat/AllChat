@@ -40,6 +40,10 @@ class friends_view(MethodView):
             except Exception as e:
                 resp = make_response(("The json data can't be parsed", 403, ))
                 return resp
+            if 'account' not in para:
+                return ("Missing 'account' Section", 403)
+            if 'message' not in para:
+                para['message'] = ''
             if name == para['account'] :
                 return ("Can't add yourself as a friend", 403)
             db_session = get_session()
@@ -56,7 +60,7 @@ class friends_view(MethodView):
                     return ("The user {account} being added doesn't exist".format(account = para['account']), 404)
                 else:
                     for friend in req_user.friends:
-                        if friend.username == resp_user.username and friend.comfirmed == True:
+                        if friend.username == resp_user.username and friend.confirmed == True:
                             return ("The user {account} is already your friend".format(account = para['account']), 404)
                     message = dict()
                     message['method'] = "add_friend_req"
@@ -99,6 +103,8 @@ class friends_view(MethodView):
                 para = request.get_json()
             except Exception,e:
                 return ("The json data can't be parsed", 403, )
+            if 'account' not in para:
+                return ("Missing 'account' Section", 403)
             db_session = get_session()
             db_session.begin()
             try:
@@ -116,7 +122,7 @@ class friends_view(MethodView):
             except Exception,e:
                 db_session.rollback()
                 return ("Delete friend {account} failed due to DataBase error".format(account = para['account']), 500)
-            if para['bidirectional'] == True:
+            if 'bidirectional' in para and para['bidirectional'] == True:
                 db_session.begin()
                 try:
                     resp_user = db_session.query(UserInfo).join(FriendList).with_lockmode('update').\
@@ -139,6 +145,10 @@ class friends_view(MethodView):
                 para = request.get_json()
             except Exception,e:
                 return ("The json data can't be parsed", 403, )
+            if 'account' not in para:
+                return ("Missing 'account' Section", 403)
+            if 'result' not in para:
+                return ("Missing 'result' Section", 403)
             db_session = get_session()
             try:
                 req_user = db_session.query(UserInfo).with_lockmode('read').filter(
