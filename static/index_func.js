@@ -10,6 +10,10 @@ $(document).ready(function (){
     	event.stopPropagation();
     	addFriendRequest();
     });
+    $('body').on('click','#search-user-button',function(event){
+    	event.stopPropagation();
+    	searchUser();
+    });
 });
 
 function addFriendRequest(){
@@ -22,12 +26,35 @@ function addFriendRequest(){
 			type: 'POST',
 			url: '/v1/friends/'+user+'/',
 			contentType: "application/json; charset=UTF-8",
-			data: $.toJSON({'account':username}),
+			data: $.toJSON({'account':username,'message':'this is '+username}),
 			dataType: 'text',
-		}).done(function (data, textStatus, jqXHR ){
-			alert(data.responseText);
-		}).fail(function (data, textStatus){
-			alert(data.responseText);
+		}).done(function (data){
+			alert(data);
+		}).fail(function (jqXHR){
+			alert(jqXHR.responseText);
+		});
+	}
+}
+function searchUser(){
+	var keyword = $('#search-username').val();
+	if(keyword.length==0){
+		alert('搜索关键字不能为空');
+	}else{
+		$.ajax({
+			type: 'GET',
+			url: '/v1/accounts/'+keyword+'/',
+			dataType: 'json',
+			headers:{'mysql_like':'1'},
+		}).done(function (data){
+			if(data.accounts.length==0){
+				alert('很遗憾，没有找到匹配的结果，换个关键字试试吧～');
+			}else{
+				$.each(data.accounts,function(index,value){
+					alert(value['account']+' '+value['nickname']+' '+value['state']+' '+value['icon']);
+				});
+			}
+		}).fail(function (jqXHR){
+			alert(jqXHR.responseText);
 		});
 	}
 }
