@@ -207,7 +207,8 @@ body
     width: 291px;
     margin: 0px;
     padding: 0px;
-    overflow-y: auto;
+    position: absolute;
+    overflow-y: hidden;
     overflow-x:hidden;
 }
 
@@ -221,6 +222,54 @@ body
     overflow-x:hidden;
     position: relative;
     list-style-type: none;
+}
+#control-list-middle-accounts-add
+{
+    height: 90px;
+    width: 291px;
+    margin: 0px;
+    padding: 0px;
+    position: absolute;
+    bottom: -80px;
+    background-color: #e0e0e0;
+}
+#add-bar-swither
+{
+    height: 10px;
+    width: 291px;
+    margin: 0px;
+    padding: 0px;
+}
+#add-bar-swither:hover
+{
+    cursor: pointer;
+}
+#fast-add,#search-user
+{
+    height: 40px;
+    width: 291px;
+    margin: 0px;
+    padding: 0px;
+}
+
+#fast-add input,#search-user input
+{
+    height: 26px;
+    width: 140px;
+    margin: 5px 30px 5px 50px;
+    padding: 0px;
+    border-width: 2px;
+}
+#fast-add img,#search-user img
+{
+    height: 26px;
+    width: 26px;
+    vertical-align: middle;
+}
+#fast-add img:hover,#search-user img:hover
+{
+    cursor: pointer;
+    background-color: #d0d0d0;
 }
 
 
