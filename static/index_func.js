@@ -70,11 +70,18 @@ function showSearchResultDialog(data,type){
 		$('#result-list-box ul').empty();
 	}else{
 		$('#layer').append('<div id="search-result-dialog"></div>');
+		$('#search-result-dialog').append('<div id="result-dialog-close"></div>');
+		$('#result-dialog-close').append('<img src="../static/images/icon/close.png" />');
 		$('#search-result-dialog').append('<div id="result-list-box"></div>');
 		$('#result-list-box').append('<ul></ul>');
 	}
 	$.each(data.accounts,function(index,value){
 		addUserToDialog(value['account'],value['nickname'],value['state'],value['icon']);
+	});
+	$('body').on('click','#result-dialog-close',function(event){
+		event.stopPropagation();
+		$('#search-result-dialog').remove();
+		$('body').off('click','#result-dialog-close');
 	});
 	$('body').off('click','button.search-result-addbutton');
 	$('body').on('click','button.search-result-addbutton',function(event){

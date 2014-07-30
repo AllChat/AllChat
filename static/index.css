@@ -691,12 +691,31 @@ body
     left: 400px;
     padding: 0px;
     margin: 0px;
-    border-radius: 10px;
+    border-radius: 8px;
     -moz-box-shadow: 0 0 20px #000;
     -webkit-box-shadow: 0 0 20px #000;
     box-shadow: 0 0 20px #000;
     background-image: linear-gradient(#7b7b7b,#8b8b8b);
     z-index: 1;
+}
+#result-dialog-close
+{
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    left: 370px;
+    border-radius: 0px 8px 0px 0px; 
+}
+#result-dialog-close img
+{
+    width: 30px;
+    height: 30px;
+    position: absolute;
+}
+#result-dialog-close:hover
+{
+    cursor: pointer;
+    background-color: #f00000;
 }
 #result-list-box
 {
