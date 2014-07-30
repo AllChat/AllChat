@@ -102,7 +102,8 @@ var Account = {
             $.ajax({
                 url: url,
                 type: "GET",
-                dataType: "json"
+                dataType: "json",
+                async: false,
             }).done(function (data, textStatus, jqXHR) {
                 $("#control-list-middle-accounts ul").empty();
                 var list = data.friendlist;

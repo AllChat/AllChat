@@ -22,17 +22,21 @@ function addFriendRequest(){
 	if(username.length==0){
 		alert('请输入用户名后再提交！');
 	}else{
-		$.ajax({
-			type: 'POST',
-			url: '/v1/friends/'+user+'/',
-			contentType: "application/json; charset=UTF-8",
-			data: $.toJSON({'account':username,'message':'this is '+user}),
-			dataType: 'text',
-		}).done(function (data){
-			alert(data);
-		}).fail(function (jqXHR){
-			alert(jqXHR.responseText);
-		});
+		var pattern = /^[\w!@#$%^&*_.]+$/;
+		if (!pattern.test(username)){alert('亲，您的关键字包含我们不支持的字符哦，换掉试试吧~');}
+		else{
+			$.ajax({
+				type: 'POST',
+				url: '/v1/friends/'+user+'/',
+				contentType: "application/json; charset=UTF-8",
+				data: $.toJSON({'account':username,'message':'this is '+user}),
+				dataType: 'text',
+			}).done(function (data){
+				alert(data);
+			}).fail(function (jqXHR){
+				alert(jqXHR.responseText);
+			});
+		}
 	}
 }
 function searchUser(){
@@ -40,21 +44,24 @@ function searchUser(){
 	if(keyword.length==0){
 		alert('搜索关键字不能为空');
 	}else{
-		$.ajax({
-			type: 'GET',
-			url: '/v1/accounts/'+keyword+'/',
-			dataType: 'json',
-			headers:{'mysql_like':1},
-		}).done(function (data){
-			if(data.accounts.length==0){
-				alert('很遗憾，没有找到匹配的结果，换个关键字试试吧～');
-			}else{
-				$.each(data.accounts,function(index,value){
-					alert(value['account']+' '+value['nickname']+' '+value['state']+' '+value['icon']);
-				});
-			}
-		}).fail(function (jqXHR){
-			alert(jqXHR.responseText);
-		});
+		var pattern = /^[\w!@#$%^&*_.]+$/;
+		if (!pattern.test(keyword)){alert('亲，您的关键字包含我们不支持的字符哦，换掉试试吧~');}
+		else{
+			$.ajax({
+				type: 'GET',
+				url: '/v1/accounts/'+keyword+'/?mysql_like=1',
+				dataType: 'json',
+			}).done(function (data){
+				if(data.accounts.length==0){
+					alert('很遗憾，没有找到匹配的结果，换个关键字试试吧～');
+				}else{
+					$.each(data.accounts,function(index,value){
+						alert(value['account']+' '+value['nickname']+' '+value['state']+' '+value['icon']);
+					});
+				}
+			}).fail(function (jqXHR){
+				alert(jqXHR.responseText);
+			});
+		}
 	}
 }
