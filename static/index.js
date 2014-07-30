@@ -103,7 +103,7 @@ var Account = {
                 url: url,
                 type: "GET",
                 dataType: "json",
-                async: false,
+                async: false
             }).done(function (data, textStatus, jqXHR) {
                 $("#control-list-middle-accounts ul").empty();
                 var list = data.friendlist;
@@ -223,6 +223,9 @@ var Account = {
                     var id = $(this).attr("id");
                     if(id.substring(0,10) == "list-user-") {
                         account.closeChatWindow(id.substr(10));
+                        if($(this).hasClass("chat-focus")) {
+                            $(this).removeClass("chat-focus")
+                        }
                     }
                     else if(id.substring(0,11) == "list-group-") {
                         
