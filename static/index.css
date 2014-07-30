@@ -681,3 +681,79 @@ body
     margin-right: 10px;
     margin-left: 375px;
 }
+
+#search-result-dialog
+{
+    width: 400px;
+    height: 300px;
+    position: relative;
+    top: 140px;
+    left: 400px;
+    padding: 0px;
+    margin: 0px;
+    border-radius: 10px;
+    -moz-box-shadow: 0 0 20px #000;
+    -webkit-box-shadow: 0 0 20px #000;
+    box-shadow: 0 0 20px #000;
+    background-image: linear-gradient(#7b7b7b,#8b8b8b);
+    z-index: 1;
+}
+#result-list-box
+{
+    width: 388px;
+    height: 240px;
+    margin: 0px auto;
+    position: relative;
+    top: 40px;
+    background-color: #f0f0f0;
+}
+#result-list-box ul
+{
+    width: 380px;
+    height: 240px;
+    padding: 0px;
+    margin: 0px auto;
+    list-style: none;
+}
+#result-list-box>ul>li
+{
+    height: 30px;
+    line-height: 24px;
+}
+#result-list-box>ul>li>p
+{
+    position: absolute;
+    text-align: center;
+    margin: 3px 0px;
+}
+.search-result-username
+{
+    width: 80px;
+    left: 0px;
+}
+.search-result-nickname
+{
+    width: 80px;
+    left: 80px;
+}
+.search-result-state
+{
+    width: 60px;
+    left: 160px;
+}
+.search-result-icon
+{
+    width: 40px;
+    left: 220px;
+}
+#result-list-box>ul>li>button
+{
+    width: 120px;
+    height: 26px;
+    position: absolute;
+    left: 260px;
+    margin: 2px 0px;
+    padding: 0px;
+    background-color: #9b9b9b;
+    font-size: 18px;
+}

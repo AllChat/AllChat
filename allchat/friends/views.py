@@ -48,7 +48,7 @@ class friends_view(MethodView):
                 return ("Can't add yourself as a friend", 403)
             db_session = get_session()
             try:
-                req_user = db_session.query(UserInfo).join(FriendList).with_lockmode('read').filter(and_(UserInfo.username == name,
+                req_user = db_session.query(UserInfo).with_lockmode('read').filter(and_(UserInfo.username == name,
                                     UserInfo.deleted == False, UserInfo.state != 'offline')).one()
             except Exception, e:
                 return ("The account {account} is not exist or offline".format(account = name), 404)
@@ -59,39 +59,45 @@ class friends_view(MethodView):
                 except Exception,e:
                     return ("The user {account} being added doesn't exist".format(account = para['account']), 404)
                 else:
-                    for friend in req_user.friends:
-                        if friend.username == resp_user.username and friend.confirmed == True:
-                            return ("The user {account} is already your friend".format(account = para['account']), 404)
-                    message = dict()
-                    message['method'] = "add_friend_req"
-                    tmp = dict()
-                    tmp['from'] = req_user.username
-                    tmp['to'] = resp_user.username
-                    tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    tmp['msg'] = para['message']
-                    message['para'] = tmp
-                    cnn = RPC.create_connection()
-                    sender = RPC.create_producer(req_user.username, cnn)
                     try:
-                        cast(sender, json.dumps(message), resp_user.username)
+                        friend_relation = db_session.query(FriendList).with_lockmode('read').filter(
+                            and_(FriendList.username == para['account'],FriendList.index == req_user.id)).one()
                     except:
+                        message = dict()
+                        message['method'] = "add_friend_req"
+                        tmp = dict()
+                        tmp['from'] = req_user.username
+                        tmp['to'] = resp_user.username
+                        tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        tmp['msg'] = para['message']
+                        message['para'] = tmp
+                        cnn = RPC.create_connection()
+                        sender = RPC.create_producer(req_user.username, cnn)
+                        try:
+                            cast(sender, json.dumps(message), resp_user.username)
+                        except:
+                            RPC.release_producer(req_user.username)
+                            RPC.release_connection(cnn)
+                            db_session.rollback()
+                            return ("Added friend failed due to system error", 500)
                         RPC.release_producer(req_user.username)
                         RPC.release_connection(cnn)
-                        db_session.rollback()
-                        return ("Added friend failed due to system error", 500)
-                    RPC.release_producer(req_user.username)
-                    RPC.release_connection(cnn)
-                    friend = FriendList(resp_user.username, resp_user.nickname, resp_user.state, False, resp_user.icon)
-                    req_user.friends.append(friend)
-                    db_session.begin()
-                    try:
-                        db_session.add(req_user)
-                        db_session.commit()
-                    except:
-                        db_session.rollback()
-                        return ("DataBase Failed", 503, )
+                        friend = FriendList(resp_user.username, resp_user.nickname, resp_user.state, False, resp_user.icon)
+                        req_user.friends.append(friend)
+                        db_session.begin()
+                        try:
+                            db_session.add(req_user)
+                            db_session.commit()
+                        except:
+                            db_session.rollback()
+                            return ("DataBase Failed", 503, )
+                        else:
+                            return ("Have sent add request to {user}".format(user = resp_user.username), 200)
                     else:
-                        return ("Have sent add request to {user}".format(user = resp_user.username), 200)
+                        if friend_relation.confirmed:
+                            return ("The user {account} is already your friend".format(account = para['account']), 404)
+                        else:
+                            return ("Please do not send duplicate requests.", 404)
         else:
             return ("Please upload a json data", 403)
 

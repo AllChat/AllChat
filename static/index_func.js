@@ -8,7 +8,8 @@ $(document).ready(function (){
     });
     $('body').on('click','#fast-add-button',function(event){
     	event.stopPropagation();
-    	addFriendRequest();
+    	var username = $('#add-username').val();
+    	addFriendRequest(username);
     });
     $('body').on('click','#search-user-button',function(event){
     	event.stopPropagation();
@@ -16,8 +17,7 @@ $(document).ready(function (){
     });
 });
 
-function addFriendRequest(){
-	var username = $('#add-username').val();
+function addFriendRequest(username){
 	var user = $.cookie('account');
 	if(username.length==0){
 		alert('请输入用户名后再提交！');
@@ -55,13 +55,40 @@ function searchUser(){
 				if(data.accounts.length==0){
 					alert('很遗憾，没有找到匹配的结果，换个关键字试试吧～');
 				}else{
-					$.each(data.accounts,function(index,value){
-						alert(value['account']+' '+value['nickname']+' '+value['state']+' '+value['icon']);
-					});
+					var type = 'user';
+					showSearchResultDialog(data,type);
 				}
 			}).fail(function (jqXHR){
 				alert(jqXHR.responseText);
 			});
 		}
 	}
+}
+
+function showSearchResultDialog(data,type){
+	if($('#search-result-dialog').length>0){
+		$('#result-list-box ul').empty();
+	}else{
+		$('#layer').append('<div id="search-result-dialog"></div>');
+		$('#search-result-dialog').append('<div id="result-list-box"></div>');
+		$('#result-list-box').append('<ul></ul>');
+	}
+	$.each(data.accounts,function(index,value){
+		addUserToDialog(value['account'],value['nickname'],value['state'],value['icon']);
+	});
+	$('body').off('click','button.search-result-addbutton');
+	$('body').on('click','button.search-result-addbutton',function(event){
+		event.stopPropagation();
+		var username = $(this).siblings('.search-result-username').text();
+		addFriendRequest(username);
+	});
+}
+function addUserToDialog(account,nickname,state,icon){
+	var userInfo = $('<li></li>');
+	userInfo.append('<p class="search-result-username">'+account+'</p>');
+	userInfo.append('<p class="search-result-nickname">'+nickname+'</p>');
+	userInfo.append('<p class="search-result-state">'+state+'</p>');
+	userInfo.append('<p class="search-result-icon">'+icon+'</p>');
+	userInfo.append('<button class="search-result-addbutton">加为好友</button>');
+	$('#result-list-box ul').append(userInfo);
 }
