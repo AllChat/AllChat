@@ -7,74 +7,133 @@ from allchat.amqp.Impl_kombu import RPC, cast
 
 
 class groups_view(MethodView):
-    def get(self,method):
+    def get(self):
+        header = request.headers
+        if 'group_id' in header and 'account' in header:
+            group_id = header['group_id']
+            account = header['account']
+            db_session = get_session()
+            try:
+                db_user = db_session.query(UserInfo).filter_by(username = account).one()
+            except:
+                return ("Invalid user.", 404)
+            # return all the groups the user has joined, including group_id and group_name
+            if group_id == str(0):
+                try:
+                    groups = db_session.query(GroupMember).filter_by(member_account = account).all()
+                except:
+                    return ("DataBase Failed querying groups info", 503 )
+                group_list = dict()
+                for group in groups:
+                    group_list[group.group_id] = group.group_name
+                return (jsonify(group_list), 201)
+            # return the member information of the specified group, check if the user is member or not
+            else:
+                try:
+                    group = db_session.query(GroupInfo).join(GroupMember).filter(GroupInfo.group_id == group_id).one()
+                except:
+                    return ("Group "+group_id+" not found.", 404)
+                if account not in [member.member_account for member in group.groupmembers]:
+                    return ("You are not in this group, access denied.", 405)
+                member_list = dict()
+                for member in group.groupmembers:
+                    member_info = [ member.member_logstate, member.role]
+                    member_list[member.member_account] = member_info
+                return (jsonify(member_list), 201)
+        else:
+            return ("Missing critical information.", 403)
+        
+
+    def post(self,method):
         if method is None:
-            ## dongzai re-structed in 2014-07-26    
-            # def getGroupInfo(self):
-            header = request.headers
-            if 'group_id' in header and 'account' in header:
-                group_id = header['group_id']
-                account = header['account']
+            if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
+                try:
+                    para = request.get_json()
+                except Exception as e:
+                    resp = make_response(("The json data can't be parsed", 403, ))
+                    return resp
+                # parse the json data and handle the request
+                account = para['account']
+                group_name = para['group_name']
+                userlist = []
+                if 'userlist' in para:
+                    userlist = para['userlist']
+                # allocate group id auto increment by 1, start from 10000
                 db_session = get_session()
                 try:
                     db_user = db_session.query(UserInfo).filter_by(username = account).one()
-                except:
-                    return ("Invalid user.", 404)
-                # return all the groups the user has joined, including group_id and group_name
-                if group_id == str(0):
-                    try:
-                        groups = db_session.query(GroupMember).filter_by(member_account = account).all()
-                    except:
-                        return ("DataBase Failed querying groups info", 503 )
-                    group_list = dict()
-                    for group in groups:
-                        group_list[group.group_id] = group.group_name
-                    return (jsonify(group_list), 201)
-                # return the member information of the specified group, check if the user is member or not
+                except Exception, e:
+                    return ("User not found", 404)
+                max_group_id = db_session.query(GroupInfo.group_id).order_by(desc(GroupInfo.group_id)).first()
+                if max_group_id is None:
+                    group_id = 10000
                 else:
-                    try:
-                        group = db_session.query(GroupInfo).join(GroupMember).filter(GroupInfo.group_id == group_id).one()
-                    except:
-                        return ("Group "+group_id+" not found.", 404)
-                    if account not in [member.member_account for member in group.groupmembers]:
-                        return ("You are not in this group, access denied.", 405)
-                    member_list = dict()
-                    for member in group.groupmembers:
-                        member_info = [ member.member_logstate, member.role]
-                        member_list[member.member_account] = member_info
-                    return (jsonify(member_list), 201)
+                    group_id = max_group_id[0]+1
+                # add users in userlist to group if userlist is not empty
+                # update both GroupMember and GroupInfo 
+                members = []
+                member = GroupMember(group_id, group_name, account, db_user.state, "owner")
+                members.append(member)
+                illegal_users = set()
+                if userlist:
+                    for user in {}.fromkeys(userlist).keys(): # eliminate the duplicated account
+                        try:
+                            db_user = db_session.query(UserInfo).filter_by(username = user).one()
+                        except Exception, e:
+                            illegal_users.add(user)
+                        else:
+                            if user != account:
+                                member = GroupMember(group_id, group_name, user, db_user.state)
+                                members.append(member)
+                group = GroupInfo(group_id, account, group_name,len(members))
+                db_session.begin()
+                for member in members:
+                    group.groupmembers.append(member)
+                db_session.add(group)
+                try:
+                    db_session.commit()
+                except:
+                    db_session.rollback()
+                    return ("DataBase Failed", 503, )
+                if illegal_users:
+                    return ("Group created,but these users are illegal:"+','.join(illegal_users), 202)
+                else:
+                    return ("Group created successfully!", 201)
             else:
-                return ("Missing critical information.", 403)
+                return ("Please upload a json data", 403)
         elif method == 'search':
             ## dongzai updated in 2014-07-26, revised in 2014-07-27
             # def searchGroup(self):
-            header = request.headers
+            try:
+                para = request.get_json()
+            except Exception as e:
+                resp = make_response(("The json data can't be parsed", 403, ))
             response_chunk_size = 5
-            if 'keyword' in header and 'account' in header and 'type' in header:
-                keyword = header['keyword']
-                account = header['account']
-                search_type = header['type']
+            if 'keyword' in para and 'account' in para and 'type' in para:
+                keyword = para['keyword']
+                account = para['account']
+                search_type = para['type']
                 db_session = get_session()
                 try:
                     db_user = db_session.query(UserInfo).filter_by(username = account).one()
                 except:
                     return ("Invalid user.", 404)
                 if search_type == 'uncertain':
-                    if 'offset' in header:
-                        offsets = int(header['offset'])*response_chunk_size
-                        if not offsets:
-                            try:
-                                result_size = db_session.query(GroupInfo).filter(GroupInfo.group_name.like\
-                                    ('%'+keyword+'%')).count()
-                            except:
-                                return ("Database Error.", 500)
+                    try:
+                        offsets = int(para['offset'])*response_chunk_size
+                    except:
+                        offsets = 0
+                    if not offsets:
                         try:
-                            groups = db_session.query(GroupInfo).filter(GroupInfo.group_name.like\
-                                ('%'+keyword+'%')).offset(offsets).limit(response_chunk_size).all()
+                            result_size = db_session.query(GroupInfo).filter(GroupInfo.group_name.like\
+                                ('%'+keyword+'%')).count()
                         except:
                             return ("Database Error.", 500)
-                    else:
-                        return ("Missing critical information.", 403)
+                    try:
+                        groups = db_session.query(GroupInfo).filter(GroupInfo.group_name.like\
+                            ('%'+keyword+'%')).offset(offsets).limit(response_chunk_size).all()
+                    except:
+                        return ("Database Error.", 500)
                 elif search_type == 'certain':
                     try:
                         groups = db_session.query(GroupInfo).filter_by(group_name = keyword).one()
@@ -102,63 +161,8 @@ class groups_view(MethodView):
                 return jsonify(group_info)
             else:
                 return ("Missing critical information.", 403)
-
-    def post(self):
-        if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
-            try:
-                para = request.get_json()
-            except Exception as e:
-                resp = make_response(("The json data can't be parsed", 403, ))
-                return resp
-            # parse the json data and handle the request
-            account = para['account']
-            group_name = para['group_name']
-            userlist = []
-            if 'userlist' in para:
-                userlist = para['userlist']
-            # allocate group id auto increment by 1, start from 10000
-            db_session = get_session()
-            try:
-                db_user = db_session.query(UserInfo).filter_by(username = account).one()
-            except Exception, e:
-                return ("User not found", 404)
-            max_group_id = db_session.query(GroupInfo.group_id).order_by(desc(GroupInfo.group_id)).first()
-            if max_group_id is None:
-                group_id = 10000
-            else:
-                group_id = max_group_id[0]+1
-            # add users in userlist to group if userlist is not empty
-            # update both GroupMember and GroupInfo 
-            members = []
-            member = GroupMember(group_id, group_name, account, db_user.state, "owner")
-            members.append(member)
-            illegal_users = set()
-            if userlist:
-                for user in {}.fromkeys(userlist).keys(): # eliminate the duplicated account
-                    try:
-                        db_user = db_session.query(UserInfo).filter_by(username = user).one()
-                    except Exception, e:
-                        illegal_users.add(user)
-                    else:
-                        if user != account:
-                            member = GroupMember(group_id, group_name, user, db_user.state)
-                            members.append(member)
-            group = GroupInfo(group_id, account, group_name,len(members))
-            db_session.begin()
-            for member in members:
-                group.groupmembers.append(member)
-            db_session.add(group)
-            try:
-                db_session.commit()
-            except:
-                db_session.rollback()
-                return ("DataBase Failed", 503, )
-            if illegal_users:
-                return ("Group created,but these users are illegal:"+','.join(illegal_users), 202)
-            else:
-                return ("Group created successfully!", 201)
         else:
-            return ("Please upload a json data", 403)
+            return ("Incorrect method.", 501)
 
     def put(self,groupID):
         if groupID is None:

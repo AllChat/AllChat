@@ -223,36 +223,27 @@ body
     position: relative;
     list-style-type: none;
 }
-#control-list-middle-accounts-add
+#control-list-middle-accounts-add,#control-list-middle-groups-add
 {
-    height: 90px;
+    height: 80px;
     width: 291px;
     margin: 0px;
     padding: 0px;
     position: absolute;
     bottom: -80px;
-    background-color: #e0e0e0;
 }
-#add-bar-swither
-{
-    height: 10px;
-    width: 291px;
-    margin: 0px;
-    padding: 0px;
-}
-#add-bar-swither:hover
-{
-    cursor: pointer;
-}
-#fast-add,#search-user
+.add-bar
 {
     height: 40px;
     width: 291px;
     margin: 0px;
     padding: 0px;
 }
-
-#fast-add input,#search-user input
+.add-bar:hover
+{background-color: #d0d0d0;}
+.add-bar,.add-bar img:hover
+{background-color: #e0e0e0;}
+.add-bar input
 {
     height: 26px;
     width: 140px;
@@ -260,16 +251,15 @@ body
     padding: 0px;
     border-width: 2px;
 }
-#fast-add img,#search-user img
+.add-bar img
 {
     height: 26px;
     width: 26px;
     vertical-align: middle;
 }
-#fast-add img:hover,#search-user img:hover
+.add-bar img:hover
 {
     cursor: pointer;
-    background-color: #d0d0d0;
 }
 
 
@@ -698,6 +688,19 @@ body
     background-image: linear-gradient(#7b7b7b,#8b8b8b);
     z-index: 1;
 }
+#dialog-title
+{
+    width: 120px;
+    height: 40px;
+    position: absolute;
+    margin: 0px;
+}
+#dialog-title p
+{
+    font-size: 18px;
+    color: #eee;
+    margin: 10px 20px;
+}
 #result-dialog-close
 {
     width: 30px;
@@ -745,22 +748,22 @@ body
     text-align: center;
     margin: 3px 0px;
 }
-.search-result-username
+.search-result-username,.search-result-groupname
 {
     width: 80px;
     left: 0px;
 }
-.search-result-nickname
+.search-result-nickname,.search-result-groupowner
 {
     width: 80px;
     left: 80px;
 }
-.search-result-state
+.search-result-state,.search-result-groupid
 {
     width: 60px;
     left: 160px;
 }
-.search-result-icon
+.search-result-icon,.search-result-groupsize
 {
     width: 40px;
     left: 220px;
