@@ -478,6 +478,10 @@ var Account = {
                             break;
                         case "add_friend_req":
                             break;
+                        case "join_group_apply":
+                            break;
+                        case "join_group_confirm":
+                            break;
                         default:
                             break;
                     }

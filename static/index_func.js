@@ -192,7 +192,7 @@ function joinGroupRequest(groupid,groupowner){
 		}).done(function (data){
 			alert('申请成功啦，等着好消息吧~');
 		}).fail(function (jqXHR){
-			alert('%>_<%，申请失败了，再试试吧~');
+			alert(jqXHR.responseText);
 		});
 	}
 }

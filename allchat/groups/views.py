@@ -1,9 +1,10 @@
 from flask.views import MethodView
-from flask import request, make_response, g, session, jsonify
+from flask import request, make_response, g, session, jsonify, json
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
 from sqlalchemy import and_, desc
-from allchat.amqp.Impl_kombu import RPC, cast
+from allchat.amqp.Impl_kombu import RPC, cast, send_message
+import datetime
 
 
 class groups_view(MethodView):
@@ -72,7 +73,7 @@ class groups_view(MethodView):
                 # add users in userlist to group if userlist is not empty
                 # update both GroupMember and GroupInfo 
                 members = []
-                member = GroupMember(group_id, group_name, account, db_user.state, "owner")
+                member = GroupMember(group_id, group_name, account, db_user.state, "owner", True)
                 members.append(member)
                 illegal_users = set()
                 if userlist:
@@ -179,6 +180,10 @@ class groups_view(MethodView):
             operation = para['operation']
             db_session = get_session()
             try:
+                db_user = db_session.query(UserInfo).filter_by(username = account).one()
+            except Exception, e:
+                return ("Invalid user.", 404)
+            try:
                 db_group = db_session.query(GroupInfo).filter_by(group_id = groupID).one()
             except Exception, e:
                 return ("Group not found", 404)
@@ -259,12 +264,47 @@ class groups_view(MethodView):
                     return ("Operation not supported", 405)
                 else:
                     if operation == "join":
-                        #validate user identity and proceed depend on the result
                         # send group owner an applying msg, when the owner confirms, send the applicant a msg
-                        '''
-                        // handle procedure of applying msg lies here
-                        '''
-                        return ("Application has been dealt, please wait for the owner to handle.", 201)
+                        try:
+                            db_member = db_session.query(GroupMember).filter(and_(GroupMember.group_id==groupID,
+                                GroupMember.member_account==account)).one()
+                        except:
+                            message = dict()
+                            message['method'] = "join_group_apply"
+                            tmp = dict()
+                            tmp['applicant'] = account
+                            tmp['groupid'] = groupID
+                            tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                            try:
+                                tmp['msg'] = para['message']
+                            except:
+                                tmp['msg'] = ''
+                            message['para'] = tmp
+                            cnn = RPC.create_connection()
+                            sender = RPC.create_producer(account, cnn)
+                            try:
+                                cast(sender, json.dumps(message), db_group.owner)
+                            except:
+                                RPC.release_producer(account)
+                                RPC.release_connection(cnn)
+                                return ("Applying failed due to system error", 500)
+                            RPC.release_producer(account)
+                            RPC.release_connection(cnn)
+                            member = GroupMember(groupID,db_group.group_name,account,db_user.state)
+                            db_group.groupmembers.append(member)
+                            db_session.begin()
+                            try:
+                                db_session.add(db_group)
+                                db_session.commit()
+                            except:
+                                db_session.rollback()
+                                return ("DataBase Failed", 503, )
+                            return ("Application has been dealt, please wait for the owner to handle.", 201)
+                        else:
+                            if db_member.confirmed:
+                                return ("You are already in the group {name}".format(name = db_group.group_name), 400)
+                            else:
+                                return ("Please do not send duplicate requests.", 400)
                     if operation == "quit":
                         #validate user identity and proceed depend on the result
                         existed_members = [member.member_account for member in db_group.groupmembers]
