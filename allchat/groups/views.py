@@ -21,7 +21,8 @@ class groups_view(MethodView):
             # return all the groups the user has joined, including group_id and group_name
             if group_id == 0:
                 try:
-                    groups = db_session.query(GroupMember).filter_by(member_account = account).all()
+                    groups = db_session.query(GroupMember).filter(and_(GroupMember.member_account == account,
+                        GroupMember.confirmed == True)).all()
                 except:
                     return ("DataBase Failed querying groups info", 503 )
                 group_list = dict()

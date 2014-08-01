@@ -190,7 +190,7 @@ class messages_view(MethodView):
                                         [tmp['time'], tmp['msg']])
         failed = []
         for user in group_to.groupmembers:
-            if user.member_account == user_from.username:
+            if user.member_account == user_from.username or user.confirmed == False:
                 continue
             message['para']['to'] = user.member_account
             ret = send_message(user_from.username, user.member_account, message)
