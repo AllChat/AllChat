@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from flask.views import MethodView
 from flask import request, make_response, g, session, jsonify, json
 from allchat.database.sql import get_session
@@ -35,7 +36,7 @@ class groups_view(MethodView):
                     group = db_session.query(GroupInfo).join(GroupMember).filter(GroupInfo.group_id == group_id).one()
                 except:
                     return ("Group "+group_id+" not found.", 404)
-                if account not in [member.member_account for member in group.groupmembers]:
+                if account not in [member.member_account for member in group.groupmembers if member.confirmed==True]:
                     return ("You are not in this group, access denied.", 405)
                 member_list = dict()
                 for member in group.groupmembers:
@@ -210,7 +211,7 @@ class groups_view(MethodView):
                                     db_user = db_session.query(UserInfo).filter_by(username = user).one()
                                 except Exception, e:
                                     return ("The user "+user+" is not registered yet.", 404)
-                                new_members.append(GroupMember(groupID, db_group.group_name, user, db_user.state))
+                                new_members.append(GroupMember(groupID, db_group.group_name, user, db_user.state,"member",True))
                             else:
                                 old_members.append(user)
                         # for users passed validation, add to GroupMember and update group size in GroupInfo
@@ -219,15 +220,39 @@ class groups_view(MethodView):
                             for member in new_members:
                                 db_group.groupmembers.append(member)
                             db_group.group_size += len(new_members)
+                            db_session.add(db_group)
                             try:
                                 db_session.commit()
                             except:
                                 db_session.rollback()
-                                return ("DataBase Failed", 503, )
+                                return ("DataBase Failed", 503 )
                         if old_members:
-                            return ("The following users are already in the group:"+','.join(old_members), 202)
-                        else:
-                            return ("Users added to the group successfully.", 201)
+                            for member in db_group.groupmembers:
+                                if member.confirmed == False and member.member_account in old_members:
+                                    message = dict()
+                                    message['method'] = 'join_group_confirm'
+                                    tmp = dict()
+                                    tmp['groupid'] = groupID
+                                    tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                                    db_session.begin()
+                                    member.confirmed = True
+                                    db_group.group_size += 1
+                                    db_session.add(db_group)
+                                    try:
+                                        db_session.commit()
+                                    except:
+                                        db_session.rollback()
+                                        tmp['result'] = 'failed'
+                                        message['para'] = tmp
+                                        send_message(db_group.owner,member.member_account,message)
+                                        return ("DataBase Failed", 503)
+                                    tmp['result'] = 'success'
+                                    message['para'] = tmp
+                                    send_message(db_group.owner,member.member_account,message)
+                                    old_members.remove(member.member_account)
+                            if old_members:
+                                return ("The following users are already in the group:"+','.join(old_members), 202)
+                        return ("Users added to the group successfully.", 201)
                     # the operation is del, make sure the user is registered and already in the group
                     if operation == "del":
                         user_req_del = []
@@ -247,8 +272,19 @@ class groups_view(MethodView):
                                     member_to_del.append(member)
                             db_session.begin()
                             for member in member_to_del:
+                                if member.confirmed == False:
+                                    message = dict()
+                                    message['method'] = 'join_group_confirm'
+                                    tmp = dict()
+                                    tmp['groupid'] = groupID
+                                    tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                                    tmp['result'] = 'rejected'
+                                    message['para'] = tmp
+                                    send_message(db_group.owner,member.member_account,message)
+                                else:
+                                    db_group.group_size -= 1
                                 db_group.groupmembers.remove(member)
-                            db_group.group_size -= len(member_to_del)
+                            db_session.add(db_group)
                             try:
                                 db_session.commit()
                             except:
@@ -303,7 +339,7 @@ class groups_view(MethodView):
                             return ("Application has been dealt, please wait for the owner to handle.", 201)
                         else:
                             if db_member.confirmed:
-                                return ("You are already in the group {name}".format(name = db_group.group_name), 400)
+                                return ("You are already in the group", 400)
                             else:
                                 return ("Please do not send duplicate requests.", 400)
                     if operation == "quit":
@@ -318,6 +354,7 @@ class groups_view(MethodView):
                             db_session.begin()
                             db_group.groupmembers.remove(applicant)
                             db_group.group_size -= 1
+                            db_session.add(db_group)
                             try:
                                 db_session.commit()
                             except:
