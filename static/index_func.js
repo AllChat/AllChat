@@ -73,13 +73,11 @@ function createResultDialog(){
 	if($('#search-result-dialog').length>0){
 		$('#result-list-box ul').empty();
 	}else{
-		var dialog = $('<div id="search-result-dialog"></div>');
-		$('#layer').append(dialog);
-		dialog.append('<div id="dialog-title"><p>搜索结果</p></div>');
-		dialog.append('<div id="result-dialog-close"></div>');
-		$('#result-dialog-close').append('<img src="../static/images/icon/close.png" />');
-		dialog.append('<div id="result-list-box"></div>');
-		$('#result-list-box').append('<ul></ul>');
+		var $dialog = $('<div></div>').attr('id','search-result-dialog');
+		var $title = $('<div></div>').attr('id','dialog-title').append($('<p></p>').text('搜索结果'));
+		var $closeTab = $('<div></div>').attr('id','result-dialog-close').append($('<img/>').attr('src','../static/images/icon/close.png'));
+		var $list = $('<div></div>').attr('id','result-list-box').append('<ul></ul>');
+		$dialog.append($title).append($closeTab).append($list).appendTo($('#layer'));
 	}
 }
 function showSearchResult(data,type){
@@ -112,21 +110,23 @@ function showSearchResult(data,type){
 	});
 }
 function addItemToDialog(value,type){
-	var itemInfo = $('<li></li>');
+	var $li = $('<li></li>');
 	if(type=='user'){
-		itemInfo.append('<p class="search-result-username">'+value['account']+'</p>');
-		itemInfo.append('<p class="search-result-nickname">'+value['nickname']+'</p>');
-		itemInfo.append('<p class="search-result-state">'+value['state']+'</p>');
-		itemInfo.append('<p class="search-result-icon">'+value['icon']+'</p>');
-		itemInfo.append('<button class="search-result-addbutton">加为好友</button>');
+		$username = $('<p></p>').attr('class','search-result-username').text(value['account']);
+		$nickname = $('<p></p>').attr('class','search-result-nickname').text(value['nickname']);
+		$state = $('<p></p>').attr('class','search-result-state').text(value['state']);
+		$icon = $('<p></p>').attr('class','search-result-icon').text(value['icon']);
+		$li.append($username).append($nickname).append($state).append($icon);
+		$li.append('<button class="search-result-addbutton">加为好友</button>');
 	}else if(type=='group'){
-		itemInfo.append('<p class="search-result-groupname">'+value['group_name']+'</p>');
-		itemInfo.append('<p class="search-result-groupid">'+value['group_id']+'</p>');
-		itemInfo.append('<p class="search-result-groupowner">'+value['group_owner']+'</p>');
-		itemInfo.append('<p class="search-result-groupsize">'+value['group_size']+'</p>');
-		itemInfo.append('<button class="search-result-joinbutton">申请加入</button>');
+		$groupname = $('<p></p>').attr('class','search-result-groupname').text(value['group_name']);
+		$groupid = $('<p></p>').attr('class','search-result-groupid').text(value['group_id']);
+		$groupowner = $('<p></p>').attr('class','search-result-groupowner').text(value['group_owner']);
+		$groupsize = $('<p></p>').attr('class','search-result-groupsize').text(value['group_size']);
+		$li.append($groupname).append($groupid).append($groupowner).append($groupsize);
+		$li.append('<button class="search-result-joinbutton">申请加入</button>');
 	}
-	$('#result-list-box ul').append(itemInfo);
+	$('#result-list-box ul').append($li);
 }
 function toggleDisplay(div){
 	if(div.css("bottom")=="-80px"){
@@ -162,7 +162,7 @@ function searchGroup(){
 function createGroup(){
 	var groupname = $('#create-group-name').val();
 	if(groupname.length==0){
-		alert('没有群名字怎么做自我介绍呢，请您三思啊~');
+		alert('群名称还没填呢，再想想吧~');
 	}else{
 		var user = $.cookie('account');
 		$.ajax({
@@ -181,7 +181,7 @@ function createGroup(){
 function joinGroupRequest(groupid,groupowner){
 	var user = $.cookie('account');
 	if(user==groupowner){
-		alert('老大小弟不可得兼，您就安心当您的老大吧~');
+		alert('您已经是群主了，别闹~');
 	}else{
 		$.ajax({
 			type: 'PUT',

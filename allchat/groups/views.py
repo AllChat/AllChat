@@ -11,7 +11,7 @@ class groups_view(MethodView):
     def get(self):
         header = request.headers
         if 'group_id' in header and 'account' in header:
-            group_id = header['group_id']
+            group_id = int(header['group_id'])
             account = header['account']
             db_session = get_session()
             try:
@@ -19,7 +19,7 @@ class groups_view(MethodView):
             except:
                 return ("Invalid user.", 404)
             # return all the groups the user has joined, including group_id and group_name
-            if group_id == str(0):
+            if group_id == 0:
                 try:
                     groups = db_session.query(GroupMember).filter_by(member_account = account).all()
                 except:

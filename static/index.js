@@ -15,6 +15,7 @@ var Account = {
             account.controlListTopSetting();
             account.closeChat();
             account.get_friends();
+            account.get_groups();
             account.setFontAndSize();
             account.uploadImage();
             account.textareaSubmit();
@@ -51,14 +52,6 @@ var Account = {
         account.load_friend = function(friend) {
             var tmp = null;
             var $li = $("<li></li>").attr("id", 'user-' + friend['account']).addClass("friends");
-            $li.on("mouseenter mouseleave", function(event) {
-                if(event.type == "mouseenter") {
-                    $(this).css("background", "rgb(203, 231, 252)");
-                }
-                else {
-                    $(this).css("background", "none");
-                }
-            });
             var $img = $("<img/>").attr("src", "/static/images/user" + friend['icon'] +"-icon.jpg").addClass("icon");
             var $nickname = $("<p></p>").addClass("nickname").text(friend['nickname']);
             if (friend['state'] === "online") {
@@ -121,8 +114,32 @@ var Account = {
                 $.removeCookie("account");
             });
         };
+        account.load_group = function(group_id,group_name){
+            var $li = $("<li></li>").attr('id','group-'+group_id).addClass('group');
+            var $img = $("<img />").attr('src','/static/images/group.jpg').addClass('icon');
+            var $groupname = $("<p></p>").addClass('groupname').text(group_name);
+            $li.append($img).append($groupname).appendTo($("#control-list-middle-groups ul"));
+        };
         account.get_groups = function() {
             var url = "/v1/groups/";
+            $.ajax({
+                type: 'GET',
+                url: url,
+                dataType: 'json',
+                headers: {'group_id':0,'account':user},
+                async: false,
+            }).done(function (data,textStatus,jqXHR){
+                $("#control-list-middle-groups ul").empty();
+                $.each(data,function (key,value){
+                    account.load_group(key,value);
+                });
+            }).fail(function (jqXHR){
+                if(jqXHR.status == 503){
+                    alert("数据库故障,请重新登陆");
+                }else if(jqXHR.status == 404){
+                    alert("用户名有误,请重新登陆");
+                }
+            });
         };
         account.controlListTopSetting = function() {
             $("#control-list-top").on("click", "ul li", function(event) {

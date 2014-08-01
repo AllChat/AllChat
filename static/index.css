@@ -263,7 +263,7 @@ body
 }
 
 
-.friends
+.friends,.group
 {
     width: 289px;
     height: 56px;
@@ -273,6 +273,10 @@ body
     border-bottom: 1px solid #e3e3e3;
     line-height: 100%;
     cursor: pointer;
+}
+.friends:hover,.group:hover
+{
+    background-color: rgb(203, 231, 252);
 }
 
 .icon
@@ -289,7 +293,7 @@ body
     -webkit-user-select: none;
 }
 
-.nickname
+.nickname,.groupname
 {
     width: 220px;
     height: 26px;
