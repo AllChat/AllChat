@@ -119,6 +119,7 @@ var Account = {
             var $img = $("<img />").attr('src','/static/images/group.jpg').addClass('icon');
             var $groupname = $("<p></p>").addClass('groupname').text(group_name);
             $li.append($img).append($groupname).appendTo($("#control-list-middle-groups ul"));
+            account.bindChat($li);
         };
         account.get_groups = function() {
             var url = "/v1/groups/";
@@ -173,9 +174,19 @@ var Account = {
                 $this = $(this);
                 var $chat = $("#chat");
                 var id = $this.attr("id");
-                var nickname = $this.children(".nickname").text();
-                var chatUser = id.substr(5);
-                if(id.split("-", 1)[0] != "user") {
+                var chatTo = id.split("-")[1];
+                var name = "";
+                var chatList = "";
+                var chatRecord = "";
+                if(id.split("-", 1)[0] == "user") {
+                    name = $this.children(".nickname").text();
+                    chatList = "list-user-";
+                    chatRecord = "records-user-";
+                }else if(id.split("-", 1)[0] == "group"){
+                    name = $this.children(".groupname").text();
+                    chatList = "list-group-";
+                    chatRecord = "records-group-";
+                }else{
                     return false;
                 }
                 $this.children("img").filter(function(index, event) {return $(event).attr("title") == "msg-reminder";}).remove();
@@ -189,7 +200,7 @@ var Account = {
                 var create = true;
                 $ul.children("li").each(function(index, element) {
                     var $element = $(element);
-                    if($element.attr("id") == "list-user-" + chatUser) {
+                    if($element.attr("id") == chatList + chatTo) {
                         if($element.css("display") == "none") {
                             $element.stop().show().addClass("chat-focus");
                         }
@@ -203,26 +214,21 @@ var Account = {
                     else {
                         if($element.hasClass("chat-focus")) {
                             $element.removeClass("chat-focus");
-                            var id = $element.attr("id");
-                            if(id.substring(0,10) == "list-user-") {
-                                account.closeChatWindow(id.substr(10));
-                            }
-                            else if(id.substring(0,11) == "list-group-") {
-                                
-                            }
+                            var chatRecordId = $element.attr("id").replace("list","records");
+                            account.closeChatWindow(chatRecordId);
                         }
                     }
                 });
                 if(create == true) {
-                    var $li = $("<li></li>").attr("id", "list-user-" + chatUser).addClass("chat-friends chat-focus");
+                    var $li = $("<li></li>").attr("id", chatList + chatTo).addClass("chat-friends chat-focus");
                     var $p = $("<p></p>").css("display", "none").text("×");
-                    var $span = $("<span></span>").text(nickname);
+                    var $span = $("<span></span>").text(name);
                     $li.append($p).append($span).appendTo($ul);
                     account.closeCard($li);
-                    account.addChatWindow(chatUser);
+                    account.addChatWindow(chatRecord + chatTo);
                 }
                 else {
-                    account.openChatWindow(chatUser);
+                    account.openChatWindow(chatRecord+chatTo);
                 }
             });
         };
@@ -237,16 +243,12 @@ var Account = {
                 }
                 $(this).next("ul").children("li").each(function() {
                     $(this).stop().hide();
-                    var id = $(this).attr("id");
-                    if(id.substring(0,10) == "list-user-") {
-                        account.closeChatWindow(id.substr(10));
-                        if($(this).hasClass("chat-focus")) {
-                            $(this).removeClass("chat-focus")
-                        }
+                    var id = $(this).attr("id").replace("list","records");
+                    account.closeChatWindow(id);
+                    if($(this).hasClass("chat-focus")) {
+                        $(this).removeClass("chat-focus")
                     }
-                    else if(id.substring(0,11) == "list-group-") {
-                        
-                    }
+                    
                 });
             });
         };
@@ -263,13 +265,8 @@ var Account = {
                 var $tmp = $(this).closest("li");
                 if($tmp.css("display") != "none") {
                     $tmp.stop().hide();
-                    var id = $tmp.attr("id");
-                    if(id.substring(0,10) == "list-user-") {
-                        account.closeChatWindow(id.substr(10));
-                    }
-                    else if(id.substring(0,11) == "list-group-") {
-                        
-                    }
+                    var id = $tmp.attr("id").replace("list","records");
+                    account.closeChatWindow(id);
                 }
                 var $ul = $tmp.closest("ul");
                 if($ul.children("li").length == $ul.children("li").filter(":hidden").length) {
@@ -281,13 +278,8 @@ var Account = {
                 }
                 if($tmp.hasClass("chat-focus")) {
                     $tmp.removeClass("chat-focus");
-                    var id = $ul.children("li").not(":hidden").last().addClass("chat-focus").attr("id");
-                    if(id.substring(0,10) == "list-user-") {
-                        account.openChatWindow(id.substr(10));
-                    }
-                    else if(id.substring(0,11) == "list-group-") {
-                        
-                    }
+                    var id = $ul.children("li").not(":hidden").last().addClass("chat-focus").attr("id").replace("list","records");
+                    account.openChatWindow(id);
                 }
             });
             $li.children("span").click(function(event) {
@@ -295,41 +287,30 @@ var Account = {
                 $li.siblings("li").each(function(index, element) {
                     var $element = $(element);
                     if($element.hasClass("chat-focus")) {
-                        var id = $element.removeClass("chat-focus").attr("id");
-                        if(id.substring(0,10) == "list-user-") {
-                            account.closeChatWindow(id.substr(10));
-                        }
-                        else if(id.substring(0,11) == "list-group-") {
-                            
-                        }
+                        var id = $element.removeClass("chat-focus").attr("id").replace("list","records");
+                        account.closeChatWindow(id);
                     }
                 });
                 if(!$li.hasClass("chat-focus")) {
-                    var id = $li.addClass("chat-focus").attr("id");
-                    if(id.substring(0,10) == "list-user-") {
-                        account.openChatWindow(id.substr(10));
-                        $("#user-" + id.substr(10)).children("img").filter(function(index, event) {
+                    var id = $li.addClass("chat-focus").attr("id").replace("list","records");
+                    account.openChatWindow(id);
+                    $(id.replace("list-","#")).children("img").filter(function(index, event) {
                             return $(event).attr("title") == "msg-reminder";}).remove();
-                    }
-                    else if(id.substring(0,11) == "list-group-") {
-                        
-                    }
                 }
-
             });
         };
         account.addChatWindow = function(id) {
-            var $div = $("<div></div>").addClass("chat-records-setting").attr("id", "records-user-" + id).appendTo("#chat-records");
+            var $div = $("<div></div>").addClass("chat-records-setting").attr("id", id).appendTo("#chat-records");
             $div.siblings().not(":hidden").css("display", "none");
         };
         account.closeChatWindow = function(id) {
-            var $div = $("#records-user-" + id);
+            var $div = $("#" + id);
             if($div.not(":hidden")) {
                 $div.css("display", "none");
             }
         };
         account.openChatWindow = function(id) {
-            var $div = $("#records-user-" + id);
+            var $div = $("#" + id);
             if($div.is(":hidden")) {
                 $div.css("display", "block");
             }
@@ -385,7 +366,7 @@ var Account = {
                         var data = {
                             "msg": msg
                         };
-                        account.addContent(account_to, nickname, img);
+                        account.addContent('records-user-'+account_to, nickname, img);
                         $.ajax({
                             url: url,
                             contentType: "application/json; charset=UTF-8",
@@ -426,7 +407,7 @@ var Account = {
                                 "msg": msg
                             };
                             $(this).siblings("textarea").val("");
-                            account.addContent(account_to, nickname, content);
+                            account.addContent('records-user-'+account_to, nickname, content);
                             $.ajax({
                                 url: url,
                                 contentType: "application/json; charset=UTF-8",
@@ -473,8 +454,8 @@ var Account = {
             var $dl = $("<dl></dl>").addClass("chatBox");
             var $dt = $("<dt></dt>").addClass("chatBox-head").attr("title", name).text(name).append($("<span></span>").css("margin-left", "5px").text(timestr));
             var $dd = $("<dd></dd>").addClass("charBox-msg").html(content);
-            $dl.append($dt).append($dd).appendTo($("#records-user-" + id));
-            $("#records-user-" + id).get(0).scrollTop = $("#records-user-" + id).get(0).scrollHeight;
+            $dl.append($dt).append($dd).appendTo($("#" + id));
+            $("#" + id).get(0).scrollTop = $("#" + id).get(0).scrollHeight;
         };
         account.getMsg = function() {
             if(typeof(Worker)!=="undefined") {
@@ -484,6 +465,11 @@ var Account = {
                     var method = msg["method"];
                     switch(method) {
                         case "send_group_message":
+                            var from = msg['args']['account'];
+                            var time = msg['args']['time'];
+                            var groupid = msg['args']['group_id'];
+                            var message = msg['args']['msg'];
+                            account.get_group_message(from,time,groupid,message);
                             break;
                         case "send_individual_message":
                             var from = msg['args']['account'];
@@ -554,7 +540,7 @@ var Account = {
                     img.push(msg[i]['content']);
                 }
             }
-            account.addContent(from, $("#user-" + from).find(".nickname").eq(0).text(), content, time);
+            account.addContent('records-user-'+from, $("#user-" + from).find(".nickname").eq(0).text(), content, time);
             for(var i=0; i<img.length; i++) {
                 var callback = function(name) {
                     var url = "/v1/messages/image/" + user + "/" + name;
@@ -571,6 +557,34 @@ var Account = {
                 };
                 setTimeout(callback(img[i]), 0);
             }
+        };
+        account.get_group_message = function(from,time,groupid,message){
+            var $groupList = $('#list-group-'+groupid);
+            if($groupList.length==0){
+                var $li = $("<li></li>").attr("id", "list-group-" + from)
+                    .css("display", "none").addClass("chat-friends");
+                var $p = $("<p></p>").css("display", "none").text("×");
+                var $span = $("<span></span>").text(nickname);
+                $li.append($p).append($span).appendTo($("#chat-list ul"));
+                account.closeCard($li);
+                $("<div></div>").addClass("chat-records-setting").css("display", "none")
+                    .attr("id", "records-group-" + groupid).appendTo("#chat-records");
+            }
+            var timeTmp = new Date();
+            timeTmp = new Date(Date.parse(time.replace(/[-]/g, "/")) - timeTmp.getTimezoneOffset()*60000);
+            time = timeTmp.toLocaleDateString() + " " + timeTmp.getHours() + ":" + timeTmp.getMinutes() + ":" + timeTmp.getSeconds();
+            var content = "";
+            var img = new Array();
+            for(var i=0; i<message.length; i++) {
+                if(message[i]['type'] == "text") {
+                    content += message[i]['content'];
+                }
+                else if(['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg'].indexOf(message[i]['type'])) {
+                    content += "<img src='/static/images/loading.gif' id='" + message[i]['content'].split(".", 2)[0] + "'/>";
+                    img.push(message[i]['content']);
+                }
+            }
+            account.addContent('records-group-'+groupid, from, content, time);
         };
         return account;
     }

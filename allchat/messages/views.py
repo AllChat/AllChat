@@ -157,7 +157,7 @@ class messages_view(MethodView):
         except Exception as e:
             return ("The json data can't be parsed", 403, )
         sender = request.headers['message_sender']
-        group_id = request.headers['group_id']
+        group_id = int(request.headers['group_id'])
         db_session = get_session()
         try:
             user_from = db_session.query(UserInfo).filter(UserInfo.username == sender).\
@@ -177,17 +177,19 @@ class messages_view(MethodView):
         tmp['to'] = None
         tmp['group_id'] = group_id
         tmp['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        record = ""
         for pic in para['msg']:
             if(pic['type'] == "text"):
+                record += pic['content']
                 continue
             elif(pic['type'] in ['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg']):
                 path = saver.savePicture(base64.b64decode(pic['content']), pic['type'], user_from.username)
                 pic_name = path.split('/')[-1]
                 pic['content'] = pic_name
+                record += "@$^*" + path + "@$^*"
         tmp['msg'] = para['msg']
         message['para'] = tmp
-        saver.saveGroupMsg(user_from.username, group_to['group_name'],
-                                        [tmp['time'], tmp['msg']])
+        saver.saveGroupMsg(sender, group_to.group_name,[tmp['time'], record])
         failed = []
         for user in group_to.groupmembers:
             if user.member_account == user_from.username or user.confirmed == False:
