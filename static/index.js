@@ -560,11 +560,23 @@ var Account = {
         };
         account.get_group_message = function(from,time,groupid,message){
             var $groupList = $('#list-group-'+groupid);
+            if(!($groupList.length != 0 && $groupList.hasClass("chat-focus"))
+                &&($("#group-" + groupid).children("img").filter(function(index, event) {return $(event).attr("title") == "msg-reminder";}).length == 0)) {
+                $("<img src='/static/images/msg-reminder.png'/>").css({
+                    "position": "absolute",
+                    "padding": "0",
+                    "margin": "0",
+                    "width": "8px",
+                    "height": "8px",
+                    "left": "48px",
+                    "top": "1px"
+                }).attr("title", "msg-reminder").prependTo($("#group-" + groupid));
+            }
             if($groupList.length==0){
-                var $li = $("<li></li>").attr("id", "list-group-" + from)
+                var $li = $("<li></li>").attr("id", "list-group-" + groupid)
                     .css("display", "none").addClass("chat-friends");
                 var $p = $("<p></p>").css("display", "none").text("×");
-                var $span = $("<span></span>").text(nickname);
+                var $span = $("<span></span>").text($("#group-"+groupid).children(".groupname").text());
                 $li.append($p).append($span).appendTo($("#chat-list ul"));
                 account.closeCard($li);
                 $("<div></div>").addClass("chat-records-setting").css("display", "none")
@@ -585,6 +597,22 @@ var Account = {
                 }
             }
             account.addContent('records-group-'+groupid, from, content, time);
+            for(var i=0; i<img.length; i++) {
+                var callback = function(name) {
+                    var url = "/v1/messages/image/" + user + "/" + name;
+                    $.ajax({
+                        url: url,
+                        type: "GET",
+                        dataType: "json"
+                    }).done(function (data, textStatus, jqXHR) {
+                        var src = "data:image/" + data['type'] + ";base64," + data['content'];
+                        $("#" + name.split(".", 2)[0]).attr("src", src);
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        $("#"+img[i]).attr("src", "/static/images/failed.jpg");
+                    });
+                };
+                setTimeout(callback(img[i]), 0);
+            }
         };
         return account;
     }

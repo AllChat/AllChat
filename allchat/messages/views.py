@@ -184,7 +184,7 @@ class messages_view(MethodView):
                 continue
             elif(pic['type'] in ['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg']):
                 path = saver.savePicture(base64.b64decode(pic['content']), pic['type'], user_from.username)
-                pic_name = path.split('/')[-1]
+                pic_name = path.split('\\')[-1]
                 pic['content'] = pic_name
                 record += "@$^*" + path + "@$^*"
         tmp['msg'] = para['msg']
