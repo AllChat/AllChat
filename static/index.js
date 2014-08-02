@@ -381,7 +381,29 @@ var Account = {
                         });
                     }
                     else if($receiverId.substring(0,11) == "list-group-") {
-
+                        var groupid = $receiverId.split("-")[2];
+                        var url = "/v1/messages/group";
+                        var msg = new Array();
+                        msg[0] = {
+                            "content": content,
+                            "type": image_type
+                        };
+                        var data = {
+                            "msg": msg
+                        };
+                        account.addContent($receiverId.replace("list","records"), nickname, img);
+                        $.ajax({
+                            url: url,
+                            contentType: "application/json; charset=UTF-8",
+                            type: "POST",
+                            data: $.toJSON(data),
+                            headers: {"message_sender": user, "group_id": groupid},
+                            dataType: "text"
+                        }).done(function (data, textStatus, jqXHR) {
+                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                            $("#" + $receiverId.replace("list","records")).children("dl").last().children("dt").append($("<span>发送失败</span>")
+                            .css({"color": "red", "padding": "0px 2px", "margin": "0px 0px 0px 10px", "background-color": "red"}));
+                        });
                     }
                     $("#image").val("");
                 }
@@ -422,8 +444,30 @@ var Account = {
                             });
                         }
                         else if(id.substring(0,11) == "list-group-") {
-                            var group_to = id.substr(11);
+                            var groupid = id.split("-")[2];
                             var url = "/v1/messages/group";
+                            var msg = new Array();
+                            msg[0] = {
+                                "content": content,
+                                "type": "text"
+                            };
+                            var data = {
+                                "msg": msg
+                            };
+                            $(this).siblings("textarea").val("");
+                            account.addContent(id.replace("list","records"), nickname, content);
+                            $.ajax({
+                                url: url,
+                                contentType: "application/json; charset=UTF-8",
+                                type: "POST",
+                                data: $.toJSON(data),
+                                headers: {"message_sender": user, "group_id": groupid},
+                                dataType: "text"
+                            }).done(function (data, textStatus, jqXHR) {
+                            }).fail(function (jqXHR, textStatus, errorThrown) {
+                                $("#" + id.replace("list","records")).children("dl").last().children("dt").append($("<span>发送失败</span>")
+                                .css({"color": "red", "padding": "0px 2px", "margin": "0px 0px 0px 10px", "background-color": "red"}));
+                            });
                         }
                     }
                 }
@@ -449,7 +493,7 @@ var Account = {
         account.addContent = function(id, name, content, timestr) {
             if(typeof(timestr) == "undefined") {
                 var now = new Date();
-                timestr = now.toLocaleDateString() + " " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+                timestr = now.toLocaleDateString() + " " + now.toTimeString().split(" ")[0];
             }
             var $dl = $("<dl></dl>").addClass("chatBox");
             var $dt = $("<dt></dt>").addClass("chatBox-head").attr("title", name).text(name).append($("<span></span>").css("margin-left", "5px").text(timestr));
@@ -528,7 +572,7 @@ var Account = {
             }
             var timeTmp = new Date();
             timeTmp = new Date(Date.parse(time.replace(/[-]/g, "/")) - timeTmp.getTimezoneOffset()*60000);
-            time = timeTmp.toLocaleDateString() + " " + timeTmp.getHours() + ":" + timeTmp.getMinutes() + ":" + timeTmp.getSeconds();
+            time = timeTmp.toLocaleDateString() + " " + timeTmp.toTimeString().split(" ")[0];
             var content = "";
             var img = new Array();
             for(var i=0; i<msg.length; i++) {
@@ -584,7 +628,7 @@ var Account = {
             }
             var timeTmp = new Date();
             timeTmp = new Date(Date.parse(time.replace(/[-]/g, "/")) - timeTmp.getTimezoneOffset()*60000);
-            time = timeTmp.toLocaleDateString() + " " + timeTmp.getHours() + ":" + timeTmp.getMinutes() + ":" + timeTmp.getSeconds();
+            time = timeTmp.toLocaleDateString() + " " + timeTmp.toTimeString().split(" ")[0];
             var content = "";
             var img = new Array();
             for(var i=0; i<message.length; i++) {
