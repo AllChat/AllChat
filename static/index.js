@@ -27,7 +27,7 @@ var Account = {
                 nickname = $.base64.decode($.cookie("nickname"));
                 icon = $.cookie('icon');
             }
-            $("#icon-self").attr("src", "/static/images/user" + icon + "-icon.jpg");
+            $("#icon-self").attr("src", "/static/images/head/" + icon + ".jpg");
             $("#account-self").html(user);
             $("#state-self").change(function(event) {
                 var $this = $(this);
@@ -52,7 +52,7 @@ var Account = {
         account.load_friend = function(friend) {
             var tmp = null;
             var $li = $("<li></li>").attr("id", 'user-' + friend['account']).addClass("friends");
-            var $img = $("<img/>").attr("src", "/static/images/user" + friend['icon'] +"-icon.jpg").addClass("icon");
+            var $img = $("<img/>").attr("src", "/static/images/head/" + friend['icon'] +".jpg").addClass("icon");
             var $nickname = $("<p></p>").addClass("nickname").text(friend['nickname']);
             if (friend['state'] === "online") {
                 tmp = "[在线]";

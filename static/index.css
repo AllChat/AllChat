@@ -223,14 +223,15 @@ body
     position: relative;
     list-style-type: none;
 }
-#control-list-middle-accounts-add,#control-list-middle-groups-add
+.search-add-bar
 {
     height: 80px;
     width: 291px;
     margin: 0px;
     padding: 0px;
     position: absolute;
-    bottom: -80px;
+    bottom: 0px;
+    display: none;
 }
 .add-bar
 {
@@ -341,6 +342,38 @@ body
     -moz-box-shadow: inset 0 0 10px transparent;
     -webkit-box-shadow: inset 0 0 10px transparent;
     box-shadow: inset 0 0 10px transparent;
+    position: absolute;
+}
+.setup-list
+{
+    width: 100px;
+    height: 90px;
+    padding: 0px;
+    margin: 0px;
+    position: absolute;
+    bottom:40px;
+    background-color: #e0e0e0;
+    display: none;
+}
+.setup-list-item
+{
+    width: 100px;
+    height: 30px;
+    padding: 0px;
+    margin: 0px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+}
+.setup-list-item p
+{
+    display: inline-block;
+    line-height: 20px;
+    margin: 5px;
+}
+.setup-list-item:hover
+{
+    background-color: #d0d0d0;
 }
 
 .control-list-bottom-icon
@@ -676,7 +709,7 @@ body
     margin-left: 375px;
 }
 
-#search-result-dialog
+.info-dialog
 {
     width: 400px;
     height: 300px;
@@ -692,20 +725,20 @@ body
     background-image: linear-gradient(#7b7b7b,#8b8b8b);
     z-index: 1;
 }
-#dialog-title
+.dialog-title
 {
-    width: 120px;
+    width: 160px;
     height: 40px;
     position: absolute;
     margin: 0px;
 }
-#dialog-title p
+.dialog-title p
 {
     font-size: 18px;
     color: #eee;
     margin: 10px 20px;
 }
-#result-dialog-close
+.dialog-close
 {
     width: 30px;
     height: 30px;
@@ -713,27 +746,29 @@ body
     left: 370px;
     border-radius: 0px 8px 0px 0px; 
 }
-#result-dialog-close img
+.dialog-close img
 {
     width: 30px;
     height: 30px;
     position: absolute;
 }
-#result-dialog-close:hover
+.dialog-close:hover
 {
     cursor: pointer;
     background-color: #f00000;
 }
-#result-list-box
+.dialog-content
 {
     width: 388px;
     height: 240px;
-    margin: 0px auto;
-    position: relative;
+    margin: 0px;
+    position: absolute;
     top: 40px;
+    left: 6px;
     background-color: #f0f0f0;
+    overflow-y: auto; 
 }
-#result-list-box ul
+#search-result-list ul
 {
     width: 380px;
     height: 240px;
@@ -741,16 +776,74 @@ body
     margin: 0px auto;
     list-style: none;
 }
-#result-list-box>ul>li
+#search-result-list>ul>li
 {
-    height: 30px;
+    height: 40px;
     line-height: 24px;
 }
-#result-list-box>ul>li>p
+#search-result-list>ul>li>p
 {
     position: absolute;
     text-align: center;
-    margin: 3px 0px;
+    margin: 8px 0px;
+}
+.personal-info-head
+{
+    height: 60px;
+    padding: 0px;
+    margin-top: 20px;
+}
+.personal-info-nickname,.personal-info-email
+{
+    height: 50px;
+}
+#personal-info-submit,#change-password-submit
+{
+    width: 60px;
+    height: 30px;
+    font-size: 16px;
+    text-align: center;
+    padding: 0px;
+    margin-top: 15px;
+    margin-left: 225px;
+}
+#personal-info-list p,.password-input p
+{
+    font-size: 16px;
+    display: inline-block;
+    line-height: 30px;
+    vertical-align: middle;
+    margin-left: 80px;
+    margin-right: 20px;
+}
+.password-input p
+{
+    width: 48px;
+    text-align: center;
+}
+.personal-info-head img
+{
+    width: 60px;
+    height: 60px;
+    padding: 0px;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+.personal-info-head button
+{
+    width: 60px;
+    height: 30px;
+    font-size: 16px;
+    text-align: center;
+    padding: 0px;
+    vertical-align: middle;
+    margin-left: 20px;
+}
+.dialog-content input
+{
+    width: 150px;
+    height: 24px;
+    font-size: 16px;
 }
 .search-result-username,.search-result-groupname
 {
@@ -767,19 +860,35 @@ body
     width: 60px;
     left: 160px;
 }
-.search-result-icon,.search-result-groupsize
+.search-result-groupsize
 {
     width: 40px;
     left: 220px;
 }
-#result-list-box>ul>li>button
+.search-result-icon
 {
-    width: 120px;
+    width: 35px;
+    height: 35px;
+    margin: 5px;
+    position: absolute;
+    left: 220px;
+}
+#search-result-list>ul>li>button
+{
+    width: 100px;
     height: 26px;
     position: absolute;
-    left: 260px;
-    margin: 2px 0px;
+    left: 280px;
+    margin: 7px 0px;
     padding: 0px;
     background-color: #9b9b9b;
     font-size: 18px;
+}
+.password-input
+{
+    height: 50px;
+}
+#password-head
+{
+    margin-top: 30px;
 }

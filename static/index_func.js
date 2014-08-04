@@ -1,9 +1,14 @@
 $(document).ready(function (){
     $('body').on('click','#search-icon',function(event){
     	event.stopPropagation();
-    	toggleDisplay($('#control-list-middle-accounts-add'));
-    	toggleDisplay($('#control-list-middle-groups-add'));
+    	if($('div.setup-list').css('display')=='block'){$('div.setup-list').toggle();};
+    	$('div.search-add-bar').toggle(600);
     });
+    $('body').on('click','#setup-icon',function(event){
+    	event.stopPropagation();
+    	if($('div.search-add-bar').css('display')=='block'){$('div.search-add-bar').toggle();};
+    	$('div.setup-list').toggle(600);
+    })
     $('body').on('click','#fast-add-button',function(event){
     	event.stopPropagation();
     	var username = $('#add-username').val();
@@ -20,7 +25,20 @@ $(document).ready(function (){
     $('body').on('click','#search-group-button',function(event){
     	event.stopPropagation();
     	searchGroup();
-    });});
+    });
+    $('body').on('click','#personal-info',function(event){
+    	event.stopPropagation();
+    	setupPersonalInfo();
+    });
+    $('body').on('click','#change-password',function(event){
+    	event.stopPropagation();
+    	changePassword();
+    });
+    $('body').on('click','#about-us',function(event){
+    	event.stopPropagation();
+    	showAbout();
+    });
+});
 
 function addFriendRequest(username){
 	var user = $.cookie('account');
@@ -69,31 +87,34 @@ function searchUser(){
 		}
 	}
 }
-function createResultDialog(){
-	if($('#search-result-dialog').length>0){
-		$('#result-list-box ul').empty();
-	}else{
-		var $dialog = $('<div></div>').attr('id','search-result-dialog');
-		var $title = $('<div></div>').attr('id','dialog-title').append($('<p></p>').text('搜索结果'));
-		var $closeTab = $('<div></div>').attr('id','result-dialog-close').append($('<img/>').attr('src','../static/images/icon/close.png'));
-		var $list = $('<div></div>').attr('id','result-list-box').append('<ul></ul>');
-		$dialog.append($title).append($closeTab).append($list).appendTo($('#layer'));
+function createDialog(dialogID,title){
+	if($('.info-dialog').length>0){
+		$('.info-dialog').remove();
 	}
+	var $dialog = $('<div></div>').attr('id',dialogID+'-dialog').addClass('info-dialog');
+	var $title = $('<div></div>').addClass('dialog-title').append($('<p></p>').text(title));
+	var $closeTab = $('<div></div>').addClass('dialog-close').append($('<img/>').attr('src','../static/images/icon/close.png'));
+	var $list = $('<div></div>').attr('id',dialogID+'-list').addClass('dialog-content');
+	$dialog.append($title).append($closeTab).append($list).appendTo($('#layer'));
+}
+function bindClose(divID){
+	$('#'+divID).off('click','.dialog-close');
+	$('#'+divID).on('click','.dialog-close',function(event){
+		event.stopPropagation();
+		$('#'+divID).remove();
+	});
 }
 function showSearchResult(data,type){
-	createResultDialog();
+	createDialog('search-result','搜索结果');
+	bindClose('search-result-dialog');
 	if(type=='user'){
 		values=data.accounts;
 	}else if(type=='group'){
 		values=data.groups;
 	}
+	$('#search-result-list').append('<ul></ul>');
 	$.each(values,function(index,value){
 		addItemToDialog(value,type);
-	});
-	$('body').off('click','#result-dialog-close');
-	$('body').on('click','#result-dialog-close',function(event){
-		event.stopPropagation();
-		$('#search-result-dialog').remove();
 	});
 	$('body').off('click','button.search-result-addbutton');
 	$('body').on('click','button.search-result-addbutton',function(event){
@@ -115,7 +136,7 @@ function addItemToDialog(value,type){
 		$username = $('<p></p>').attr('class','search-result-username').text(value['account']);
 		$nickname = $('<p></p>').attr('class','search-result-nickname').text(value['nickname']);
 		$state = $('<p></p>').attr('class','search-result-state').text(value['state']);
-		$icon = $('<p></p>').attr('class','search-result-icon').text(value['icon']);
+		$icon = $('<img/>').attr('class','search-result-icon').attr('src',"/static/images/head/" + value['icon'] + ".jpg");
 		$li.append($username).append($nickname).append($state).append($icon);
 		$li.append('<button class="search-result-addbutton">加为好友</button>');
 	}else if(type=='group'){
@@ -126,14 +147,7 @@ function addItemToDialog(value,type){
 		$li.append($groupname).append($groupid).append($groupowner).append($groupsize);
 		$li.append('<button class="search-result-joinbutton">申请加入</button>');
 	}
-	$('#result-list-box ul').append($li);
-}
-function toggleDisplay(div){
-	if(div.css("bottom")=="-80px"){
-		div.animate({"bottom":"0px"},600);
-	}else{
-		div.animate({"bottom":"-80px"},600);
-	}
+	$('#search-result-list ul').append($li);
 }
 function searchGroup(){
 	var keyword = $('#search-group-name').val();
@@ -195,4 +209,111 @@ function joinGroupRequest(groupid,groupowner){
 			alert(jqXHR.responseText);
 		});
 	}
+}
+function setupPersonalInfo(){
+	$('.setup-list').toggle();
+	createDialog('personal-info','个人信息');
+	bindClose('personal-info-dialog');
+	constructInfoDialog();
+	$('div.personal-info-head img').attr('src',$('#icon-self').attr('src'));
+	$('#personal-info-submit').off('click');
+	$('#personal-info-submit').on('click',function(event){
+		event.stopPropagation();
+		var icon = $('div.personal-info-head img').attr('src').split('head/')[1].split('.')[0];
+		var nickname = $('div.personal-info-nickname input').val();
+		var email = $('div.personal-info-email input').val();
+		var modifiedInfo = {'icon':icon};
+		if(nickname.length>0){modifiedInfo['nickname']=nickname};
+		if(email.length>0){modifiedInfo['email']=email};
+		$.ajax({
+			type: 'PUT',
+			url: '/v1/accounts/'+$.cookie('account')+'/',
+			contentType: 'application/json; charset:utf-8',
+			data: $.toJSON(modifiedInfo),
+			dataType: 'text',
+		}).done(function (data){
+			$.cookie('icon',icon);
+			$('#icon-self').attr('src',"/static/images/head/" + icon + ".jpg");
+			alert('个人信息修改成功');
+		}).fail(function (jqXHR){
+			alert(jqXHR.responseText);
+		});
+	});
+	$('div.personal-info-head button').off('click');
+	$('div.personal-info-head button').on('click',function(event){
+		event.stopPropagation();
+		$displayIcons = $('<div></div>').attr('id','head-options').css({"width":"290px","height":"155px","position":"absolute",
+		"top":"20px","left":"40px","border":"2px","padding":"2px","background-color":"#fff","overflow-y":"auto"});
+		for (var i=0;i<6;i++){
+			$displayIcons.append($('<img/>').attr('src',"/static/images/head/" + i + ".jpg").css({
+				"width":"60px","height":"60px","padding":"0px","margin-left":"10px","margin-top":"10px"
+			}));
+		}
+		$displayIcons.appendTo($('div.dialog-content'));
+		$('#head-options img').on('click',function(event){
+			event.stopPropagation();
+			$('div.personal-info-head img').attr('src',$(this).attr('src'));
+			$('#head-options').remove();
+			$('#head-options img').off('click');
+		});
+	});
+}
+function constructInfoDialog(){
+	$head = $('<div></div>').addClass('personal-info-head');
+	$head.append($('<p></p>').text('头像')).append('<img/>').append($('<button></button>').text('更换'));
+	$nickname = $('<div></div>').addClass('personal-info-nickname');
+	$nickname.append($('<p></p>').text('昵称')).append('<input/>');
+	$email = $('<div></div>').addClass('personal-info-email');
+	$email.append($('<p></p>').text('邮箱')).append('<input/>');
+	$submit = $('<button></button>').attr('id','personal-info-submit').text('确认');
+	$('#personal-info-list').append($head).append($nickname).append($email).append($submit);
+}
+function changePassword(){
+	$('.setup-list').toggle();
+	createDialog('change-password','修改密码');
+	bindClose('change-password-dialog');
+	constructPasswordDialog();
+	$('#change-password-submit').off('click');
+	$('#change-password-submit').on('click',function(event){
+		event.stopPropagation();
+		var oldpassword = $('#oldpassword').val();
+		var newpassword = $('#newpassword').val();
+		var newconfirm = $('#newconfirm').val();
+		if(newpassword!=newconfirm){
+			alert('两次输入的新密码不一致');
+		}else if(oldpassword.length==0 || newpassword.length==0 || newconfirm.length==0){
+			alert('请确认所有输入框不为空');
+		}else{
+			$.ajax({
+				type: 'PUT',
+				url: '/v1/accounts/'+$.cookie('account')+'/',
+				contentType: 'application/json; charset:utf-8',
+				data: $.toJSON({'new_password':newpassword,'old_password':oldpassword}),
+				dataType: 'text',
+			}).done(function (data){
+				alert('密码修改成功！');
+			}).fail(function (jqXHR){
+				alert(jqXHR.responseText);
+			});
+		}
+
+	});
+}
+function constructPasswordDialog(){
+	$oldpassword = $('<div></div>').attr('id','password-head').addClass('password-input');
+	$oldpassword.append($('<p></p>').text('原密码')).append('<input id="oldpassword" type="password"/>');
+	$newpassword = $('<div></div>').addClass('password-input');
+	$newpassword.append($('<p></p>').text('新密码')).append('<input id="newpassword" type="password"/>');
+	$newconfirm = $('<div></div>').addClass('password-input');
+	$newconfirm.append($('<p></p>').text('确认')).append('<input id="newconfirm" type="password"/>');
+	$submit = $('<button></button>').attr('id','change-password-submit').text('确认');
+	$('#change-password-list').append($oldpassword).append($newpassword).append($newconfirm).append($submit);
+}
+function showAbout(){
+	$('.setup-list').toggle();
+	createDialog('about-allchat','关于allchat');
+	bindClose('about-allchat-dialog');
+	$('#about-allchat-list').append($('<p></p>').text('Allchat 1.0').css({"margin-top":"30px","margin-left":"20px"})).append(
+		$('<p></p>').text('Author: Derake, Alex').css("margin-left","20px")).append(
+		$('<p></p>').text('Copyright© 2014-2020. All rights reserved.').css("margin-left","20px"));
 }
