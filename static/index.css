@@ -569,8 +569,41 @@ body
     padding: 0px;
     margin: 0px;
     overflow: auto;
+    position: relative;
 }
-
+.group-members
+{
+    width: 150px;
+    height: 335px;
+    padding: 0px;
+    margin: 0px;
+    position: absolute;
+    right: 0px;
+    background-color: #fff;
+}
+.group-members ul
+{
+    list-style: none;
+    width: 150px;
+    height: 335px;
+    padding: 0px;
+    margin: 0px;
+    overflow-y: auto;
+}
+.group-members li
+{
+    height: 24px;
+    margin: 0px;
+    padding: 0px;
+}
+.group-members p
+{
+    width: 50px;
+    display: inline-block;
+    overflow: hidden;
+    line-height: 24px;
+    font-size: 12px;
+}
 .chatBox
 {
     display: block;

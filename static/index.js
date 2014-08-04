@@ -142,6 +142,25 @@ var Account = {
                 }
             });
         };
+        account.get_group_member = function(groupID,div){
+            var url = "/v1/groups/";
+            $.ajax({
+                type: 'GET',
+                url: url,
+                dataType: 'json',
+                headers: {'group_id':groupID,'account':user},
+            }).done(function (data){
+                $member_list = $('<ul></ul>');
+                $.each(data,function (key,value){
+                    $('<li></li>').append($('<p></p>').text(key)).append(
+                        $('<p></p>').text(value[0])).append($('<p></p>').text(value[1])).appendTo(
+                        $member_list);
+                });
+                $member_list.appendTo(div);
+            }).fail(function (jqXHR){
+                alert(jqXHR.responseText);
+            });
+        };
         account.controlListTopSetting = function() {
             $("#control-list-top").on("click", "ul li", function(event) {
                 var $select = $(this);
@@ -228,7 +247,7 @@ var Account = {
                     account.addChatWindow(chatRecord + chatTo);
                 }
                 else {
-                    account.openChatWindow(chatRecord+chatTo);
+                    account.openChatWindow(chatRecord + chatTo);
                 }
             });
         };
@@ -300,7 +319,13 @@ var Account = {
             });
         };
         account.addChatWindow = function(id) {
-            var $div = $("<div></div>").addClass("chat-records-setting").attr("id", id).appendTo("#chat-records");
+            var $div = $("<div></div>").addClass("chat-records-setting").attr("id", id);
+            if(id.split('-')[1]=='group'){
+                $members = $("<div></div>").addClass("group-members");
+                account.get_group_member(id.split('-')[2],$members);
+                $div.append($members);
+            }
+            $div.appendTo("#chat-records");
             $div.siblings().not(":hidden").css("display", "none");
         };
         account.closeChatWindow = function(id) {
@@ -624,7 +649,8 @@ var Account = {
                 $li.append($p).append($span).appendTo($("#chat-list ul"));
                 account.closeCard($li);
                 $("<div></div>").addClass("chat-records-setting").css("display", "none")
-                    .attr("id", "records-group-" + groupid).appendTo("#chat-records");
+                    .attr("id", "records-group-" + groupid).append($("<div></div>").addClass("group-members")
+                        ).appendTo("#chat-records");
             }
             var timeTmp = new Date();
             timeTmp = new Date(Date.parse(time.replace(/[-]/g, "/")) - timeTmp.getTimezoneOffset()*60000);
