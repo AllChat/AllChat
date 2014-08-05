@@ -562,24 +562,64 @@ body
     overflow: hidden;
 }
 
-.chat-records-setting 
+.chat-records-setting,.chat-records-content
 {
     width: 550px;
     height: 335px;
     padding: 0px;
     margin: 0px;
-    overflow: auto;
+}
+.chat-records-setting
+{
     position: relative;
+    overflow: hidden;
+}
+.chat-records-content
+{
+    overflow: auto;
 }
 .group-members
 {
-    width: 150px;
+    width: 155px;
     height: 335px;
     padding: 0px;
     margin: 0px;
     position: absolute;
-    right: 0px;
+    right: -150px;
+    top: 0px;
     background-color: #fff;
+}
+.group-members-switcher
+{
+    width: 5px;
+    height: 335px;
+    padding: 0px;
+    margin: 0px;
+    position: absolute;
+    background-color: #fffbe2;
+}
+.group-members-switcher:hover
+{
+    cursor: pointer;
+    background-color: #ddd;
+}
+.triangle-left {
+    width: 0;
+    height: 0;
+    position: absolute;
+    top: 165px;
+    border-top: 8px solid transparent;
+    border-right: 5px solid #aaa;
+    border-bottom: 8px solid transparent;
+}
+.triangle-right {
+    width: 0;
+    height: 0;
+    position: absolute;
+    top: 165px;
+    border-top: 8px solid transparent;
+    border-left: 5px solid #aaa;
+    border-bottom: 8px solid transparent;
 }
 .group-members ul
 {
@@ -589,20 +629,37 @@ body
     padding: 0px;
     margin: 0px;
     overflow-y: auto;
+    position: absolute;
+    left: 10px;
 }
 .group-members li
 {
-    height: 24px;
+    height: 30px;
     margin: 0px;
+    margin-top: 5px;
     padding: 0px;
+}
+.group-members li:hover
+{
+    background-color: #ddd;
+}
+.group-members img
+{
+    width: 24px;
+    height: 24px;
+    padding: 0px;
+    margin: 3px;
 }
 .group-members p
 {
-    width: 50px;
+    width: 55px;
+    padding: 0px;
+    margin: 3px 0px 3px 5px;
     display: inline-block;
     overflow: hidden;
     line-height: 24px;
-    font-size: 12px;
+    font-size: 14px;
+    text-align: center;
 }
 .chatBox
 {

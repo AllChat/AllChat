@@ -40,8 +40,13 @@ class groups_view(MethodView):
                     return ("You are not in this group, access denied.", 405)
                 member_list = dict()
                 for member in group.groupmembers:
-                    member_info = [ member.member_logstate, member.role]
-                    member_list[member.member_account] = member_info
+                    if member.confirmed:
+                        tmp = dict()
+                        tmp['nickname'] = member.nickname
+                        tmp['state'] = member.member_logstate
+                        tmp['icon'] = member.icon
+                        tmp['role'] = member.role
+                        member_list[member.member_account] = tmp
                 return (jsonify(member_list), 201)
         else:
             return ("Missing critical information.", 403)
@@ -75,7 +80,7 @@ class groups_view(MethodView):
                 # add users in userlist to group if userlist is not empty
                 # update both GroupMember and GroupInfo 
                 members = []
-                member = GroupMember(group_id, group_name, account, db_user.state, "owner", True)
+                member = GroupMember(group_id, group_name, account, db_user.state, db_user.nickname, db_user.icon, "owner", True)
                 members.append(member)
                 illegal_users = set()
                 if userlist:
@@ -86,7 +91,7 @@ class groups_view(MethodView):
                             illegal_users.add(user)
                         else:
                             if user != account:
-                                member = GroupMember(group_id, group_name, user, db_user.state)
+                                member = GroupMember(group_id, group_name, user, db_user.state, db_user.nickname, db_user.icon)
                                 members.append(member)
                 group = GroupInfo(group_id, account, group_name,len(members))
                 db_session.begin()
@@ -211,7 +216,7 @@ class groups_view(MethodView):
                                     db_user = db_session.query(UserInfo).filter_by(username = user).one()
                                 except Exception, e:
                                     return ("The user "+user+" is not registered yet.", 404)
-                                new_members.append(GroupMember(groupID, db_group.group_name, user, db_user.state,"member",True))
+                                new_members.append(GroupMember(groupID, db_group.group_name, user, db_user.state,db_user.nickname, db_user.icon,"member",True))
                             else:
                                 old_members.append(user)
                         # for users passed validation, add to GroupMember and update group size in GroupInfo
@@ -327,7 +332,7 @@ class groups_view(MethodView):
                                 return ("Applying failed due to system error", 500)
                             RPC.release_producer(account)
                             RPC.release_connection(cnn)
-                            member = GroupMember(groupID,db_group.group_name,account,db_user.state)
+                            member = GroupMember(groupID,db_group.group_name,account,db_user.state,db_user.nickname, db_user.icon)
                             db_group.groupmembers.append(member)
                             db_session.begin()
                             try:

@@ -145,18 +145,32 @@ var Account = {
         account.get_group_member = function(groupID,div){
             var url = "/v1/groups/";
             $.ajax({
-                type: 'GET',
+                type: "GET",
                 url: url,
-                dataType: 'json',
-                headers: {'group_id':groupID,'account':user},
+                dataType: "json",
+                headers: {"group_id":groupID,"account":user},
             }).done(function (data){
-                $member_list = $('<ul></ul>');
+                $switcher = $("<div></div>").addClass("group-members-switcher");
+                $switcher.append($("<div></div>").addClass("triangle-left"));
+                $member_list = $("<ul></ul>");
                 $.each(data,function (key,value){
-                    $('<li></li>').append($('<p></p>').text(key)).append(
-                        $('<p></p>').text(value[0])).append($('<p></p>').text(value[1])).appendTo(
-                        $member_list);
+                    if(value["state"]=="online"){value["state"]="[在线]"}else{value["state"]="[离线]"}
+                    $("<li></li>").attr("title",key)
+                    .append($("<img/>").attr("src","/static/images/head/" + value['icon'] +".jpg"))
+                    .append($("<p></p>").text(value["nickname"])).append($("<p></p>").text(value["state"]))
+                    .appendTo($member_list);
                 });
-                $member_list.appendTo(div);
+                div.append($switcher).append($member_list);
+                $switcher.on("click",function(event){
+                    event.stopPropagation();
+                    if($(this).parent().css("right")=="-150px"){
+                        $(this).parent().css("right","0px");
+                        $(this).children(0).attr("class","triangle-right");
+                    }else{
+                        $(this).parent().css("right","-150px");
+                        $(this).children(0).attr("class","triangle-left");
+                    }
+                });
             }).fail(function (jqXHR){
                 alert(jqXHR.responseText);
             });
@@ -321,9 +335,11 @@ var Account = {
         account.addChatWindow = function(id) {
             var $div = $("<div></div>").addClass("chat-records-setting").attr("id", id);
             if(id.split('-')[1]=='group'){
+                $content = $("<div></div>").attr("id",id.replace("records","content")).addClass(
+                    "chat-records-content");
                 $members = $("<div></div>").addClass("group-members");
                 account.get_group_member(id.split('-')[2],$members);
-                $div.append($members);
+                $div.append($content).append($members);
             }
             $div.appendTo("#chat-records");
             $div.siblings().not(":hidden").css("display", "none");
@@ -416,7 +432,7 @@ var Account = {
                         var data = {
                             "msg": msg
                         };
-                        account.addContent($receiverId.replace("list","records"), nickname, img);
+                        account.addContent($receiverId.replace("list","content"), nickname, img);
                         $.ajax({
                             url: url,
                             contentType: "application/json; charset=UTF-8",
@@ -480,7 +496,7 @@ var Account = {
                                 "msg": msg
                             };
                             $(this).siblings("textarea").val("");
-                            account.addContent(id.replace("list","records"), nickname, content);
+                            account.addContent(id.replace("list","content"), nickname, content);
                             $.ajax({
                                 url: url,
                                 contentType: "application/json; charset=UTF-8",
@@ -648,9 +664,8 @@ var Account = {
                 var $span = $("<span></span>").text($("#group-"+groupid).children(".groupname").text());
                 $li.append($p).append($span).appendTo($("#chat-list ul"));
                 account.closeCard($li);
-                $("<div></div>").addClass("chat-records-setting").css("display", "none")
-                    .attr("id", "records-group-" + groupid).append($("<div></div>").addClass("group-members")
-                        ).appendTo("#chat-records");
+                account.addChatWindow("records-group-" + groupid);
+                $("#records-group-"+groupid).css("display","none");
             }
             var timeTmp = new Date();
             timeTmp = new Date(Date.parse(time.replace(/[-]/g, "/")) - timeTmp.getTimezoneOffset()*60000);
@@ -666,7 +681,7 @@ var Account = {
                     img.push(message[i]['content']);
                 }
             }
-            account.addContent('records-group-'+groupid, from, content, time);
+            account.addContent('content-group-'+groupid, from, content, time);
             for(var i=0; i<img.length; i++) {
                 var callback = function(name) {
                     var url = "/v1/messages/image/" + user + "/" + name;
