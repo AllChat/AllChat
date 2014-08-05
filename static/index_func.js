@@ -38,6 +38,10 @@ $(document).ready(function (){
     	event.stopPropagation();
     	showAbout();
     });
+    $('body').on('click','#group-manage',function(event){
+    	event.stopPropagation();
+    	manageGroups();
+    });
 });
 
 function addFriendRequest(username){
@@ -96,17 +100,17 @@ function createDialog(dialogID,title){
 	var $closeTab = $('<div></div>').addClass('dialog-close').append($('<img/>').attr('src','../static/images/icon/close.png'));
 	var $list = $('<div></div>').attr('id',dialogID+'-list').addClass('dialog-content');
 	$dialog.append($title).append($closeTab).append($list).appendTo($('#layer'));
+	bindClose($dialog);
 }
-function bindClose(divID){
-	$('#'+divID).off('click','.dialog-close');
-	$('#'+divID).on('click','.dialog-close',function(event){
+function bindClose($div){
+	$div.off('click','.dialog-close');
+	$div.on('click','.dialog-close',function(event){
 		event.stopPropagation();
-		$('#'+divID).remove();
+		$div.remove();
 	});
 }
 function showSearchResult(data,type){
 	createDialog('search-result','搜索结果');
-	bindClose('search-result-dialog');
 	if(type=='user'){
 		values=data.accounts;
 	}else if(type=='group'){
@@ -213,7 +217,6 @@ function joinGroupRequest(groupid,groupowner){
 function setupPersonalInfo(){
 	$('.setup-list').toggle();
 	createDialog('personal-info','个人信息');
-	bindClose('personal-info-dialog');
 	constructInfoDialog();
 	$('div.personal-info-head img').attr('src',$('#icon-self').attr('src'));
 	$('#personal-info-submit').off('click');
@@ -271,7 +274,6 @@ function constructInfoDialog(){
 function changePassword(){
 	$('.setup-list').toggle();
 	createDialog('change-password','修改密码');
-	bindClose('change-password-dialog');
 	constructPasswordDialog();
 	$('#change-password-submit').off('click');
 	$('#change-password-submit').on('click',function(event){
@@ -312,8 +314,14 @@ function constructPasswordDialog(){
 function showAbout(){
 	$('.setup-list').toggle();
 	createDialog('about-allchat','关于allchat');
-	bindClose('about-allchat-dialog');
 	$('#about-allchat-list').append($('<p></p>').text('Allchat 1.0').css({"margin-top":"30px","margin-left":"20px"})).append(
 		$('<p></p>').text('Author: Derake, Alex').css("margin-left","20px")).append(
 		$('<p></p>').text('Copyright© 2014-2020. All rights reserved.').css("margin-left","20px"));
+}
+function manageGroups(){
+	createDialog('manage-group','我加入的群');
+	constructGroupDialog();
+}
+function constructGroupDialog(){
+	
 }
