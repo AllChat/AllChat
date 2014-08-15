@@ -28,7 +28,7 @@ class groups_view(MethodView):
                     return ("DataBase Failed querying groups info", 503 )
                 group_list = dict()
                 for group in groups:
-                    group_list[group.group_id] = group.group_name
+                    group_list[group.group_id] = dict([("name",group.group_name),("role",group.role)])
                 return (jsonify(group_list), 201)
             # return the member information of the specified group, check if the user is member or not
             else:

@@ -100,13 +100,12 @@ function createDialog(dialogID,title){
 	var $closeTab = $('<div></div>').addClass('dialog-close').append($('<img/>').attr('src','../static/images/icon/close.png'));
 	var $list = $('<div></div>').attr('id',dialogID+'-list').addClass('dialog-content');
 	$dialog.append($title).append($closeTab).append($list).appendTo($('#layer'));
-	bindClose($dialog);
+	bindClose($closeTab);
 }
 function bindClose($div){
-	$div.off('click','.dialog-close');
-	$div.on('click','.dialog-close',function(event){
+	$div.on('click',function(event){
 		event.stopPropagation();
-		$div.remove();
+		$div.parent().remove();
 	});
 }
 function showSearchResult(data,type){
@@ -137,17 +136,17 @@ function showSearchResult(data,type){
 function addItemToDialog(value,type){
 	var $li = $('<li></li>');
 	if(type=='user'){
-		$username = $('<p></p>').attr('class','search-result-username').text(value['account']);
-		$nickname = $('<p></p>').attr('class','search-result-nickname').text(value['nickname']);
-		$state = $('<p></p>').attr('class','search-result-state').text(value['state']);
-		$icon = $('<img/>').attr('class','search-result-icon').attr('src',"/static/images/head/" + value['icon'] + ".jpg");
+		$username = $('<p></p>').addClass('search-result-username').text(value['account']);
+		$nickname = $('<p></p>').addClass('search-result-nickname').text(value['nickname']);
+		$state = $('<p></p>').addClass('search-result-state').text(value['state']);
+		$icon = $('<img/>').addClass('search-result-icon').attr('src',"/static/images/head/"+value['icon']+".jpg");
 		$li.append($username).append($nickname).append($state).append($icon);
 		$li.append('<button class="search-result-addbutton">加为好友</button>');
 	}else if(type=='group'){
-		$groupname = $('<p></p>').attr('class','search-result-groupname').text(value['group_name']);
-		$groupid = $('<p></p>').attr('class','search-result-groupid').text(value['group_id']);
-		$groupowner = $('<p></p>').attr('class','search-result-groupowner').text(value['group_owner']);
-		$groupsize = $('<p></p>').attr('class','search-result-groupsize').text(value['group_size']);
+		$groupname = $('<p></p>').addClass('search-result-groupname').text(value['group_name']);
+		$groupid = $('<p></p>').addClass('search-result-groupid').text(value['group_id']);
+		$groupowner = $('<p></p>').addClass('search-result-groupowner').text(value['group_owner']);
+		$groupsize = $('<p></p>').addClass('search-result-groupsize').text(value['group_size']);
 		$li.append($groupname).append($groupid).append($groupowner).append($groupsize);
 		$li.append('<button class="search-result-joinbutton">申请加入</button>');
 	}
@@ -323,5 +322,33 @@ function manageGroups(){
 	constructGroupDialog();
 }
 function constructGroupDialog(){
-	
+	var url = "/v1/groups/";
+	var user = $.cookie('account');
+    $.ajax({
+        type: 'GET',
+        url: url,
+        dataType: 'json',
+        headers: {'group_id':0,'account':user},
+        async: false,
+    }).done(function (data,textStatus,jqXHR){
+    	$groupList = $('<ul></ul>');
+        $.each(data,function (key,value){
+            $li = $('<li></li>');
+            $groupname = $('<p></p>').addClass('search-result-groupname').text(value['name']);
+			$groupid = $('<p></p>').addClass('search-result-groupid').text(key);
+			if(value['role']=='owner'){
+				$button = $('<button>管理该群</button>').addClass('manage-group-button');
+			}else{
+				$button = $('<button>退出该群</button>').addClass('quit-group-button');
+			}
+			$li.append($groupname).append($groupid).append($button).appendTo($groupList);
+        });
+        $('#manage-group-list').append($groupList);
+    }).fail(function (jqXHR){
+        if(jqXHR.status == 503){
+            alert("数据库故障,请重新登陆");
+        }else if(jqXHR.status == 404){
+            alert("用户名有误,请重新登陆");
+        }
+    });
 }

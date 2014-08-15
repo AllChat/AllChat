@@ -132,7 +132,7 @@ var Account = {
             }).done(function (data,textStatus,jqXHR){
                 $("#control-list-middle-groups ul").empty();
                 $.each(data,function (key,value){
-                    account.load_group(key,value);
+                    account.load_group(key,value["name"]);
                 });
             }).fail(function (jqXHR){
                 if(jqXHR.status == 503){
@@ -164,10 +164,10 @@ var Account = {
                 $switcher.on("click",function(event){
                     event.stopPropagation();
                     if($(this).parent().css("right")=="-150px"){
-                        $(this).parent().css("right","0px");
+                        $(this).parent().animate({right:"0px"},500);
                         $(this).children(0).attr("class","triangle-right");
                     }else{
-                        $(this).parent().css("right","-150px");
+                        $(this).parent().animate({right:"-150px"},500);
                         $(this).children(0).attr("class","triangle-left");
                     }
                 });

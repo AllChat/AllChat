@@ -858,7 +858,13 @@ body
     background-color: #f0f0f0;
     overflow-y: auto; 
 }
-#search-result-list ul
+.dialog-content input
+{
+    width: 150px;
+    height: 24px;
+    font-size: 16px;
+}
+#search-result-list ul,#manage-group-list ul
 {
     width: 380px;
     height: 240px;
@@ -866,16 +872,27 @@ body
     margin: 0px auto;
     list-style: none;
 }
-#search-result-list>ul>li
+#search-result-list>ul>li,#manage-group-list>ul>li
 {
     height: 40px;
     line-height: 24px;
 }
-#search-result-list>ul>li>p
+#search-result-list>ul>li>p,#manage-group-list>ul>li>p 
 {
     position: absolute;
     text-align: center;
     margin: 8px 0px;
+}
+#search-result-list>ul>li>button,#manage-group-list>ul>li>button
+{
+    width: 100px;
+    height: 26px;
+    position: absolute;
+    left: 280px;
+    margin: 7px 0px;
+    padding: 0px;
+    background-color: #9b9b9b;
+    font-size: 18px;
 }
 .personal-info-head
 {
@@ -929,12 +946,6 @@ body
     vertical-align: middle;
     margin-left: 20px;
 }
-.dialog-content input
-{
-    width: 150px;
-    height: 24px;
-    font-size: 16px;
-}
 .search-result-username,.search-result-groupname
 {
     width: 80px;
@@ -962,17 +973,6 @@ body
     margin: 5px;
     position: absolute;
     left: 220px;
-}
-#search-result-list>ul>li>button
-{
-    width: 100px;
-    height: 26px;
-    position: absolute;
-    left: 280px;
-    margin: 7px 0px;
-    padding: 0px;
-    background-color: #9b9b9b;
-    font-size: 18px;
 }
 .password-input
 {
