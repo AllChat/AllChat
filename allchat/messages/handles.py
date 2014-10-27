@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import json
 import Queue
-from allchat.database.sql import get_session
-from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
-from sqlalchemy import and_
 
 
 class base(object):

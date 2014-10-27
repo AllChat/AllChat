@@ -5,7 +5,8 @@ from flask import jsonify
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, FriendList, GroupInfo, GroupMember
 from allchat.amqp.Impl_kombu import send_message, receive_message
-from sqlalchemy import and_, or_
+# from sqlalchemy import and_, or_
+from allchat import db
 import time, base64, os
 from allchat.filestore import saver
 from allchat.login import views
@@ -27,7 +28,7 @@ class messages_view(MethodView):
         if type == 'text':
             db_session = get_session()
             try:
-                account = db_session.query(UserInfo).filter(and_(UserInfo.deleted == False,
+                account = db_session.query(UserInfo).filter(db.and_(UserInfo.deleted == False,
                                 UserInfo.state != 'offline', UserInfo.username == user)).one()
             except Exception,e:
                 return ("Account {0} doesn't exist or logout now".format(user), 404)
@@ -43,7 +44,7 @@ class messages_view(MethodView):
             user = user
             db_session = get_session()
             try:
-                account = db_session.query(UserInfo).filter(and_(UserInfo.deleted == False,
+                account = db_session.query(UserInfo).filter(db.and_(UserInfo.deleted == False,
                                 UserInfo.state != 'offline', UserInfo.username == user)).one()
             except Exception,e:
                 return ("Account {0} doesn't exist or logout now".format(user), 404)
@@ -100,9 +101,9 @@ class messages_view(MethodView):
         users = []
         db_session = get_session()
         users.extend(db_session.query(UserInfo).join(FriendList).filter(UserInfo.username == sender)
-                     .filter(and_(UserInfo.state != "offline", UserInfo.deleted == False)).all())
+                     .filter(db.and_(UserInfo.state != "offline", UserInfo.deleted == False)).all())
         users.extend(db_session.query(UserInfo).join(FriendList)
-                    .filter(and_(UserInfo.username == receiver, UserInfo.deleted == False)).all())
+                    .filter(db.and_(UserInfo.username == receiver, UserInfo.deleted == False)).all())
         if len(users) != 2:
             return ('Message send failed due to account not exist or offline', 403)
         user_from = None
@@ -161,7 +162,7 @@ class messages_view(MethodView):
         db_session = get_session()
         try:
             user_from = db_session.query(UserInfo).filter(UserInfo.username == sender).\
-                                filter(and_(UserInfo.state != "offline",
+                                filter(db.and_(UserInfo.state != "offline",
                                 UserInfo.deleted == False)).one()
         except Exception,e:
             return ('Message send failed due to the sender not exist or offline', 403)

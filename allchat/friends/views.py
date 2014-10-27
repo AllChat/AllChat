@@ -3,7 +3,8 @@ from flask.views import MethodView
 from flask import request, make_response, g, session
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
-from sqlalchemy import and_
+# from sqlalchemy import and_
+from allchat import db
 from allchat.amqp.Impl_kombu import RPC, cast, send_message
 from flask import json, jsonify
 import datetime
@@ -48,20 +49,20 @@ class friends_view(MethodView):
                 return ("Can't add yourself as a friend", 403)
             db_session = get_session()
             try:
-                req_user = db_session.query(UserInfo).with_lockmode('read').filter(and_(UserInfo.username == name,
+                req_user = db_session.query(UserInfo).with_lockmode('read').filter(db.and_(UserInfo.username == name,
                                     UserInfo.deleted == False, UserInfo.state != 'offline')).one()
             except Exception, e:
                 return ("The account {account} is not exist or offline".format(account = name), 404)
             else:
                 try:
                     resp_user = db_session.query(UserInfo).with_lockmode('read').filter(
-                                    and_(UserInfo.username == para['account'],UserInfo.deleted == False)).one()
+                                    db.and_(UserInfo.username == para['account'],UserInfo.deleted == False)).one()
                 except Exception,e:
                     return ("The user {account} being added doesn't exist".format(account = para['account']), 404)
                 else:
                     try:
                         friend_relation = db_session.query(FriendList).with_lockmode('read').filter(
-                            and_(FriendList.username == para['account'],FriendList.index == req_user.id)).one()
+                            db.and_(FriendList.username == para['account'],FriendList.index == req_user.id)).one()
                     except:
                         message = dict()
                         message['method'] = "add_friend_req"
@@ -114,13 +115,13 @@ class friends_view(MethodView):
             db_session = get_session()
             db_session.begin()
             try:
-                req_id = db_session.query(UserInfo.id).filter(and_(UserInfo.username == name,
+                req_id = db_session.query(UserInfo.id).filter(db.and_(UserInfo.username == name,
                                     UserInfo.deleted == False)).first()
                 if req_id is None:
                     db_session.rollback()
                     return ('Please create the user {name}'.format(name = name), 403)
 
-                friend = db_session.query(FriendList).with_lockmode('update').filter(and_(FriendList.index == req_id[0],
+                friend = db_session.query(FriendList).with_lockmode('update').filter(db.and_(FriendList.index == req_id[0],
                                     FriendList.username == para['account'])).first()
                 if friend is not None:
                     db_session.delete(friend)
@@ -132,7 +133,7 @@ class friends_view(MethodView):
                 db_session.begin()
                 try:
                     resp_user = db_session.query(UserInfo).join(FriendList).with_lockmode('update').\
-                                filter(and_(UserInfo.username == para['account'], FriendList.username == name)).first()
+                                filter(db.and_(UserInfo.username == para['account'], FriendList.username == name)).first()
                     if (resp_user is not None) and len(resp_user.friends) != 0:
                         db_session.delete(resp_user.friends[0])
                     db_session.commit()
@@ -158,7 +159,7 @@ class friends_view(MethodView):
             db_session = get_session()
             try:
                 req_user = db_session.query(UserInfo).with_lockmode('read').filter(
-                                and_(UserInfo.username == name, UserInfo.deleted == False,
+                                db.and_(UserInfo.username == name, UserInfo.deleted == False,
                                      UserInfo.state != 'offline')).one()
             except Exception,e:
                 return ("The account {account} is not exist or offline".format(account = name), 404)
@@ -201,7 +202,7 @@ class friends_view(MethodView):
                                     return ret
                 try:
                     resp_user = db_session.query(UserInfo).join(FriendList).with_lockmode('read').filter(
-                                            and_(UserInfo.username == para['account'],UserInfo.deleted == False,
+                                            db.and_(UserInfo.username == para['account'],UserInfo.deleted == False,
                                                 FriendList.username == name, FriendList.confirmed == False)).one()
                 except Exception,e:
                     return ("Can't invoke the API before someone request to add you as a friend", 403)

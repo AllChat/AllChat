@@ -1,20 +1,22 @@
 from flask import Flask, render_template, url_for, redirect, session, request
+from flask.ext.sqlalchemy import SQLAlchemy
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config.from_pyfile('../conf/allchat.cfg', silent = True)
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+db = SQLAlchemy(app, session_options={'autoflush':False, 'expire_on_commit':False, \
+                                      'autocommit':True})
 
 
-from allchat.database.sql import get_session
+
+# from allchat.database.sql import get_session
 from allchat.database import init_db
 from allchat import messages
 from allchat.amqp import init_rpc
 from allchat import accounts
-#from allchat import database
 from allchat import filestore
 from allchat import friends
 from allchat import groups
-#from allchat import heatbeat
 from allchat import login
 from allchat import records
 from allchat import versions
@@ -33,11 +35,11 @@ def init():
     init_db()
     init_rpc()
     
-@app.teardown_request
-def shutdown_session(exception=None):
-    db_session = get_session()
-    if db_session is not None:
-        db_session.remove()
+# @app.teardown_request
+# def shutdown_session(exception=None):
+#     db_session = get_session()
+#     if db_session is not None:
+#         db_session.remove()
 
 @app.route('/', methods = ['GET'])
 @app.route('/index.html', methods = ['GET'])

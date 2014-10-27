@@ -1,14 +1,15 @@
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Table, Column, Integer, String, Enum, MetaData, ForeignKey, Unicode, Boolean, DateTime
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy import ForeignKey
-from sqlalchemy import func
+# from sqlalchemy.ext.declarative import declarative_base
+# from sqlalchemy import Table, Column, Integer, String, Enum, MetaData, ForeignKey, Unicode, Boolean, DateTime
+# from sqlalchemy.orm import relationship, backref
+# from sqlalchemy import ForeignKey
+# from sqlalchemy import func
 import datetime
 from allchat import app
+from allchat import db
 
-Base = declarative_base()
+# Base = declarative_base()
 
-class UserInfo(Base):
+class UserInfo(db.Model):
     __tablename__ = "userinfo"
     __table_args__ = {
         'mysql_engine': 'InnoDB',
@@ -16,24 +17,25 @@ class UserInfo(Base):
         'mysql_collate': 'utf8_bin'
     }
     
-    id = Column(Integer, primary_key = True)
-    username = Column(String(50), index = True, unique = True, nullable = False)
-    nickname = Column(Unicode(50))
-    password = Column(String(50), nullable = False)
-    email = Column(String(100), nullable = False)
-    state = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
-    last_state = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False, default="offline")
-    method = Column(Enum('web', 'mobile', 'desktop', name = 'method'))
-    getunreadmsg = Column(Boolean, nullable = False, default = False)
-    login = Column(DateTime(timezone = True))
-    created = Column(DateTime(timezone = True), nullable = False)
-    updated = Column(DateTime(timezone = True), nullable = False)
-    deleted = Column(Boolean, nullable = False, default = False)
-    ip = Column(String(15), nullable = False, default = "0.0.0.0")
-    port = Column(Integer, nullable = False, default = 0)
-    icon = Column(Integer, nullable = False, default = 0)
+    id = db.Column(db.Integer, primary_key = True)
+    username = db.Column(db.String(50), index = True, unique = True, nullable = False)
+    nickname = db.Column(db.Unicode(50))
+    password = db.Column(db.String(50), nullable = False)
+    email = db.Column(db.String(100), nullable = False)
+    state = db.Column(db.Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
+    last_state = db.Column(db.Enum('online', 'invisible', 'offline', name = 'state'), nullable = False, default="offline")
+    method = db.Column(db.Enum('web', 'mobile', 'desktop', name = 'method'))
+    getunreadmsg = db.Column(db.Boolean, nullable = False, default = False)
+    login = db.Column(db.DateTime(timezone = True))
+    created = db.Column(db.DateTime(timezone = True), nullable = False)
+    updated = db.Column(db.DateTime(timezone = True), nullable = False)
+    deleted = db.Column(db.Boolean, nullable = False, default = False)
+    ip = db.Column(db.String(15), nullable = False, default = "0.0.0.0")
+    port = db.Column(db.Integer, nullable = False, default = 0)
+    icon = db.Column(db.Integer, nullable = False, default = 0)
 
-    friends = relationship('FriendList', cascade="all, delete-orphan", single_parent = True, passive_deletes=True, backref=backref('user', order_by=id))
+    friends = db.relationship('FriendList', cascade="all, delete-orphan", single_parent = True, passive_deletes=True, \
+                              backref=db.backref('user', order_by=id), lazy="dynamic")
     
     def __init__(self, username, password, email, nickname = None, state = None, method = None, 
                 getunreadmsg = False, login = None, created = None, updated = None, deleted = False, 
@@ -56,20 +58,20 @@ class UserInfo(Base):
         self.port = app.config["CLIENT_PORT"] if not port else port
         self.icon = int(icon) if (type(icon) == int) and (int(icon) >= 0) else 0
         
-class FriendList(Base):
+class FriendList(db.Model):
     __tablename__ = "friendlist"
     __table_args__ = {
         'mysql_engine': 'InnoDB',
         'mysql_charset': 'utf8',
         'mysql_collate': 'utf8_bin'
     }
-    id = Column(Integer, primary_key = True)
-    username = Column(String(50), index = True, nullable = False)
-    nickname = Column(Unicode(50))
-    state = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
-    icon = Column(Integer, nullable = False, default = 0)
-    confirmed = Column(Boolean, nullable = False, default = False)
-    index = Column(Integer, ForeignKey('userinfo.id', onupdate="CASCADE", ondelete='CASCADE'), nullable = False)
+    id = db.Column(db.Integer, primary_key = True)
+    username = db.Column(db.String(50), index = True, nullable = False)
+    nickname = db.Column(db.Unicode(50))
+    state = db.Column(db.Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
+    icon = db.Column(db.Integer, nullable = False, default = 0)
+    confirmed = db.Column(db.Boolean, nullable = False, default = False)
+    index = db.Column(db.Integer, db.ForeignKey('userinfo.id', onupdate="CASCADE", ondelete='CASCADE'), nullable = False)
     
     def __init__(self, username, nickname, state = None, confirmed = False, icon = None):
         self.username = username
@@ -81,23 +83,24 @@ class FriendList(Base):
         self.icon = int(icon) if (type(icon) == int) and (int(icon) >= 0) else 0
         self.confirmed = confirmed
 
-class GroupInfo(Base):
+class GroupInfo(db.Model):
     __tablename__ = "groupinfo"
     __table_args__ = {
         'mysql_engine': 'InnoDB',
         'mysql_charset': 'utf8',
         'mysql_collate': 'utf8_bin'
     }
-    id = Column(Integer, primary_key = True)
-    group_id = Column(Integer, nullable = False, index = True, unique = True)
-    group_name = Column(Unicode(50))
-    owner = Column(String(50), nullable = False)
-    group_size = Column(Integer, nullable = False)
-    group_volume = Column(Integer, nullable = False)
-    created = Column(DateTime(timezone = True), nullable = False)
-    updated = Column(DateTime(timezone = True), nullable = False)
+    id = db.Column(db.Integer, primary_key = True)
+    group_id = db.Column(db.Integer, nullable = False, index = True, unique = True)
+    group_name = db.Column(db.Unicode(50))
+    owner = db.Column(db.String(50), nullable = False)
+    group_size = db.Column(db.Integer, nullable = False)
+    group_volume = db.Column(db.Integer, nullable = False)
+    created = db.Column(db.DateTime(timezone = True), nullable = False)
+    updated = db.Column(db.DateTime(timezone = True), nullable = False)
 
-    groupmembers = relationship('GroupMember', cascade="all, delete-orphan", single_parent = True, passive_deletes=True, backref=backref('group', order_by=id))
+    groupmembers = db.relationship('GroupMember', cascade="all, delete-orphan", single_parent = True, passive_deletes=True, \
+                                   backref=db.backref('group', order_by=id), lazy="dynamic")
     
     def __init__(self, group_id, owner, group_name = None, group_size = 1, group_volume = 100, created = None, updated = None):
         self.group_id = group_id
@@ -108,23 +111,23 @@ class GroupInfo(Base):
         self.created = datetime.datetime.utcnow() if not created else created
         self.updated = self.created if not updated else updated
 
-class GroupMember(Base):
+class GroupMember(db.Model):
     __tablename__ = "groupmember"
     __table_args__ = {
         'mysql_engine': 'InnoDB',
         'mysql_charset': 'utf8',
         'mysql_collate': 'utf8_bin'
     }
-    id = Column(Integer, primary_key = True)
-    group_id = Column(Integer, nullable = False)
-    group_name = Column(Unicode(50))
-    member_account = Column(String(50), index = True, nullable = False)
-    nickname = Column(Unicode(50))
-    icon = Column(Integer, nullable = False, default = 0)
-    role = Column(Enum('owner', 'manager', 'member', name = 'role'), nullable = False)
-    member_logstate = Column(Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
-    confirmed = Column(Boolean, nullable = False, default = False)
-    index = Column(Integer, ForeignKey('groupinfo.id', onupdate="CASCADE", ondelete='CASCADE'), nullable = False)
+    id = db.Column(db.Integer, primary_key = True)
+    group_id = db.Column(db.Integer, nullable = False)
+    group_name = db.Column(db.Unicode(50))
+    member_account = db.Column(db.String(50), index = True, nullable = False)
+    nickname = db.Column(db.Unicode(50))
+    icon = db.Column(db.Integer, nullable = False, default = 0)
+    role = db.Column(db.Enum('owner', 'manager', 'member', name = 'role'), nullable = False)
+    member_logstate = db.Column(db.Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
+    confirmed = db.Column(db.Boolean, nullable = False, default = False)
+    index = db.Column(db.Integer, db.ForeignKey('groupinfo.id', onupdate="CASCADE", ondelete='CASCADE'), nullable = False)
 
     def __init__(self, group_id, group_name, member_account, member_logstate, nickname, icon, role = "member", confirmed = False):
         self.group_id = group_id

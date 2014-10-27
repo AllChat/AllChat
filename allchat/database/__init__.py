@@ -1,11 +1,11 @@
-from allchat import app
-from allchat.database.sql import get_session
+from allchat import app,db
+# from allchat.database.sql import get_session
 
 def init_db():
     if app.config['DATABASE'].upper() == 'MYSQL':
         import MySQLdb
-        origin_url = app.config['DATABASE_URL']
-        url = app.config['DATABASE_URL']
+        origin_url = app.config['SQLALCHEMY_DATABASE_URI']
+        url = app.config['SQLALCHEMY_DATABASE_URI']
         if url.startswith("mysql://"):
             url = url[8:]
         else:
@@ -35,7 +35,11 @@ def init_db():
         cursor = conn.cursor()
         cursor.execute("create database if not exists %s" % (db_name,))
         conn.close()
-        return get_session(origin_url)
+        try:
+            db.create_all()
+        except Exception as e:
+            raise e
+        return
     elif app.config['DATABASE'].upper() == 'SQLITE':
         pass
     else:

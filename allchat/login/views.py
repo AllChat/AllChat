@@ -2,7 +2,8 @@ from flask.views import MethodView
 from flask import request, make_response, g, session
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
-from sqlalchemy import and_
+# from sqlalchemy import and_
+from allchat import db
 import time, string, base64, threading
 from allchat.amqp.Impl_kombu import send_message
 
@@ -23,7 +24,7 @@ class login_view(MethodView):
                     def callback(name):
                         db_session = get_session()
                         try:
-                            db_user = db_session.query(UserInfo).filter(and_(UserInfo.username == name, UserInfo.state != "offline")).one()
+                            db_user = db_session.query(UserInfo).filter(db.and_(UserInfo.username == name, UserInfo.state != "offline")).one()
                         except Exception, e:
                             return None
                         db_session.begin()
@@ -119,7 +120,7 @@ def friendlist_update_status(sender, receiver, state):
 def group_update_status(sender, group_id, state):
     db_session = get_session()
     try:
-        group = db_session.query(GroupInfo).join(GroupMember).filter(and_(GroupInfo.group_id == group_id,
+        group = db_session.query(GroupInfo).join(GroupMember).filter(db.and_(GroupInfo.group_id == group_id,
                 GroupMember.member_account != sender, GroupMember.member_logstate != "offline")).one()
     except:
         return ("Failed to change group {0}'s state".format(group_id), 403)

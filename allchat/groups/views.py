@@ -3,7 +3,8 @@ from flask.views import MethodView
 from flask import request, make_response, g, session, jsonify, json
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
-from sqlalchemy import and_, desc
+# from sqlalchemy import and_, desc
+from allchat import db
 from allchat.amqp.Impl_kombu import RPC, cast, send_message
 import datetime
 
@@ -22,7 +23,7 @@ class groups_view(MethodView):
             # return all the groups the user has joined, including group_id and group_name
             if group_id == 0:
                 try:
-                    groups = db_session.query(GroupMember).filter(and_(GroupMember.member_account == account,
+                    groups = db_session.query(GroupMember).filter(db.and_(GroupMember.member_account == account,
                         GroupMember.confirmed == True)).all()
                 except:
                     return ("DataBase Failed querying groups info", 503 )
@@ -72,7 +73,7 @@ class groups_view(MethodView):
                     db_user = db_session.query(UserInfo).filter_by(username = account).one()
                 except Exception, e:
                     return ("User not found", 404)
-                max_group_id = db_session.query(GroupInfo.group_id).order_by(desc(GroupInfo.group_id)).first()
+                max_group_id = db_session.query(GroupInfo.group_id).order_by(db.desc(GroupInfo.group_id)).first()
                 if max_group_id is None:
                     group_id = 10000
                 else:
@@ -308,7 +309,7 @@ class groups_view(MethodView):
                     if operation == "join":
                         # send group owner an applying msg, when the owner confirms, send the applicant a msg
                         try:
-                            db_member = db_session.query(GroupMember).filter(and_(GroupMember.group_id==groupID,
+                            db_member = db_session.query(GroupMember).filter(db.and_(GroupMember.group_id==groupID,
                                 GroupMember.member_account==account)).one()
                         except:
                             message = dict()

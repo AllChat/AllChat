@@ -11,8 +11,7 @@ if os.path.exists(os.path.join(possible_topdir, "allchat", "__init__.py")):
 sys.path.insert(0, possible_topdir)
 
 
-from allchat import app
-from allchat import init
+from allchat import app, init
 
 
 if __name__ == '__main__':
