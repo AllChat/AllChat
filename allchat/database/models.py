@@ -3,7 +3,7 @@
 # from sqlalchemy.orm import relationship, backref
 # from sqlalchemy import ForeignKey
 # from sqlalchemy import func
-import datetime
+import datetime, hashlib, random, string
 from allchat import app
 from allchat import db
 
@@ -57,7 +57,129 @@ class UserInfo(db.Model):
         self.ip = "0.0.0.0" if not ip else ip
         self.port = app.config["CLIENT_PORT"] if not port else port
         self.icon = int(icon) if (type(icon) == int) and (int(icon) >= 0) else 0
-        
+
+class UserAuth(db.Model):
+    __tablename__ = "userauth"
+    __table_args__ = {
+        'mysql_engine': 'InnoDB',
+        'mysql_charset': 'utf8',
+        'mysql_collate': 'utf8_bin'
+    }
+
+    id = db.Column(db.Integer, primary_key = True)
+    account = db.Column(db.String(50), index = True, unique = True, nullable = False)
+    password = db.Column(db.String(64), nullable = False)
+    salt = db.Column(db.String(16), nullable = False)
+    prev_token = db.Column(db.String(32))
+    token = db.Column(db.String(32))
+    created = db.Column(db.DateTime(timezone = True), nullable = False)
+    updated = db.Column(db.DateTime(timezone = True), nullable = False)
+    deleted = db.Column(db.Boolean, nullable = False, default = False)
+
+
+    def __init__(self, account, password):
+        self.account = account
+        self.salt = ''.join(random.sample(string.ascii_letters + string.digits, 8))
+        self.password = hashlib.sha256(self.salt+password).hexdigest()
+        self.token = None
+        self.prev_token = None
+        self.created = datetime.datetime.utcnow()
+        self.updated = self.created
+        self.deleted = False
+
+    def is_authenticated(self, password):
+        if self.deleted == True:
+            return False
+        if password == hashlib.sha256(self.salt+password).hexdigest():
+            db.session.begin(subtransactions=True)
+            try:
+                self.prev_token = self.token
+                self.token = ''.join(random.sample(string.ascii_letters + string.digits, 32))
+                self.updated = datetime.datetime.utcnow()
+                db.session.add(self)
+                db.session.commit()
+            except:
+                db.session.rollback()
+                return False
+            return True
+        else:
+            return False
+    def is_token(self, token):
+        if (self.deleted == True) or (token == None):
+            return False
+        if token == self.token:
+            return True
+        else:
+            return False
+    def is_prev_token(self, token):
+        if (self.deleted == True) or (token == None):
+            return False
+        if token == self.prev_token:
+            return True
+        else:
+            return False
+    def fresh(self, token):
+        if (self.deleted == False) and self.is_token(token):
+            db.session.begin(subtransactions=True)
+            try:
+                self.prev_token = self.token
+                self.token = ''.join(random.sample(string.ascii_letters + string.digits, 32))
+                self.updated = datetime.datetime.utcnow()
+                db.session.add(self)
+                db.session.commit()
+            except:
+                db.session.rollback()
+                return False
+        return True
+    def clear(self):
+        db.session.begin(subtransactions=True)
+        try:
+            self.prev_token = None
+            self.token = None
+            self.updated = datetime.datetime.utcnow()
+            db.session.add(self)
+            db.session.commit()
+        except:
+            db.session.rollback()
+            return False
+
+    def delete(self):
+        if(self.deleted == True):
+            return True
+        db.session.begin(subtransactions=True)
+        try:
+            self.deleted = True
+            self.prev_token = None
+            self.token = None
+            self.updated = datetime.datetime.utcnow()
+            db.session.add(self)
+            db.session.commit()
+        except:
+            db.session.rollback()
+            return False
+        return True
+
+
+    def activate(self, password):
+        if self.deleted == False:
+            return True
+        if password == hashlib.sha256(self.salt+password).hexdigest():
+            db.session.begin(subtransactions=True)
+            try:
+                self.deleted = False
+                self.prev_token = None
+                self.token = ''.join(random.sample(string.ascii_letters + string.digits, 32))
+                self.updated = datetime.datetime.utcnow()
+                db.session.add(self)
+                db.session.commit()
+            except:
+                db.session.rollback()
+                return False
+        else:
+            return False
+        return True
+
+
 class FriendList(db.Model):
     __tablename__ = "friendlist"
     __table_args__ = {
