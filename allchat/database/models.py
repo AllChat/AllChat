@@ -88,7 +88,7 @@ class UserAuth(db.Model):
         self.deleted = False
 
     def is_authenticated(self, password):
-        if self.deleted == True:
+        if self.deleted:
             return False
         if password == hashlib.sha256(self.salt+password).hexdigest():
             db.session.begin(subtransactions=True)
@@ -105,19 +105,22 @@ class UserAuth(db.Model):
         else:
             return False
     def is_token(self, token):
-        if (self.deleted == True) or (token == None):
+        if self.deleted or (token is None):
             return False
         if token == self.token:
             return True
         else:
             return False
     def is_prev_token(self, token):
-        if (self.deleted == True) or (token == None):
+        if self.deleted or (token is None):
             return False
         if token == self.prev_token:
             return True
         else:
             return False
+    def is_token_timeout(self):
+        now = datetime.datetime.utcnow()
+        return (now - self.updated).seconds >= 86400
     def fresh(self, token):
         if (self.deleted == False) and self.is_token(token):
             db.session.begin(subtransactions=True)
@@ -134,17 +137,17 @@ class UserAuth(db.Model):
     def clear(self):
         db.session.begin(subtransactions=True)
         try:
-            self.prev_token = None
+            self.prev_token = self.token
             self.token = None
             self.updated = datetime.datetime.utcnow()
             db.session.add(self)
             db.session.commit()
-        except:
+        except Exception:
             db.session.rollback()
             return False
 
     def delete(self):
-        if(self.deleted == True):
+        if self.deleted:
             return True
         db.session.begin(subtransactions=True)
         try:
@@ -154,14 +157,14 @@ class UserAuth(db.Model):
             self.updated = datetime.datetime.utcnow()
             db.session.add(self)
             db.session.commit()
-        except:
+        except Exception:
             db.session.rollback()
             return False
         return True
 
 
     def activate(self, password):
-        if self.deleted == False:
+        if not self.deleted:
             return True
         if password == hashlib.sha256(self.salt+password).hexdigest():
             db.session.begin(subtransactions=True)
