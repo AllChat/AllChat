@@ -20,7 +20,7 @@ class UserInfo(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(50), index = True, unique = True, nullable = False)
     nickname = db.Column(db.Unicode(50))
-    password = db.Column(db.String(50), nullable = False)
+    # password = db.Column(db.String(50), nullable = False)
     email = db.Column(db.String(100), nullable = False)
     state = db.Column(db.Enum('online', 'invisible', 'offline', name = 'state'), nullable = False)
     last_state = db.Column(db.Enum('online', 'invisible', 'offline', name = 'state'), nullable = False, default="offline")
@@ -37,13 +37,13 @@ class UserInfo(db.Model):
     friends = db.relationship('FriendList', cascade="all, delete-orphan", single_parent = True, passive_deletes=True, \
                               backref=db.backref('user', order_by=id), lazy="dynamic")
     
-    def __init__(self, username, password, email, nickname = None, state = None, method = None, 
+    def __init__(self, username, email, nickname = None, state = None, method = None,
                 getunreadmsg = False, login = None, created = None, updated = None, deleted = False, 
                 ip = None, port = None, icon = None):
         self.username = username
         self.nickname = nickname
         self.email = email
-        self.password = password
+        # self.password = password
         if state is None:
             self.state = 'offline'
         else:
@@ -91,16 +91,16 @@ class UserAuth(db.Model):
         if self.deleted:
             return False
         if password == hashlib.sha256(self.salt+password).hexdigest():
-            db.session.begin(subtransactions=True)
-            try:
-                self.prev_token = self.token
-                self.token = ''.join(random.sample(string.ascii_letters + string.digits, 32))
-                self.updated = datetime.datetime.utcnow()
-                db.session.add(self)
-                db.session.commit()
-            except:
-                db.session.rollback()
-                return False
+            # db.session.begin(subtransactions=True)
+            # try:
+            #     self.prev_token = self.token
+            #     self.token = ''.join(random.sample(string.ascii_letters + string.digits, 32))
+            #     self.updated = datetime.datetime.utcnow()
+            #     db.session.add(self)
+            #     db.session.commit()
+            # except:
+            #     db.session.rollback()
+            #     return False
             return True
         else:
             return False
@@ -121,8 +121,8 @@ class UserAuth(db.Model):
     def is_token_timeout(self):
         now = datetime.datetime.utcnow()
         return (now - self.updated).seconds >= 86400
-    def fresh(self, token):
-        if (self.deleted == False) and self.is_token(token):
+    def fresh(self, token = None):
+        if (self.deleted == False) and (self.is_token(token) or token is None):
             db.session.begin(subtransactions=True)
             try:
                 self.prev_token = self.token
@@ -134,6 +134,7 @@ class UserAuth(db.Model):
                 db.session.rollback()
                 return False
         return True
+
     def clear(self):
         db.session.begin(subtransactions=True)
         try:
@@ -145,7 +146,22 @@ class UserAuth(db.Model):
         except Exception:
             db.session.rollback()
             return False
-
+    def modify(self, password, new):
+        if self.is_authenticated(password):
+            db.session.begin(subtransactions=True)
+            try:
+                self.password = hashlib.sha256(self.salt+new).hexdigest()
+                self.prev_token = None
+                self.token = ''.join(random.sample(string.ascii_letters + string.digits, 32))
+                self.updated = datetime.datetime.utcnow()
+                db.session.add(self)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                return False
+            return True
+        else:
+            return False
     def delete(self):
         if self.deleted:
             return True
@@ -163,8 +179,21 @@ class UserAuth(db.Model):
         return True
 
 
-    def activate(self, password):
+    def activate(self, password = None):
         if not self.deleted:
+            return True
+        if password is None:
+            db.session.begin(subtransactions=True)
+            try:
+                self.deleted = False
+                self.prev_token = None
+                self.token = ''.join(random.sample(string.ascii_letters + string.digits, 32))
+                self.updated = datetime.datetime.utcnow()
+                db.session.add(self)
+                db.session.commit()
+            except:
+                db.session.rollback()
+                return False
             return True
         if password == hashlib.sha256(self.salt+password).hexdigest():
             db.session.begin(subtransactions=True)
@@ -181,6 +210,7 @@ class UserAuth(db.Model):
         else:
             return False
         return True
+
 
 
 class FriendList(db.Model):
