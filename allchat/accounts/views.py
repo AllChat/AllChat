@@ -57,7 +57,7 @@ class accounts_view(MethodView):
                 RPC.create_consumer(user.username, cnn, queue)
                 RPC.release_consumer(user.username)
                 RPC.release_connection(cnn)
-                resp = Response("Account is created successfully", 201, {'token':auth.token})
+                resp = Response("Account is created successfully", 201, )
                 return resp
             else:
                 if not db_user.deleted:
