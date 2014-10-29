@@ -1,5 +1,6 @@
-from flask import Flask, render_template, url_for, redirect, session, request
+from flask import Flask, render_template, url_for, redirect, session, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
+import base64
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config.from_pyfile('../conf/allchat.cfg', silent = True)
@@ -11,6 +12,7 @@ db = SQLAlchemy(app, session_options={'autoflush':False, 'expire_on_commit':Fals
 
 # from allchat.database.sql import get_session
 from allchat.database import init_db
+from allchat.database.models import UserAuth, UserInfo
 from allchat import messages
 from allchat.amqp import init_rpc
 from allchat import accounts
@@ -44,21 +46,36 @@ def init():
 @app.route('/', methods = ['GET'])
 @app.route('/index.html', methods = ['GET'])
 def index():
-    if 'account' in request.cookies and 'account' in session \
-            and session['account'] == request.cookies['account']:
-        return render_template('index.html')
-    else:
+    db_session = db.session
+    try:
+        account = session['account']
+        token = session['token']
+        db_user = db_session.query(UserInfo).filter(db.and_(UserInfo.username == account, \
+                                                            UserInfo.deleted == False)).one()
+        auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == account, \
+                                                            UserAuth.deleted == False)).one()
+    except Exception,e:
         return redirect(url_for('login'))
+    else:
+        if not auth.is_token(token) or auth.is_token_timeout():
+            return redirect(url_for('login'))
+        else:
+            resp = make_response(render_template('index.html'))
+            resp.headers['account'] = account
+            resp.headers['nickname'] = base64.b64encode(db_user.nickname.encode("utf8"))
+            resp.headers['icon'] = str(db_user.icon)
+            return resp
 
 @app.route('/login.html', methods = ['GET'])
 def login():
-    if 'account' in request.cookies and 'account' in session \
-            and session['account'] == request.cookies['account']:
-        return redirect(url_for('index'))
-    else:
+    try:
+        account = session['account']
+        token = session['token']
+    except Exception,e:
         return render_template('login.html')
+    else:
+        return redirect(url_for('index'))
 
-    #return redirect(url_for('login.login_view'))
 @app.route('/register.html', methods = ['GET'])
 def signup():
     return render_template('register.html')

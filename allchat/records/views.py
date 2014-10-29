@@ -4,9 +4,11 @@ from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
 # from sqlalchemy import and_
 from allchat import db
+from allchat.authentication import authorized
 from allchat.filestore.fileExtract import FileExtractor
 
 class records_view(MethodView):
+    @authorized
     def get(self):
         header = request.headers
         for item in ['account', 'starttime', 'chattype', 'chatname']:

@@ -7,9 +7,12 @@ from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
 from allchat import db
 from allchat.amqp.Impl_kombu import RPC, cast, send_message
 from flask import json, jsonify
+from allchat.authentication import authorized, checked
 import datetime
 
 class friends_view(MethodView):
+    @authorized
+    @checked
     def get(self, name):
         if name is None:
             return ('URL error', 403)
@@ -32,6 +35,7 @@ class friends_view(MethodView):
             resp['friendlist'].append(tmp_user)
         return jsonify(resp)
 
+    @authorized
     def post(self, name):
         if name is None:
             return ("Error in the URL. Please put the account name in the URL.", 403)
@@ -102,6 +106,8 @@ class friends_view(MethodView):
         else:
             return ("Please upload a json data", 403)
 
+    @authorized
+    @checked
     def delete(self, name):
         if name is None:
             return ("The account name can't be None", 403)
@@ -144,6 +150,8 @@ class friends_view(MethodView):
         else:
             return ("Please upload a json data", 403)
 
+    @authorized
+    @checked
     def put(self, name):
         if name is None:
             return ("Error in the URL. Please put the account name in the URL.", 403)

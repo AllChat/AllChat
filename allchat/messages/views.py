@@ -10,13 +10,13 @@ from allchat import db
 import time, base64, os
 from allchat.filestore import saver
 from allchat.login import views
+from allchat.authentication import authorized, checked
 
 
 class messages_view(MethodView):
+    @authorized
     def get(self, type, user, file):
-        if 'account' in request.cookies and 'account' in session \
-            and session['account'] == request.cookies['account'] \
-            and session['account'] == user:
+        if 'account' in session and session['account'] == user:
             if user in views.login_timer:
                 try:
                     views.login_timer[user].cancel()
@@ -71,6 +71,8 @@ class messages_view(MethodView):
             pass
         else:
             return ('Type {0} is not found'.format(type), 404)
+
+    @authorized
     def post(self, type):
         content_type = request.environ['CONTENT_TYPE'].split(';', 1)[0]
         tmp = content_type.split(';', 1)[0]

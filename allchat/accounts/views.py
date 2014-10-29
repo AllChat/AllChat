@@ -3,11 +3,12 @@ from flask.views import MethodView
 from flask import request, make_response, session, jsonify, Response
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, UserAuth,GroupMember, FriendList
-from sqlalchemy import and_
+#from sqlalchemy import and_
+from allchat import db
 from allchat.amqp.Impl_kombu import RPC
 from allchat.messages.handles import rpc_callbacks
 from allchat.login.views import friendlist_update_status, group_update_status
-from allchat.authentication import authorized
+from allchat.authentication import authorized,checked
 import re
 
 tmp_str = "^[\w!@#$%^&*_.]+$"
@@ -84,8 +85,9 @@ class accounts_view(MethodView):
         else:
             return make_response(("Please upload a json data", 403, ))
     @authorized
+    @checked
     def put(self, name):
-        if( name is None):
+        if name is None:
             return ("Account name shouldn't be None", 403)
         if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
             try:
@@ -114,8 +116,8 @@ class accounts_view(MethodView):
                 return ("No content in request", 202)
             db_session = get_session()
             try:
-                user = db_session.query(UserInfo).filter(and_(UserInfo.username == name, UserInfo.deleted == False)).one()
-                auth = db_session.query(UserAuth).filter(and_(UserAuth.account == name, UserInfo.deleted == False)).one()
+                user = db_session.query(UserInfo).filter(db.and_(UserInfo.username == name, UserInfo.deleted == False)).one()
+                auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == name, UserInfo.deleted == False)).one()
             except Exception, e:
                 return make_response(("The account {0} isn't existed".format(name), 404, ))
             if all((new_password, old_password)):
@@ -188,6 +190,7 @@ class accounts_view(MethodView):
         else:
             return make_response(("Please upload a json data", 403, ))
     @authorized
+    @checked
     def delete(self, name):
         if( name is None):
             return ("Account name shouldn't be None", 403)
@@ -201,8 +204,8 @@ class accounts_view(MethodView):
                 return ('Please upload the account {user} password'.format(user = name), 401)
             db_session = get_session()
             try:
-                user = db_session.query(UserInfo).filter(and_(UserInfo.username == name, UserInfo.deleted == False)).one()
-                auth = db_session.query(UserAuth).filter(and_(UserAuth.account == name, UserInfo.deleted == False)).one()
+                user = db_session.query(UserInfo).filter(db.and_(UserInfo.username == name, UserInfo.deleted == False)).one()
+                auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == name, UserInfo.deleted == False)).one()
             except Exception, e:
                 return make_response(("The account {0} isn't existed or password is wrong".format(name), 404, ))
             if not auth.is_authenticated(para['password']):
@@ -221,52 +224,43 @@ class accounts_view(MethodView):
         else:
             return make_response(("Please upload a json data", 403, ))
     @authorized
+    @checked
     def get(self, name):
         if name is None:
             return make_response(("Not developed.Try again later", 204))
         if 'mysql_like' in request.args and request.args['mysql_like'] == '1':
-            if 'account' in request.cookies and 'account' in session \
-                    and session['account'] == request.cookies['account']:
-                db_session = get_session()
-                try:
-                    users = db_session.query(UserInfo).filter(and_(UserInfo.username.like("%" + name + "%"),
-                            UserInfo.deleted != True)).all()
-                except:
-                    return ("Database Error", 500)
-                msg = dict()
-                msg['accounts'] = list()
-                for user in users:
-                    tmp = dict()
-                    tmp['account'] = user.username
-                    tmp['nickname'] = user.nickname
-                    tmp['state'] = "offline" if user.state != "online" else "online"
-                    tmp['icon'] = user.icon
-                    msg['accounts'].append(tmp)
-                return jsonify(msg)
-            else:
-                return ("Please login first", 403)
-        else:
-            #正常查询
-            if 'account' in request.cookies and 'account' in session \
-                    and session['account'] == request.cookies['account']:
-                db_session = get_session()
-                try:
-                    user = db_session.query(UserInfo).filter(and_(UserInfo.username == name, UserInfo.deleted == False)).one()
-                except:
-                    msg = dict()
-                    msg['accounts'] = list()
-                    return jsonify(msg)
-                msg = dict()
-                msg['accounts'] = list()
+            db_session = get_session()
+            try:
+                users = db_session.query(UserInfo).filter(db.and_(UserInfo.username.like("%" + name + "%"),
+                        UserInfo.deleted != True)).all()
+            except:
+                return ("Database Error", 500)
+            msg = dict()
+            msg['accounts'] = list()
+            for user in users:
                 tmp = dict()
                 tmp['account'] = user.username
                 tmp['nickname'] = user.nickname
                 tmp['state'] = "offline" if user.state != "online" else "online"
                 tmp['icon'] = user.icon
                 msg['accounts'].append(tmp)
+            return jsonify(msg)
+        else:
+            #正常查询
+            db_session = get_session()
+            try:
+                user = db_session.query(UserInfo).filter(db.and_(UserInfo.username == name, UserInfo.deleted == False)).one()
+            except:
+                msg = dict()
+                msg['accounts'] = list()
                 return jsonify(msg)
-            else:
-                return ("Please login first", 403)
-
-
+            msg = dict()
+            msg['accounts'] = list()
+            tmp = dict()
+            tmp['account'] = user.username
+            tmp['nickname'] = user.nickname
+            tmp['state'] = "offline" if user.state != "online" else "online"
+            tmp['icon'] = user.icon
+            msg['accounts'].append(tmp)
+            return jsonify(msg)
 

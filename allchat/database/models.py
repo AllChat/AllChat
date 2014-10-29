@@ -90,7 +90,7 @@ class UserAuth(db.Model):
     def is_authenticated(self, password):
         if self.deleted:
             return False
-        if password == hashlib.sha256(self.salt+password).hexdigest():
+        if self.password == hashlib.sha256(self.salt+password).hexdigest():
             # db.session.begin(subtransactions=True)
             # try:
             #     self.prev_token = self.token

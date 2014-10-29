@@ -1,7 +1,7 @@
 from flask.views import MethodView
 from flask import request, make_response, g, session
 from allchat.database.sql import get_session
-from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
+from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo, UserAuth
 # from sqlalchemy import and_
 from allchat import db
 import time, string, base64, threading
@@ -17,14 +17,24 @@ class login_view(MethodView):
             except Exception as e:
                 resp = make_response(("The json data can't be parsed", 403, ))
                 return resp
+            if 'state' not in para:
+                return make_response("No status information", 403)
             logstate = para['state']
             if logstate == "offline":
-                if 'account' in request.cookies and 'account' in session \
-                        and session['account'] == request.cookies['account']:
+                db_session = get_session()
+                try:
+                    auth = db_session.query(UserAuth).filter(db._and(UserAuth.account == name, \
+                                                                    UserAuth.deleted == False)).one()
+                except:
+                    return make_response('Account error', 500)
+                if name == session['account'] and auth.is_token(session['token']):
                     def callback(name):
                         db_session = get_session()
                         try:
-                            db_user = db_session.query(UserInfo).filter(db.and_(UserInfo.username == name, UserInfo.state != "offline")).one()
+                            db_user = db_session.query(UserInfo).filter(db.and_(UserInfo.username == name, \
+                                                                                UserInfo.state != "offline")).one()
+                            auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == name, \
+                                                                    UserAuth.deleted == False)).one()
                         except Exception, e:
                             return None
                         db_session.begin()
@@ -42,6 +52,7 @@ class login_view(MethodView):
                             if db_friend.user.state != "offline" and prev_state != "offline":
                                 friendlist_update_status(name, db_friend.user.username, "offline")
                         try:
+                            auth.clear()
                             db_session.commit()
                         except:
                             db_session.rollback()
@@ -58,15 +69,20 @@ class login_view(MethodView):
                     return make_response("Succeed to logout", 200)
                 else:
                     return make_response(("Failed to logout", 403, ))
+            if 'password' not in para:
+                return make_response(("No password", 403, ))
             password = para['password']
             if(logstate not in ['online', 'invisible']):
                 return make_response(("The login state is illegal", 403, ))
             db_session = get_session()
             try:
-                db_user = db_session.query(UserInfo).filter_by(username = name).one()
+                db_user = db_session.query(UserInfo).filter(db.and_(UserInfo.username == name, \
+                                                                    UserInfo.deleted == False)).one()
+                auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == name, \
+                                                                    UserAuth.deleted == False)).one()
             except Exception, e:
-                return make_response(("The user is not registered yet", 403, ))
-            if(password == db_user.password):
+                return make_response(("Account or password error", 403, ))
+            if auth.is_authenticated(password):
                 db_session.begin()
                 db_user.last_state = db_user.state
                 db_user.state = logstate
@@ -87,6 +103,7 @@ class login_view(MethodView):
                     if db_friend.user.state != "offline" and prev_state != now_state:
                         friendlist_update_status(name, db_friend.user.username, now_state)
                 try:
+                    auth.fresh()
                     db_session.commit()
                 except:
                     db_session.rollback()
@@ -94,10 +111,14 @@ class login_view(MethodView):
                 #render_template to new page or stay at current page?
                 session.permanent = False
                 session['account'] = name
+                session['token'] = auth.token
                 resp = make_response(("Successful logged in", 200, ))
-                resp.set_cookie("account", value = name)
-                resp.set_cookie("nickname", value = base64.b64encode(db_user.nickname.encode("utf8")))
-                resp.set_cookie("icon", value = str(db_user.icon))
+                # resp.set_cookie("account", value = name)
+                # resp.set_cookie("nickname", value = base64.b64encode(db_user.nickname.encode("utf8")))
+                # resp.set_cookie("icon", value = str(db_user.icon))
+                resp.headers['account'] = name
+                resp.headers['nickname'] = base64.b64encode(db_user.nickname.encode("utf8"))
+                resp.headers['icon'] = str(db_user.icon)
                 return resp
             else:
                 return make_response(("Password is wrong, please check out", 403, ))

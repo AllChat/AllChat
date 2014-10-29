@@ -6,10 +6,12 @@ from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
 # from sqlalchemy import and_, desc
 from allchat import db
 from allchat.amqp.Impl_kombu import RPC, cast, send_message
+from allchat.authentication import authorized
 import datetime
 
 
 class groups_view(MethodView):
+    @authorized
     def get(self):
         header = request.headers
         if 'group_id' in header and 'account' in header:
@@ -53,6 +55,7 @@ class groups_view(MethodView):
             return ("Missing critical information.", 403)
         
 
+    @authorized
     def post(self,method):
         if method is None:
             if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
@@ -173,6 +176,7 @@ class groups_view(MethodView):
         else:
             return ("Incorrect method.", 501)
 
+    @authorized
     def put(self,groupID):
         if groupID is None:
             return ("Error in the URL. Please contain proper group id in the URL.", 403)
@@ -372,6 +376,7 @@ class groups_view(MethodView):
         else:
             return ("Please upload a json data", 403)
 
+    @authorized
     def delete(self, groupID):
         if groupID is None:
             return ("Error in the URL. Please contain proper group id in the URL.", 403)
