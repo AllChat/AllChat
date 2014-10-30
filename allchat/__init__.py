@@ -1,16 +1,17 @@
 from flask import Flask, render_template, url_for, redirect, session, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
-import base64
+from flask.ext.admin import Admin
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config.from_pyfile('../conf/allchat.cfg', silent = True)
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 db = SQLAlchemy(app, session_options={'autoflush':False, 'expire_on_commit':False, \
                                       'autocommit':True})
-
+admin = Admin(app)
 
 
 # from allchat.database.sql import get_session
+from allchat.admin import *
 from allchat.database import init_db
 from allchat.database.models import UserAuth, UserInfo
 from allchat.authentication import authorized
