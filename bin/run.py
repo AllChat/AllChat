@@ -16,9 +16,9 @@ from allchat import app, init
 
 if __name__ == '__main__':
     init()
-    app.run(debug = True, use_debugger = False, use_reloader = False)
-    # pool = reactor.getThreadPool()
-    # pool.start()
-    # resource = WSGIResource(reactor, pool, app)
-    # reactor.listenTCP(8080, Site(resource))
-    # reactor.run()
+    #app.run(debug = True, use_debugger = False, use_reloader = False)
+    pool = reactor.getThreadPool()
+    pool.start()
+    resource = WSGIResource(reactor, pool, app)
+    reactor.listenTCP(8080, Site(resource))
+    reactor.run()

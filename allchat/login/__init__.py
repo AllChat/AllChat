@@ -4,5 +4,4 @@ import allchat
 
 login = Blueprint('login',__name__)
 login_view = views.login_view.as_view('login_view')
-login.add_url_rule('/login/',view_func = login_view, methods = ['GET', ])
-login.add_url_rule('/login/<string:name>',view_func = login_view, methods = ['POST', ])
+login.add_url_rule('/login/<string:name>/',view_func = login_view, methods = ['POST', 'GET'])

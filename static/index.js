@@ -2,12 +2,23 @@
  * Created by Derek Fang on 2014/6/11.
  */
 
+function error401(xhr) {
+    window.location.href = "login.html";
+}
+
+function error403(xhr) {
+    window.location.href = "login.html";
+}
+
+var user;
+var nickname;
+var icon;
+var token;
+var state;
+
 var Account = {
     createNew: function() {
         var account = {};
-        var user;
-        var nickname;
-        var icon;
         account.init = function() {
             $.base64.utf8encode = true;
             $.base64.utf8decode = true;
@@ -23,10 +34,29 @@ var Account = {
         };
         account.getSelf = function() {
             if(typeof(user) == "undefined") {
-                user = $.cookie('account');
-                nickname = $.base64.decode($.cookie("nickname"));
-                icon = $.cookie('icon');
+                user = sessionStorage.getItem("account");
+                sessionStorage.removeItem("account");
+                nickname = $.base64.decode(sessionStorage.getItem("nickname"));
+                sessionStorage.removeItem("nickname");
+                icon = sessionStorage.getItem('icon');
+                sessionStorage.removeItem("icon");
+                state = sessionStorage.getItem('state');
+                sessionStorage.removeItem("state");
+                token = sessionStorage.getItem('token');
+                sessionStorage.removeItem("token");
             }
+            $.ajax({
+                    url: "/v1/login/" + user + "/",
+                    type: "GET",
+                    headers: {"token":token},
+                    dataType: "text",
+                    async: false,
+                    statusCode: {
+                        401: error401,
+                        403: error403
+                    }
+                }).always(function (data, textStatus, jqXHR) {
+                });
             $("#icon-self").attr("src", "/static/images/head/" + icon + ".jpg");
             $("#account-self").html(user);
             $("#state-self").change(function(event) {
@@ -40,14 +70,18 @@ var Account = {
                     contentType: "application/json; charset=UTF-8",
                     type: "PUT",
                     data: $.toJSON(data),
-                    dataType: "text"
+                    headers: {"token":token},
+                    dataType: "text",
+                    statusCode: {
+                        401: error401,
+                        403: error403
+                    }
                 }).done(function (data, textStatus, jqXHR) {
-                    sessionStorage.setItem("state", $this.val());
+                    state = $this.val();
                 }).fail(function (jqXHR, textStatus, errorThrown) {
                     alert("Failed to change user state");
-                    $this.val(sessionStorage.getItem("state"));
                 });
-            }).val(sessionStorage.getItem("state"));
+            }).val(state);
         };
         account.load_friend = function(friend) {
             var tmp = null;
@@ -96,7 +130,12 @@ var Account = {
                 url: url,
                 type: "GET",
                 dataType: "json",
-                async: false
+                headers: {"token":token},
+                async: false,
+                statusCode: {
+                    401: error401,
+                    403: error403
+                }
             }).done(function (data, textStatus, jqXHR) {
                 $("#control-list-middle-accounts ul").empty();
                 var list = data.friendlist;
@@ -127,8 +166,12 @@ var Account = {
                 type: 'GET',
                 url: url,
                 dataType: 'json',
-                headers: {'group_id':0,'account':user},
+                headers: {'group_id':0,'account':user,"token":token},
                 async: false,
+                statusCode: {
+                    401: error401,
+                    403: error403
+                }
             }).done(function (data,textStatus,jqXHR){
                 $("#control-list-middle-groups ul").empty();
                 $.each(data,function (key,value){
@@ -148,7 +191,11 @@ var Account = {
                 type: "GET",
                 url: url,
                 dataType: "json",
-                headers: {"group_id":groupID,"account":user},
+                headers: {"group_id":groupID,"account":user, "token":token},
+                statusCode: {
+                    401: error401,
+                    403: error403
+                }
             }).done(function (data){
                 $switcher = $("<div></div>").addClass("group-members-switcher");
                 $switcher.append($("<div></div>").addClass("triangle-left"));
@@ -413,8 +460,12 @@ var Account = {
                             contentType: "application/json; charset=UTF-8",
                             type: "POST",
                             data: $.toJSON(data),
-                            headers: {"message_sender": user, "message_receiver": account_to},
-                            dataType: "text"
+                            headers: {"message_sender": user, "message_receiver": account_to, "token":token},
+                            dataType: "text",
+                            statusCode: {
+                                401: error401,
+                                403: error403
+                            }
                         }).done(function (data, textStatus, jqXHR) {
                         }).fail(function (jqXHR, textStatus, errorThrown) {
                             $("#records-user-" + account_to).children("dl").last().children("dt").append($("<span>发送失败</span>")
@@ -438,8 +489,12 @@ var Account = {
                             contentType: "application/json; charset=UTF-8",
                             type: "POST",
                             data: $.toJSON(data),
-                            headers: {"message_sender": user, "group_id": groupid},
-                            dataType: "text"
+                            headers: {"message_sender": user, "group_id": groupid, "token":token},
+                            dataType: "text",
+                            statusCode: {
+                                401: error401,
+                                403: error403
+                            }
                         }).done(function (data, textStatus, jqXHR) {
                         }).fail(function (jqXHR, textStatus, errorThrown) {
                             $("#" + $receiverId.replace("list","records")).children("dl").last().children("dt").append($("<span>发送失败</span>")
@@ -476,8 +531,12 @@ var Account = {
                                 contentType: "application/json; charset=UTF-8",
                                 type: "POST",
                                 data: $.toJSON(data),
-                                headers: {"message_sender": user, "message_receiver": account_to},
-                                dataType: "text"
+                                headers: {"message_sender": user, "message_receiver": account_to, "token":token},
+                                dataType: "text",
+                                statusCode: {
+                                    401: error401,
+                                    403: error403
+                                }
                             }).done(function (data, textStatus, jqXHR) {
                             }).fail(function (jqXHR, textStatus, errorThrown) {
                                 $("#records-user-" + account_to).children("dl").last().children("dt").append($("<span>发送失败</span>")
@@ -502,8 +561,12 @@ var Account = {
                                 contentType: "application/json; charset=UTF-8",
                                 type: "POST",
                                 data: $.toJSON(data),
-                                headers: {"message_sender": user, "group_id": groupid},
-                                dataType: "text"
+                                headers: {"message_sender": user, "group_id": groupid, "token":token},
+                                dataType: "text",
+                                statusCode: {
+                                    401: error401,
+                                    403: error403
+                                }
                             }).done(function (data, textStatus, jqXHR) {
                             }).fail(function (jqXHR, textStatus, errorThrown) {
                                 $("#" + id.replace("list","records")).children("dl").last().children("dt").append($("<span>发送失败</span>")
@@ -570,14 +633,17 @@ var Account = {
                             break;
                         case "join_group_confirm":
                             break;
+                        case "authorized":
+                            window.location.href = "login.html";
+                            break;
                         default:
                             break;
                     }
                 };
                 worker.onerror = function(event) {
                     throw event.data;
-                }
-                worker.postMessage(user);
+                };
+                worker.postMessage({'user':user, 'token':token});
             }
         }
         account.get_individual_message = function(from, time, msg) {
@@ -632,7 +698,12 @@ var Account = {
                     $.ajax({
                         url: url,
                         type: "GET",
-                        dataType: "json"
+                        dataType: "json",
+                        headers: {"token":token},
+                        statusCode: {
+                            401: error401,
+                            403: error403
+                        }
                     }).done(function (data, textStatus, jqXHR) {
                         var src = "data:image/" + data['type'] + ";base64," + data['content'];
                         $("#" + name.split(".", 2)[0]).attr("src", src);
@@ -688,7 +759,12 @@ var Account = {
                     $.ajax({
                         url: url,
                         type: "GET",
-                        dataType: "json"
+                        dataType: "json",
+                        headers: {"token":token},
+                        statusCode: {
+                            401: error401,
+                            403: error403
+                        }
                     }).done(function (data, textStatus, jqXHR) {
                         var src = "data:image/" + data['type'] + ";base64," + data['content'];
                         $("#" + name.split(".", 2)[0]).attr("src", src);
@@ -704,22 +780,6 @@ var Account = {
 };
 
 $(document).ready(function() {
-    $('#chat-setting form img').on('click', function(e) {
-        e.preventDefault();
-        $(this).next().trigger("click");
-    });
-    if($.cookie('backup') && $.cookie('account')) {
-        $.cookie('backup', $.cookie('account'));
-    }
-    else if($.cookie('backup')) {
-        $.cookie('account', $.cookie('backup'));
-    }
-    else if($.cookie('account')) {
-        $.cookie('backup', $.cookie('account'));
-    }
-    else {
-        window.location.href = "login.html";
-    }
     var user = Account.createNew();
     user.init();
 });
@@ -729,11 +789,12 @@ $(window).unload(function(){
         "state":"offline"
     };
     $.ajax({
-        url: "/v1/login/" + $.cookie('account'),
+        url: "/v1/login/" + user + "/",
         contentType: "application/json; charset=UTF-8",
         type: "POST",
         async:false,
         timeout: 2000,
+        headers: {"token":token},
         data: $.toJSON(data),
         dataType: "text"
     }).always(function (jqXHR, textStatus, errorThrown) {

@@ -47,30 +47,24 @@ def init():
 @app.route('/', methods = ['GET'])
 @app.route('/index.html', methods = ['GET'])
 def index():
-    db_session = db.session
+    # db_session = db.session
     try:
         account = session['account']
-        token = request.headers['token']
-        auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == account, \
-                                                            UserAuth.deleted == False)).one()
+        # token = request.headers['token']
+        # auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == account, \
+        #                                                     UserAuth.deleted == False)).one()
     except Exception,e:
         return redirect(url_for('login'))
     else:
-        if not auth.is_token(token) or auth.is_token_timeout():
-            return redirect(url_for('login'))
-        else:
-            resp = make_response(render_template('index.html'))
-            return resp
+        # if not auth.is_token(token) or auth.is_token_timeout():
+        #     return redirect(url_for('login'))
+        # else:
+        resp = make_response(render_template('index.html'))
+        return resp
 
 @app.route('/login.html', methods = ['GET'])
 def login():
-    try:
-        account = session['account']
-        token = request.headers['token']
-    except Exception,e:
         return render_template('login.html')
-    else:
-        return redirect(url_for('index'))
 
 @app.route('/register.html', methods = ['GET'])
 def signup():

@@ -6,10 +6,13 @@ from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
 from allchat import db
 import time, string, base64, threading
 from allchat.amqp.Impl_kombu import send_message
+from allchat.authentication import authorized,checked
 
 class login_view(MethodView):
-    def get(self):
-        return make_response(("This is the login page", 200, ))
+    @authorized
+    @checked
+    def get(self, name):
+        return make_response(("Continue", 200, ))
     def post(self,name):
         if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
             try:
@@ -25,7 +28,7 @@ class login_view(MethodView):
                 try:
                     account = session['account']
                     token = request.headers['token']
-                    auth = db_session.query(UserAuth).filter(db._and(UserAuth.account == name, \
+                    auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == name, \
                                                                     UserAuth.deleted == False)).one()
                 except:
                     return make_response('Account error', 500)
@@ -110,13 +113,13 @@ class login_view(MethodView):
                 resp.headers['token'] = auth.token
                 resp.headers['nickname'] = base64.b64encode(db_user.nickname.encode("utf8"))
                 resp.headers['icon'] = str(db_user.icon)
+                resp.headers['state'] = db_user.state
                 return resp
             else:
                 return make_response(("Password is wrong, please check out", 403, ))
         else:
             return make_response(("Please upload a json data", 403, ))
 
-login_timer = {}
 
 def friendlist_update_status(sender, receiver, state):
     tmp = {}

@@ -49,13 +49,17 @@ $(document).ready(function(){
             state: $("#state").val()
         };
         $.ajax({
-            url: $(".middle-right-form").attr("action") + account,
+            url: $(".middle-right-form").attr("action") + account + "/",
             contentType: "application/json; charset=UTF-8",
             type: "POST",
             data: $.toJSON(data),
             dataType: "text"
         }).done(function (data, textStatus, jqXHR) {
-            sessionStorage.setItem("state", $("#state").val());
+            sessionStorage.setItem("state", jqXHR.getResponseHeader('state'));
+            sessionStorage.setItem("token", jqXHR.getResponseHeader('token'));
+            sessionStorage.setItem("account", jqXHR.getResponseHeader('account'));
+            sessionStorage.setItem("nickname", jqXHR.getResponseHeader('nickname'));
+            sessionStorage.setItem("icon", jqXHR.getResponseHeader('icon'));
             window.location.href = "index.html";
         }).fail(function (jqXHR, textStatus, errorThrown) {
             alert("账户名或密码有误，请重新输入");

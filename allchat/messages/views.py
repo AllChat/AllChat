@@ -91,6 +91,8 @@ class messages_view(MethodView):
             receiver = request.headers['message_receiver']
         except Exception,e:
             return ("HTTP header format error", 403)
+        if sender != session['account']:
+            return ("Account error", 403)
         users = []
         db_session = get_session()
         users.extend(db_session.query(UserInfo).join(FriendList).filter(UserInfo.username == sender)
@@ -152,6 +154,8 @@ class messages_view(MethodView):
             return ("The json data can't be parsed", 403, )
         sender = request.headers['message_sender']
         group_id = int(request.headers['group_id'])
+        if sender != session['account']:
+            return ("Account error", 403)
         db_session = get_session()
         try:
             user_from = db_session.query(UserInfo).filter(UserInfo.username == sender).\
