@@ -23,50 +23,41 @@ class login_view(MethodView):
             if logstate == "offline":
                 db_session = get_session()
                 try:
+                    account = session['account']
+                    token = request.headers['token']
                     auth = db_session.query(UserAuth).filter(db._and(UserAuth.account == name, \
                                                                     UserAuth.deleted == False)).one()
                 except:
                     return make_response('Account error', 500)
-                if name == session['account'] and auth.is_token(session['token']):
-                    def callback(name):
-                        db_session = get_session()
-                        try:
-                            db_user = db_session.query(UserInfo).filter(db.and_(UserInfo.username == name, \
-                                                                                UserInfo.state != "offline")).one()
-                            auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == name, \
-                                                                    UserAuth.deleted == False)).one()
-                        except Exception, e:
-                            return None
-                        db_session.begin()
-                        db_user.state = "offline"
-                        db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
-                        for db_member in db_groupmember:
-                            prev_state = "offline" if db_member.member_logstate != "online" else "online"
-                            db_member.member_logstate = "offline"
-                            if prev_state != "offline":
-                                group_update_status(name, db_member.member_account, "offline")
-                        db_friendlist = db_session.query(FriendList).filter_by(username = name).all()
-                        for db_friend in db_friendlist:
-                            prev_state = "offline" if db_friend.state != "online" else "online"
-                            db_friend.state = "offline"
-                            if db_friend.user.state != "offline" and prev_state != "offline":
-                                friendlist_update_status(name, db_friend.user.username, "offline")
-                        try:
-                            auth.clear()
-                            db_session.commit()
-                        except:
-                            db_session.rollback()
-                        else:
-                            pass
-                    if name in login_timer:
-                        try:
-                            login_timer[name].cancel()
-                        except:
-                            pass
-                        del login_timer[name]
-                    login_timer[name] = threading.Timer(120.0, callback, args = [name])
-                    login_timer[name].start()
-                    return make_response("Succeed to logout", 200)
+                if name == account and auth.is_token(token):
+                    try:
+                        db_user = db_session.query(UserInfo).filter(db.and_(UserInfo.username == name, \
+                                                                            UserInfo.state != "offline")).one()
+                        auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == name, \
+                                                                UserAuth.deleted == False)).one()
+                    except Exception, e:
+                        return None
+                    db_session.begin()
+                    db_user.state = "offline"
+                    db_groupmember = db_session.query(GroupMember).filter_by(member_account = name).all()
+                    for db_member in db_groupmember:
+                        prev_state = "offline" if db_member.member_logstate != "online" else "online"
+                        db_member.member_logstate = "offline"
+                        if prev_state != "offline":
+                            group_update_status(name, db_member.member_account, "offline")
+                    db_friendlist = db_session.query(FriendList).filter_by(username = name).all()
+                    for db_friend in db_friendlist:
+                        prev_state = "offline" if db_friend.state != "online" else "online"
+                        db_friend.state = "offline"
+                        if db_friend.user.state != "offline" and prev_state != "offline":
+                            friendlist_update_status(name, db_friend.user.username, "offline")
+                    try:
+                        auth.clear()
+                        db_session.commit()
+                    except:
+                        db_session.rollback()
+                    else:
+                        return make_response("Succeed to logout", 200)
                 else:
                     return make_response(("Failed to logout", 403, ))
             if 'password' not in para:
@@ -111,12 +102,12 @@ class login_view(MethodView):
                 #render_template to new page or stay at current page?
                 session.permanent = False
                 session['account'] = name
-                session['token'] = auth.token
                 resp = make_response(("Successful logged in", 200, ))
                 # resp.set_cookie("account", value = name)
                 # resp.set_cookie("nickname", value = base64.b64encode(db_user.nickname.encode("utf8")))
                 # resp.set_cookie("icon", value = str(db_user.icon))
                 resp.headers['account'] = name
+                resp.headers['token'] = auth.token
                 resp.headers['nickname'] = base64.b64encode(db_user.nickname.encode("utf8"))
                 resp.headers['icon'] = str(db_user.icon)
                 return resp

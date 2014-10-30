@@ -9,21 +9,13 @@ from allchat.amqp.Impl_kombu import send_message, receive_message
 from allchat import db
 import time, base64, os
 from allchat.filestore import saver
-from allchat.login import views
 from allchat.authentication import authorized, checked
 
 
 class messages_view(MethodView):
     @authorized
     def get(self, type, user, file):
-        if 'account' in session and session['account'] == user:
-            if user in views.login_timer:
-                try:
-                    views.login_timer[user].cancel()
-                except:
-                    pass
-                del views.login_timer[user]
-        else:
+        if not ('account' in session and session['account'] == user):
             return make_response("Please login first", 404)
         if type == 'text':
             db_session = get_session()
@@ -41,7 +33,6 @@ class messages_view(MethodView):
             else:
                 return ("URL error", 403)
         elif type == 'image':
-            user = user
             db_session = get_session()
             try:
                 account = db_session.query(UserInfo).filter(db.and_(UserInfo.deleted == False,

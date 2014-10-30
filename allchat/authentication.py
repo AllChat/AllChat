@@ -7,7 +7,7 @@ from allchat.database.models import UserAuth
 def authorized(func):
     def action(*args, **kwargs):
         try:
-            token = session['token']
+            token = request.headers['token']
             account = session['account']
         except Exception,e:
             return make_response("Authentication first", 401)

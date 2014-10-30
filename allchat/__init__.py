@@ -13,6 +13,7 @@ db = SQLAlchemy(app, session_options={'autoflush':False, 'expire_on_commit':Fals
 # from allchat.database.sql import get_session
 from allchat.database import init_db
 from allchat.database.models import UserAuth, UserInfo
+from allchat.authentication import authorized
 from allchat import messages
 from allchat.amqp import init_rpc
 from allchat import accounts
@@ -49,9 +50,7 @@ def index():
     db_session = db.session
     try:
         account = session['account']
-        token = session['token']
-        db_user = db_session.query(UserInfo).filter(db.and_(UserInfo.username == account, \
-                                                            UserInfo.deleted == False)).one()
+        token = request.headers['token']
         auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == account, \
                                                             UserAuth.deleted == False)).one()
     except Exception,e:
@@ -61,16 +60,13 @@ def index():
             return redirect(url_for('login'))
         else:
             resp = make_response(render_template('index.html'))
-            resp.headers['account'] = account
-            resp.headers['nickname'] = base64.b64encode(db_user.nickname.encode("utf8"))
-            resp.headers['icon'] = str(db_user.icon)
             return resp
 
 @app.route('/login.html', methods = ['GET'])
 def login():
     try:
         account = session['account']
-        token = session['token']
+        token = request.headers['token']
     except Exception,e:
         return render_template('login.html')
     else:
