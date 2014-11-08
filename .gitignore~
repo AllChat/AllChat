@@ -37,4 +37,3 @@ nosetests.xml
 
 #Data folder
 Data/
-conf/
