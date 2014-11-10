@@ -626,8 +626,16 @@ var Account = {
                             account.get_individual_message(from, time, message);
                             break;
                         case "add_friend_resp":
+                            var from = msg['args']['account'];
+                            var time = msg['args']['time'];
+                            var message = msg['args']['msg'];
+                            account.add_message(from, time, message, method);
                             break;
                         case "add_friend_req":
+                            var from = msg['args']['account'];
+                            var time = msg['args']['time'];
+                            var message = msg['args']['msg'];
+                            account.add_message(from, time, message, method);
                             break;
                         case "join_group_apply":
                             break;
@@ -774,6 +782,29 @@ var Account = {
                 };
                 setTimeout(callback(img[i]), 0);
             }
+        };
+        account.add_message = function(from, time, message, msg_type){
+            if($("#message-center img[title=msg-reminder]").length == 0){
+                $("<img src='/static/images/msg-reminder.png'/>").css({
+                    "position": "absolute",
+                    "padding": "0",
+                    "margin": "0",
+                    "width": "8px",
+                    "height": "8px",
+                    "right": "1px",
+                    "top": "1px"
+                }).attr("title", "msg-reminder").prependTo($("#message-center"));
+            }
+            var data = {
+                "from":from,
+                "time":time,
+                "message":message,
+                "type":msg_type,
+            }
+            if($("#message-center").data("messages") == undefined){
+                $("#message-center").data("messages",[]);
+            }
+            $("#message-center").data("messages").push($.toJSON(data));
         };
         return account;
     }

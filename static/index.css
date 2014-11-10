@@ -382,18 +382,26 @@ body
     margin: 0px;
 }
 
-.control-list-bottom-icon img
+.control-list-bottom-icon div
 {
     cursor: pointer;
     width: 37px;
     height: 37px;
     padding: 0px;
     margin: 0px 0px 0px 5px;
+    position: relative;
+    float: left;
     user-select: none;
     -o-user-select:none;
     -moz-user-select: none;
     -khtml-user-select: none;
     -webkit-user-select: none;
+}
+
+.control-list-bottom-icon img
+{
+    width: 37px;
+    height: 37px;
 }
 
 #chat
@@ -981,4 +989,27 @@ body
 #password-head
 {
     margin-top: 30px;
+}
+#message-center-list ul
+{
+    width: 368px;
+    height: 220px;
+    margin: 0px auto;
+    padding: 0px;
+    list-style: none;
+}
+#message-center-list li
+{
+    height: 24px;
+    line-height: 24px;
+    font-size: 16px;
+    margin: 3px 0px;
+    padding: 0px;
+}
+#message-center-list p
+{
+    display: inline-block;
+    width: 260px;
+    margin: 0px;
+    padding: 0px;
 }

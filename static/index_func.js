@@ -38,9 +38,9 @@ $(document).ready(function (){
         event.stopPropagation();
         showAbout();
     });
-    $('body').on('click','#group-manage',function(event){
+    $('body').on('click','#message-center',function(event){
         event.stopPropagation();
-        manageGroups();
+        openMessageCenter();
     });
 });
 
@@ -348,41 +348,91 @@ function showAbout(){
         $('<p></p>').text('Author: Derake, Alex').css("margin-left","20px")).append(
         $('<p></p>').text('Copyright© 2014-2020. All rights reserved.').css("margin-left","20px"));
 }
-function manageGroups(){
-    createDialog('manage-group','我加入的群');
-    constructGroupDialog();
+function openMessageCenter(){
+    createDialog('message-center','消息中心');
+    constructMessageCenter();
+    $("#message-center img[title=msg-reminder]").remove();
 }
-function constructGroupDialog(){
-    var url = "/v1/groups/";
-    $.ajax({
-        type: 'GET',
-        url: url,
-        dataType: 'json',
-        headers: {'group_id':0,'account':user, 'token':token},
-        async: false,
-        statusCode: {
-            401: error401,
-            403: error403
-        }
-    }).done(function (data,textStatus,jqXHR){
-        $groupList = $('<ul></ul>');
-        $.each(data,function (key,value){
-            $li = $('<li></li>');
-            $groupname = $('<p></p>').addClass('search-result-groupname').text(value['name']);
-            $groupid = $('<p></p>').addClass('search-result-groupid').text(key);
-            if(value['role']=='owner'){
-                $button = $('<button>管理该群</button>').addClass('manage-group-button');
+function constructMessageCenter(){
+    $messageList = $('<ul></ul>');
+    data = $("#message-center").data("messages");
+    $.each(data, function(index, message){
+        var content = $.parseJSON(message);
+        if(content["type"]=="add_friend_req"){
+            $li = $("<li></li>").attr("from",content["from"]);
+            $messageBody = $("<p></p>").addClass("message-center-content").text(content["from"]+"请求加你为好友");
+            $accept = $("<button>同意</button>").addClass("message-center-button").attr("action","accept");
+            $reject = $("<button>拒绝</button>").addClass("message-center-button").attr("action","reject");
+            $li.append($messageBody).append($accept).append($reject).appendTo($messageList);
+        }else if(content["type"]=="add_friend_resp"){
+            $li = $("<li></li>");
+            var result;
+            if(content["message"]=="accept"){
+                result = "同意了您的好友请求";
             }else{
-                $button = $('<button>退出该群</button>').addClass('quit-group-button');
+                result = "拒绝了您的好友请求";
             }
-            $li.append($groupname).append($groupid).append($button).appendTo($groupList);
-        });
-        $('#manage-group-list').append($groupList);
-    }).fail(function (jqXHR){
-        if(jqXHR.status == 503){
-            alert("数据库故障,请重新登陆");
-        }else if(jqXHR.status == 404){
-            alert("用户名有误,请重新登陆");
+            $messageBody = $("<p></p>").addClass("message-center-content").text(content["from"]+result);
+            $li.append($messageBody).appendTo($messageList);
         }
     });
+    $('#message-center-list').append($messageList);
+    bindClick($messageList);
 }
+function bindClick($div){
+    $div.on("click", ".message-center-button", function(event){
+        event.stopPropagation();
+        action = $(this).attr("action");
+        from_user = $(this).parent().attr("from");
+        $.ajax({
+            type: 'PUT',
+            url: '/v1/friends/'+user+'/',
+            contentType: "application/json; charset=UTF-8",
+            headers: {"token":token},
+            data: $.toJSON({'account':from_user,'result':action}),
+            dataType: 'text',
+            statusCode: {
+                401: error401,
+                403: error403
+            }
+        }).done(function (data){
+            alert(data);
+        }).fail(function (jqXHR){
+            alert(jqXHR.responseText);
+        });
+    });
+}
+// function constructGroupDialog(){
+//     var url = "/v1/groups/";
+//     $.ajax({
+//         type: 'GET',
+//         url: url,
+//         dataType: 'json',
+//         headers: {'group_id':0,'account':user, 'token':token},
+//         async: false,
+//         statusCode: {
+//             401: error401,
+//             403: error403
+//         }
+//     }).done(function (data,textStatus,jqXHR){
+//         $groupList = $('<ul></ul>');
+//         $.each(data,function (key,value){
+//             $li = $('<li></li>');
+//             $groupname = $('<p></p>').addClass('search-result-groupname').text(value['name']);
+//             $groupid = $('<p></p>').addClass('search-result-groupid').text(key);
+//             if(value['role']=='owner'){
+//                 $button = $('<button>管理该群</button>').addClass('manage-group-button');
+//             }else{
+//                 $button = $('<button>退出该群</button>').addClass('quit-group-button');
+//             }
+//             $li.append($groupname).append($groupid).append($button).appendTo($groupList);
+//         });
+//         $('#manage-group-list').append($groupList);
+//     }).fail(function (jqXHR){
+//         if(jqXHR.status == 503){
+//             alert("数据库故障,请重新登陆");
+//         }else if(jqXHR.status == 404){
+//             alert("用户名有误,请重新登陆");
+//         }
+//     });
+// }

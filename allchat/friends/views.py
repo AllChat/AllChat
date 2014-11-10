@@ -172,42 +172,6 @@ class friends_view(MethodView):
             except Exception,e:
                 return ("The account {account} is not exist or offline".format(account = name), 404)
             else:
-                for user in req_user.friends:
-                    if user.username == para['account']:
-                        if user.confirmed:
-                            return ('The account {account} is already your friend'.format(
-                                        account = para['account']), 202)
-                        else:
-                            message = dict()
-                            message['method'] = "add_friend_resp"
-                            tmp = dict()
-                            tmp['from'] = req_user.username
-                            tmp['to'] = para['account']
-                            tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                            db_session.begin()
-                            if para['result'] == 'accept':
-                                user.confirmed = True
-                                tmp['msg'] = 'accept'
-                                db_session.add(req_user)
-                            else:
-                                tmp['msg'] = 'reject'
-                                db_session.delete(user)
-                            try:
-                                db_session.commit()
-                            except:
-                                db_session.rollback()
-                                tmp['msg'] = 'failed'
-                                message['para'] = tmp
-                                send_message(req_user.username, para['account'], message)
-                                return ("DataBase Failed", 503, )
-                            else:
-                                message['para'] = tmp
-                                ret = send_message(req_user.username, para['account'], message)
-                                if not ret:
-                                    return ("You have processed the add request from {account}".format(
-                                            account = para['account']), 200)
-                                else:
-                                    return ret
                 try:
                     resp_user = db_session.query(UserInfo).join(FriendList).with_lockmode('read').filter(
                                             db.and_(UserInfo.username == para['account'],UserInfo.deleted == False,
@@ -222,7 +186,16 @@ class friends_view(MethodView):
                     tmp['to'] = resp_user.username
                     tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     if para['result'] == 'accept':
-                        req_user.friends.append(FriendList(para['account'], resp_user.nickname, resp_user.state, True, resp_user.icon))
+                        for user in req_user.friends:
+                            if user.username == resp_user.username:
+                                if user.confirmed:
+                                    return ('The account {account} is already your friend'.format(
+                                        account = resp_user.username), 202)
+                                else:
+                                    user.confirmed = True
+                                    break
+                        else:
+                            req_user.friends.append(FriendList(resp_user.username, resp_user.nickname, resp_user.state, True, resp_user.icon))
                         tmp['msg'] = 'accept'
                     elif para['result'] == 'reject':
                         tmp['msg'] = 'reject'
