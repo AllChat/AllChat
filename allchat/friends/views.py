@@ -15,7 +15,7 @@ class friends_view(MethodView):
     @checked
     def get(self, name):
         if name is None:
-            return ('URL error', 403)
+            return ('URL error', 405)
         db_session = get_session()
         try:
             user = db_session.query(UserInfo).filter(UserInfo.username == name).\
@@ -38,19 +38,19 @@ class friends_view(MethodView):
     @authorized
     def post(self, name):
         if name is None:
-            return ("Error in the URL. Please put the account name in the URL.", 403)
+            return ("Error in the URL. Please put the account name in the URL.", 405)
         if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
             try:
                 para = request.get_json()
             except Exception as e:
-                resp = make_response(("The json data can't be parsed", 403, ))
+                resp = make_response(("The json data can't be parsed", 405))
                 return resp
             if 'account' not in para:
-                return ("Missing 'account' Section", 403)
+                return ("Missing 'account' Section", 404)
             if 'message' not in para:
                 para['message'] = ''
             if name == para['account'] :
-                return ("Can't add yourself as a friend", 403)
+                return ("Can't add yourself as a friend", 405)
             db_session = get_session()
             try:
                 req_user = db_session.query(UserInfo).with_lockmode('read').filter(db.and_(UserInfo.username == name,
@@ -104,20 +104,20 @@ class friends_view(MethodView):
                         else:
                             return ("Please do not send duplicate requests.", 404)
         else:
-            return ("Please upload a json data", 403)
+            return ("Please upload a json data", 405)
 
     @authorized
     @checked
     def delete(self, name):
         if name is None:
-            return ("The account name can't be None", 403)
+            return ("The account name can't be None", 405)
         if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
             try:
                 para = request.get_json()
             except Exception,e:
-                return ("The json data can't be parsed", 403, )
+                return ("The json data can't be parsed", 405)
             if 'account' not in para:
-                return ("Missing 'account' Section", 403)
+                return ("Missing 'account' Section", 404)
             db_session = get_session()
             db_session.begin()
             try:
@@ -125,7 +125,7 @@ class friends_view(MethodView):
                                     UserInfo.deleted == False)).first()
                 if req_id is None:
                     db_session.rollback()
-                    return ('Please create the user {name}'.format(name = name), 403)
+                    return ('Please create the user {name}'.format(name = name), 404)
 
                 friend = db_session.query(FriendList).with_lockmode('update').filter(db.and_(FriendList.index == req_id[0],
                                     FriendList.username == para['account'])).first()
@@ -148,22 +148,22 @@ class friends_view(MethodView):
                     return ("Failed to delete your account in opposing friendlist", 500)
             return ('Delete successfully', 200)
         else:
-            return ("Please upload a json data", 403)
+            return ("Please upload a json data", 405)
 
     @authorized
     @checked
     def put(self, name):
         if name is None:
-            return ("Error in the URL. Please put the account name in the URL.", 403)
+            return ("Error in the URL. Please put the account name in the URL.", 405)
         if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
             try:
                 para = request.get_json()
             except Exception,e:
-                return ("The json data can't be parsed", 403, )
+                return ("The json data can't be parsed", 405, )
             if 'account' not in para:
-                return ("Missing 'account' Section", 403)
+                return ("Missing 'account' Section", 404)
             if 'result' not in para:
-                return ("Missing 'result' Section", 403)
+                return ("Missing 'result' Section", 404)
             db_session = get_session()
             try:
                 req_user = db_session.query(UserInfo).with_lockmode('read').filter(
@@ -177,7 +177,7 @@ class friends_view(MethodView):
                                             db.and_(UserInfo.username == para['account'],UserInfo.deleted == False,
                                                 FriendList.username == name, FriendList.confirmed == False)).one()
                 except Exception,e:
-                    return ("Can't invoke the API before someone request to add you as a friend", 403)
+                    return ("Can't invoke the API before someone request to add you as a friend", 405)
                 else:
                     message = dict()
                     message['method'] = "add_friend_resp"
@@ -229,6 +229,6 @@ class friends_view(MethodView):
                         else:
                             return ret
         else:
-            return ("Please upload a json data", 403)
+            return ("Please upload a json data", 405)
 
 

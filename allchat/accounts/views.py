@@ -224,7 +224,6 @@ class accounts_view(MethodView):
         else:
             return make_response(("Please upload a json data", 403, ))
     @authorized
-    @checked
     def get(self, name):
         if name is None:
             return make_response(("Not developed.Try again later", 204))
