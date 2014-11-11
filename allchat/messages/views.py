@@ -10,6 +10,7 @@ from allchat import db
 import time, base64, os
 from allchat.filestore import saver
 from allchat.authentication import authorized, checked
+from allchat.path import getPicturePath
 
 
 class messages_view(MethodView):
@@ -43,11 +44,11 @@ class messages_view(MethodView):
                 name, tag = os.path.splitext(file)
                 if tag is None:
                     return ('file extension is not allowed', 403)
-                path = "/../Data/picture/" + file
+                path = os.path.join(getPicturePath(),file)
                 tmp = dict()
                 tmp['type'] = tag.lstrip('.')
                 try:
-                    with open(os.path.normpath("".join([os.getcwd(), path])), "rb") as fp:
+                    with open(path, "rb") as fp:
                         tmp['content'] = base64.b64encode(fp.read())
                 except IOError:
                     return ('Not found', 404)

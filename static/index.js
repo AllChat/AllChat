@@ -362,20 +362,23 @@ var Account = {
                     account.openChatWindow(id);
                 }
             });
-            $li.children("span").click(function(event) {
-                var $li = $(this).closest("li");
-                $li.siblings("li").each(function(index, element) {
-                    var $element = $(element);
-                    if($element.hasClass("chat-focus")) {
-                        var id = $element.removeClass("chat-focus").attr("id").replace("list","records");
-                        account.closeChatWindow(id);
+            $li.on("click", function(event){
+                event.stopPropagation();
+                if(!$(this).is("p")){
+                    var $li = $(this).closest("li");
+                    $li.siblings("li").each(function(index, element) {
+                        var $element = $(element);
+                        if($element.hasClass("chat-focus")) {
+                            var id = $element.removeClass("chat-focus").attr("id").replace("list","records");
+                            account.closeChatWindow(id);
+                        }
+                    });
+                    if(!$li.hasClass("chat-focus")) {
+                        var id = $li.addClass("chat-focus").attr("id").replace("list","records");
+                        account.openChatWindow(id);
+                        $(id.replace("list-","#")).children("img").filter(function(index, event) {
+                                return $(event).attr("title") == "msg-reminder";}).remove();
                     }
-                });
-                if(!$li.hasClass("chat-focus")) {
-                    var id = $li.addClass("chat-focus").attr("id").replace("list","records");
-                    account.openChatWindow(id);
-                    $(id.replace("list-","#")).children("img").filter(function(index, event) {
-                            return $(event).attr("title") == "msg-reminder";}).remove();
                 }
             });
         };
@@ -419,6 +422,9 @@ var Account = {
             });
         };
         account.uploadImage = function() {
+            $("#image-select-icon").on("click", function(event){
+                $("#image").click();
+            });
             $("#image").change(function(event) {
                 var reader = new FileReader();
                 var file = this.files[0];
@@ -714,7 +720,7 @@ var Account = {
                         }
                     }).done(function (data, textStatus, jqXHR) {
                         var src = "data:image/" + data['type'] + ";base64," + data['content'];
-                        $("#" + name.split(".", 2)[0]).attr("src", src);
+                        $("#" + name.split(".", 2)[0]).attr("src", src).css("max-width","480px");
                     }).fail(function (jqXHR, textStatus, errorThrown) {
                         $("#"+img[i]).attr("src", "/static/images/failed.jpg");
                     });

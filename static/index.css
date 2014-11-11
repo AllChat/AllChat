@@ -524,15 +524,18 @@ body
 
 .chat-friends
 {
-    height: 20px;
+    height: 30px;
     width: auto;
-    padding: 2px;
-    margin: 16px 5px 5px 5px;
-    font-size: 10px;
-    line-height: 170%;
+    padding: 2px 5px 7px 5px;
+    margin: 5px 0px 0px 0px;
+    font-size: 14px;
+    line-height: 30px;
     display: inline-block;
     color: #fffef0;
+    background-image: linear-gradient(#7b7b7b, #484848);
     text-align: center;
+    border-top: solid 1px #484848;
+    border-right: solid 1px #484848;
     border-radius: 3px;
     cursor: default;
 }
@@ -540,18 +543,13 @@ body
 
 .chat-focus
 {
-    height: 20px;
-    padding: 2px 5px 7px 5px;
-    margin: 0;
-    margin-top: 16px;
-    margin-left: 2px;
+    height: 30px;
     border-radius: 0;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
-    background-color: #9f9f9f;
-    -moz-box-shadow: 0 0 3px #ffffff;
-    -webkit-box-shadow: 0 0 3px #ffffff;
-    box-shadow: 0 0 3px #ffffff;
+    -moz-box-shadow: inset 0 0 8px #111;
+    -webkit-box-shadow: inset 0 0 8px #111;
+    box-shadow: inset 0 0 8px #111;
     text-shadow: 1px 1px 1px #000;
 }
 
@@ -580,7 +578,8 @@ body
 .chat-records-setting
 {
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 .chat-records-content
 {

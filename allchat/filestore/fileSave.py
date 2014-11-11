@@ -38,7 +38,7 @@ class FileSaver(object):
         f=open(os.path.join(pic_dir,file_name),'wb')
         f.write(pic)
         f.close()
-        return os.path.join('/Data/picture',file_name)
+        return file_name
 
     def writeBuffer2File(self):
         timer = Timer(self.writeInterval,self.writeBuffer2File)
