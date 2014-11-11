@@ -526,6 +526,7 @@ body
 {
     height: 30px;
     width: auto;
+    min-width: 80px;
     padding: 2px 5px 7px 5px;
     margin: 5px 0px 0px 0px;
     font-size: 14px;
