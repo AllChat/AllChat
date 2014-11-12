@@ -97,6 +97,34 @@ class rpc_callbacks(base):
             return None
         message.ack()
 
+    def join_group_apply(self, body, message):
+        para = body.get("para")
+        account = para.get("applicant")
+        group_id = para.get("groupid",0)
+        tmp = dict()
+        tmp["method"] = body.get("method")
+        tmp["args"] = {"account":account, "group_id":group_id,
+                        "time":para.get("time",""),"msg":para.get("msg","")}
+        try:
+            self.queue.put(tmp, True, self.timeout)
+        except Queue.Full, e:
+            message.reject()
+            return None
+        message.ack()
+
+    def join_group_confirm(self, body, message):
+        para = body.get("para")
+        tmp = dict()
+        tmp["method"] = body.get("method")
+        tmp["args"] = {"group_id":para.get("groupid"), "time":para.get("time",""),
+                        "result":para.get("result","unkown")}
+        try:
+            self.queue.put(tmp, True, self.timeout)
+        except Queue.Full, e:
+            message.reject()
+            return None
+        message.ack()
+
     def send_individual_message(self, body, message):
         para = body['para']
         user_from = para['from']

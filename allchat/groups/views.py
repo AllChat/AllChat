@@ -188,8 +188,8 @@ class groups_view(MethodView):
             except Exception as e:
                 resp = make_response(("The json data can't be parsed", 403, ))
                 return resp
-            account = para['account']
-            operation = para['operation']
+            account = para.get('account')
+            operation = para.get('operation')
             db_session = get_session()
             try:
                 db_user = db_session.query(UserInfo).filter_by(username = account).one()
@@ -200,110 +200,76 @@ class groups_view(MethodView):
             except Exception, e:
                 return ("Group not found", 404)
             # this is the group owner try to add or del group member
-            if account == db_group.owner:
-                if operation not in ["add","del"]:
-                    return ("Operation not supported", 405)
-                else:
-                    if 'userlist' not in para:
-                        return ("Userlist missing", 404)
-                    # eliminate duplication and validate each user's identity
-                    userlist = {}.fromkeys(para["userlist"]).keys()
-                    if not userlist:
-                        return ("Userlist is empty", 405)
-                    existed_members = [member.member_account for member in db_group.groupmembers]
-                    # the operation is add, make sure the user is registered and new to the group
-                    if operation == "add":
-                        new_members = []
-                        old_members = []
-                        for user in userlist:
-                            if user not in existed_members:
+            if session['account'] == db_group.owner:
+                if operation == "add":
+                    for member in db_group.groupmembers:
+                        if member.member_account == account:
+                            if member.confirmed == False:
+                                message = dict()
+                                message['method'] = 'join_group_confirm'
+                                tmp = dict()
+                                tmp['groupid'] = groupID
+                                tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                                db_session.begin()
+                                member.confirmed = True
+                                db_group.group_size += 1
+                                db_session.add(db_group)
                                 try:
-                                    db_user = db_session.query(UserInfo).filter_by(username = user).one()
-                                except Exception, e:
-                                    return ("The user "+user+" is not registered yet.", 404)
-                                new_members.append(GroupMember(groupID, db_group.group_name, user, db_user.state,db_user.nickname, db_user.icon,"member",True))
-                            else:
-                                old_members.append(user)
-                        # for users passed validation, add to GroupMember and update group size in GroupInfo
-                        if new_members:
-                            db_session.begin()
-                            for member in new_members:
-                                db_group.groupmembers.append(member)
-                            db_group.group_size += len(new_members)
-                            db_session.add(db_group)
-                            try:
-                                db_session.commit()
-                            except:
-                                db_session.rollback()
-                                return ("DataBase Failed", 503 )
-                        if old_members:
-                            for member in db_group.groupmembers:
-                                if member.confirmed == False and member.member_account in old_members:
-                                    message = dict()
-                                    message['method'] = 'join_group_confirm'
-                                    tmp = dict()
-                                    tmp['groupid'] = groupID
-                                    tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                                    db_session.begin()
-                                    member.confirmed = True
-                                    db_group.group_size += 1
-                                    db_session.add(db_group)
-                                    try:
-                                        db_session.commit()
-                                    except:
-                                        db_session.rollback()
-                                        tmp['result'] = 'failed'
-                                        message['para'] = tmp
-                                        send_message(db_group.owner,member.member_account,message)
-                                        return ("DataBase Failed", 503)
-                                    tmp['result'] = 'success'
+                                    db_session.commit()
+                                except:
+                                    db_session.rollback()
+                                    tmp['result'] = 'failed'
                                     message['para'] = tmp
                                     send_message(db_group.owner,member.member_account,message)
-                                    old_members.remove(member.member_account)
-                            if old_members:
-                                return ("The following users are already in the group:"+','.join(old_members), 202)
-                        return ("Users added to the group successfully.", 201)
-                    # the operation is del, make sure the user is registered and already in the group
-                    if operation == "del":
-                        user_req_del = []
-                        member_to_del = []
-                        non_member = []
-                        for user in userlist:
-                            if user in existed_members:
-                                if user == db_group.owner:
-                                    return ("The group owner can't be deleted.", 405)
-                                user_req_del.append(user)
+                                    return ("DataBase Failed", 503)
+                                tmp['result'] = 'success'
+                                message['para'] = tmp
+                                send_message(db_group.owner,member.member_account,message)
                             else:
-                                non_member.append(user)
-                        # for users passed validation, del from GroupMember and update group size in GroupInfo
-                        if user_req_del:
-                            for member in db_group.groupmembers:
-                                if member.member_account in user_req_del:
-                                    member_to_del.append(member)
+                                return ("User %s already in group."%(account), 201)
+                            break
+                    else:
+                        db_session.begin()
+                        db_group.groupmembers.append(GroupMember(groupID, db_group.group_name, account, 
+                                            db_user.state,db_user.nickname, db_user.icon,"member",True))
+                        db_group.group_size += 1
+                        db_session.add(db_group)
+                        try:
+                            db_session.commit()
+                        except:
+                            db_session.rollback()
+                            return ("DataBase Failed", 503 )
+                    return ("Users added to the group successfully.", 201)
+                elif operation == "del":
+                    if account == db_group.owner:
+                        return ("The group owner can't be deleted.", 405)
+                    for member in db_group.groupmembers:
+                        if member.member_account == account:
+                            if member.confirmed == False:
+                                message = dict()
+                                message['method'] = 'join_group_confirm'
+                                tmp = dict()
+                                tmp['groupid'] = groupID
+                                tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                                tmp['result'] = 'rejected'
+                                message['para'] = tmp
+                                send_message(db_group.owner,member.member_account,message)
+                            else:
+                                db_group.group_size -= 1
                             db_session.begin()
-                            for member in member_to_del:
-                                if member.confirmed == False:
-                                    message = dict()
-                                    message['method'] = 'join_group_confirm'
-                                    tmp = dict()
-                                    tmp['groupid'] = groupID
-                                    tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                                    tmp['result'] = 'rejected'
-                                    message['para'] = tmp
-                                    send_message(db_group.owner,member.member_account,message)
-                                else:
-                                    db_group.group_size -= 1
-                                db_group.groupmembers.remove(member)
+                            db_group.groupmembers.remove(member)
                             db_session.add(db_group)
                             try:
                                 db_session.commit()
                             except:
                                 db_session.rollback()
                                 return ("DataBase Failed", 503, )
-                        if non_member:
-                            return ("The following users are not group members:"+" ,".join(non_member), 202)
-                        else:
-                            return ("Users deleted from the group successfully", 201)                        
+                            break
+                    else:
+                        return ("Users to be deleted does not exist.", 404)
+                    return ("Users deleted from the group successfully", 201)                        
+                else:
+                    return ("Operation not supported", 405)
 
             # this is a member trying to quit or a non-member trying to join in
             else:
@@ -322,10 +288,7 @@ class groups_view(MethodView):
                             tmp['applicant'] = account
                             tmp['groupid'] = groupID
                             tmp['time'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                            try:
-                                tmp['msg'] = para['message']
-                            except:
-                                tmp['msg'] = ''
+                            tmp['msg'] = para.get("message","")
                             message['para'] = tmp
                             cnn = RPC.create_connection()
                             sender = RPC.create_producer(account, cnn)

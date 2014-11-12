@@ -280,6 +280,33 @@ body
     background-color: rgb(203, 231, 252);
 }
 
+.btn
+{
+    width: 40px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+    border-radius: 3px;
+    position: absolute;
+    top: 16px;
+}
+
+.btn p
+{
+    margin: 0px;
+    padding: 0px;
+    font-size: 14px;
+    color: #f0f0f0;
+}
+
+.delete
+{
+    right: 20px;
+    background-image: linear-gradient(#ed1c24,#aa1317);
+}
+
 .icon
 {
     float: left;

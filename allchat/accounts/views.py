@@ -95,23 +95,12 @@ class accounts_view(MethodView):
             except Exception as e:
                 resp = make_response(("The json data can't be parsed", 403, ))
                 return resp
-            old_password = None
-            new_password = None
-            nickname = None
-            email = None
-            icon = None
-            state = None
-            if(('new_password' in para) and ('old_password' in para)):
-                old_password = para['old_password']
-                new_password = para['new_password']
-            if('nickname' in para):
-                nickname = para['nickname']
-            if('email' in para):
-                email = para['email']
-            if('icon' in para):
-                icon = int(para['icon'])
-            if('state' in para):
-                state = para['state']
+            old_password = para.get("old_password")
+            new_password = para.get("new_password")
+            nickname = para.get("nickname")
+            email = para.get("email")
+            icon = int(para.get("icon"))
+            state = para.get("state")
             if(not any((old_password, new_password, nickname, email, icon, state))):
                 return ("No content in request", 202)
             db_session = get_session()
@@ -160,6 +149,8 @@ class accounts_view(MethodView):
                 for db_member in db_groupmember:
                     prev_state = "offline" if db_member.member_logstate != "online" else "online"
                     now_state = "offline" if user.state != "online" else "online"
+                    db_member.nickname = user.nickname
+                    db_member.icon = user.icon
                     db_member.member_logstate = user.state
                     db_session.add(db_member)
                     if prev_state != now_state:

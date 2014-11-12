@@ -86,6 +86,30 @@ var Account = {
                 });
             }).val(state);
         };
+        account.add_action_button = function($li){
+            $button = $("<div></div>").addClass("btn").addClass("delete").css("display","none").append("<p>刪除</p>");
+            $button.on("click", function(event){
+                event.stopPropagation();
+                $.ajax({
+                    url: "/v1/friends/" + user,
+                    type: "DELETE",
+                    contentType: "application/json; charset=UTF-8",
+                    data: $.toJSON({"account":$(this).parent().attr("id").slice(5),}),
+                    headers: {"token":token},
+                    async: false,
+                    statusCode: {
+                        401: error401,
+                        403: error403
+                    }
+                }).done(function (data, textStatus, jqXHR){
+                    account.get_friends();
+                    alert("成功刪除好友");
+                }).fail(function (jqXHR, textStatus, errorThrown){
+                    alert("删除好友失败，请重试");
+                });
+            });
+            $li.append($button);
+        }
         account.load_friend = function(friend) {
             var tmp = null;
             var $li = $("<li></li>").attr("id", 'user-' + friend['account']).addClass("friends");
@@ -98,8 +122,13 @@ var Account = {
                 tmp = "[离线]";
             }
             var $state = $("<p></p>").addClass("state").text(tmp);
+            account.add_action_button($li);
             $li.append($img).append($nickname).append($state).appendTo($("#control-list-middle-accounts ul"));
             account.bindChat($li);
+            $li.on("click", "img" ,function(event){
+                event.stopPropagation();
+                $li.children("div.btn").toggle(600);
+            });
         };
         account.order_friends = function(list) {
             var online = new Array();
@@ -615,28 +644,28 @@ var Account = {
             $("#" + id).get(0).scrollTop = $("#" + id).get(0).scrollHeight;
         };
         account.init_setup_button = function(){
-            $('body').on('click','#setup-icon',function(event){
+            $("body").on("click", "div", function(event){
                 event.stopPropagation();
-                if($('div.search-add-bar').css('display')=='block'){$('div.search-add-bar').toggle();};
-                $('div.setup-list').toggle(600);
-            });
-            $('body').on('click','#personal-info',function(event){
-                event.stopPropagation();
-                account.setupPersonalInfo();
-            });
-            $('body').on('click','#change-password',function(event){
-                event.stopPropagation();
-                account.changePassword();
-            });
-            $('body').on('click','#about-us',function(event){
-                event.stopPropagation();
-                account.showAbout();
+                if($(this).attr("id")=="setup-icon"){
+                    if($('div.search-add-bar').css('display')=='block'){$('div.search-add-bar').toggle();};
+                    $('div.setup-list').toggle(600);
+                }else if($(this).attr("id")=="personal-info"){
+                    account.setupPersonalInfo();
+                }else if($(this).attr("id")=="change-password"){
+                    account.changePassword();
+                }else if($(this).attr("id")=="about-us"){
+                    account.showAbout();
+                }
             });
         };
+        account.setupPersonalInfo = function(){
+            $('.setup-list').toggle();
+            account.createDialog('personal-info','个人信息');
+            account.constructInfoDialog();
+            $('div.personal-info-head img').attr('src',$('#icon-self').attr('src'));
+        }
         account.createDialog = function(dialogID,title){
-            if($('.info-dialog').length>0){
-                $('.info-dialog').remove();
-            }
+            if($('.info-dialog').length>0){ $('.info-dialog').remove(); }
             var $dialog = $('<div></div>').attr('id',dialogID+'-dialog').addClass('info-dialog');
             var $title = $('<div></div>').addClass('dialog-title').append($('<p></p>').text(title));
             var $closeTab = $('<div></div>').addClass('dialog-close').append($('<img/>').attr('src','../static/images/icon/close.png'));
@@ -659,14 +688,7 @@ var Account = {
             $email.append($('<p></p>').text('邮箱')).append('<input/>');
             $submit = $('<button></button>').attr('id','personal-info-submit').text('确认');
             $('#personal-info-list').append($head).append($nickname).append($email).append($submit);
-        }
-        account.setupPersonalInfo = function(){
-            $('.setup-list').toggle();
-            account.createDialog('personal-info','个人信息');
-            account.constructInfoDialog();
-            $('div.personal-info-head img').attr('src',$('#icon-self').attr('src'));
-            $('#personal-info-submit').off('click');
-            $('#personal-info-submit').on('click',function(event){
+            $submit.on('click',function(event){
                 event.stopPropagation();
                 var icon_up = $('div.personal-info-head img').attr('src').split('head/')[1].split('.')[0];
                 var nickname_up = $('div.personal-info-nickname input').val();
@@ -693,8 +715,7 @@ var Account = {
                     alert(jqXHR.responseText);
                 });
             });
-            $('div.personal-info-head button').off('click');
-            $('div.personal-info-head button').on('click',function(event){
+            $head.on("click", "button" , function(event){
                 event.stopPropagation();
                 $displayIcons = $('<div></div>').attr('id','head-options').css({"width":"290px","height":"155px","position":"absolute",
                 "top":"20px","left":"40px","border":"2px","padding":"2px","background-color":"#fff","overflow-y":"auto"});
@@ -716,8 +737,17 @@ var Account = {
             $('.setup-list').toggle();
             account.createDialog('change-password','修改密码');
             account.constructPasswordDialog();
-            $('#change-password-submit').off('click');
-            $('#change-password-submit').on('click',function(event){
+        }
+        account.constructPasswordDialog = function(){
+            $oldpassword = $('<div></div>').attr('id','password-head').addClass('password-input');
+            $oldpassword.append($('<p></p>').text('原密码')).append('<input id="oldpassword" type="password"/>');
+            $newpassword = $('<div></div>').addClass('password-input');
+            $newpassword.append($('<p></p>').text('新密码')).append('<input id="newpassword" type="password"/>');
+            $newconfirm = $('<div></div>').addClass('password-input');
+            $newconfirm.append($('<p></p>').text('确认')).append('<input id="newconfirm" type="password"/>');
+            $submit = $('<button></button>').attr('id','change-password-submit').text('确认');
+            $('#change-password-list').append($oldpassword).append($newpassword).append($newconfirm).append($submit);
+            $submit.on('click',function(event){
                 event.stopPropagation();
                 var oldpassword = $('#oldpassword').val();
                 var newpassword = $('#newpassword').val();
@@ -744,18 +774,7 @@ var Account = {
                         alert(jqXHR.responseText);
                     });
                 }
-
             });
-        }
-        account.constructPasswordDialog = function(){
-            $oldpassword = $('<div></div>').attr('id','password-head').addClass('password-input');
-            $oldpassword.append($('<p></p>').text('原密码')).append('<input id="oldpassword" type="password"/>');
-            $newpassword = $('<div></div>').addClass('password-input');
-            $newpassword.append($('<p></p>').text('新密码')).append('<input id="newpassword" type="password"/>');
-            $newconfirm = $('<div></div>').addClass('password-input');
-            $newconfirm.append($('<p></p>').text('确认')).append('<input id="newconfirm" type="password"/>');
-            $submit = $('<button></button>').attr('id','change-password-submit').text('确认');
-            $('#change-password-list').append($oldpassword).append($newpassword).append($newconfirm).append($submit);
         }
         account.showAbout = function(){
             $('.setup-list').toggle();
@@ -765,27 +784,23 @@ var Account = {
                 $('<p></p>').text('Copyright© 2014-2020. All rights reserved.').css("margin-left","20px"));
         }
         account.init_search_button = function(){
-            $('body').on('click','#search-icon',function(event){
+            $("body").on("click","#search-icon",function(event){
                 event.stopPropagation();
-                if($('div.setup-list').css('display')=='block'){$('div.setup-list').toggle();};
-                $('div.search-add-bar').toggle(600);
+                if($("div.setup-list").css("display")=="block"){$("div.setup-list").toggle();};
+                $("div.search-add-bar").toggle(600);
             });
-            $('body').on('click','#fast-add-button',function(event){
+            $("div.add-bar").on("click", "img" ,function(event){
                 event.stopPropagation();
-                var username = $('#add-username').val();
-                account.addFriendRequest(username);
-            });
-            $('body').on('click','#search-user-button',function(event){
-                event.stopPropagation();
-                account.searchUser();
-            });
-            $('body').on('click','#create-group-button',function(event){
-                event.stopPropagation();
-                account.createGroup();
-            });
-            $('body').on('click','#search-group-button',function(event){
-                event.stopPropagation();
-                account.searchGroup();
+                if($(this).attr("id")=="fast-add-button"){
+                    var username = $("#add-username").val();
+                    account.addFriendRequest(username);
+                }else if($(this).attr("id")=="search-user-button"){
+                    account.searchUser();
+                }else if($(this).attr("id")=="create-group-button"){
+                    account.createGroup();
+                }else if($(this).attr("id")=="search-group-button"){
+                    account.searchGroup();
+                }
             });
         }
         account.addFriendRequest = function(username){
@@ -845,31 +860,31 @@ var Account = {
             }
         }
         account.showSearchResult = function(data,type){
-            account.createDialog('search-result','搜索结果');
-            if(type=='user'){
+            account.createDialog("search-result","搜索结果");
+            if(type=="user"){
                 values=data.accounts;
-            }else if(type=='group'){
+            }else if(type=="group"){
                 values=data.groups;
             }
-            $('#search-result-list').append('<ul></ul>');
+            $result_list = $("<ul></ul>");
             $.each(values,function(index,value){
-                account.addItemToDialog(value,type);
+                $item = account.createListItem(value,type);
+                $result_list.append($item);
             });
-            $('body').off('click','button.search-result-addbutton');
-            $('body').on('click','button.search-result-addbutton',function(event){
+            $result_list.on("click","button.search-result-addbutton",function(event){
                 event.stopPropagation();
-                var username = $(this).siblings('.search-result-username').text();
+                var username = $(this).siblings(".search-result-username").text();
                 account.addFriendRequest(username);
             });
-            $('body').off('click','button.search-result-joinbutton');
-            $('body').on('click','button.search-result-joinbutton',function(event){
+            $result_list.on("click","button.search-result-joinbutton",function(event){
                 event.stopPropagation();
-                var groupid = $(this).siblings('.search-result-groupid').text();
-                var groupowner = $(this).siblings('.search-result-groupowner').text();
+                var groupid = $(this).siblings(".search-result-groupid").text();
+                var groupowner = $(this).siblings(".search-result-groupowner").text();
                 account.joinGroupRequest(groupid,groupowner);
             });
+            $("#search-result-list").append($result_list);
         }
-        account.addItemToDialog = function(value,type){
+        account.createListItem = function(value,type){
             var $li = $('<li></li>');
             if(type=='user'){
                 $username = $('<p></p>').addClass('search-result-username').text(value['account']);
@@ -886,7 +901,7 @@ var Account = {
                 $li.append($groupname).append($groupid).append($groupowner).append($groupsize);
                 $li.append('<button class="search-result-joinbutton">申请加入</button>');
             }
-            $('#search-result-list ul').append($li);
+            return $li;
         }
         account.joinGroupRequest = function(groupid,groupowner){
             if(user==groupowner){
@@ -983,8 +998,8 @@ var Account = {
                     if(content["type"]=="add_friend_req"){
                         $li = $("<li></li>").attr("from",content["from"]);
                         $messageBody = $("<p></p>").addClass("message-center-content").text(content["from"]+"请求加你为好友");
-                        $accept = $("<button>同意</button>").addClass("message-center-button").attr("action","accept");
-                        $reject = $("<button>拒绝</button>").addClass("message-center-button").attr("action","reject");
+                        $accept = $("<button>同意</button>").addClass("add-friends-button").attr("action","accept");
+                        $reject = $("<button>拒绝</button>").addClass("add-friends-button").attr("action","reject");
                         $li.append($messageBody).append($accept).append($reject).appendTo($messageList);
                     }else if(content["type"]=="add_friend_resp"){
                         $li = $("<li></li>");
@@ -996,6 +1011,24 @@ var Account = {
                         }
                         $messageBody = $("<p></p>").addClass("message-center-content").text(content["from"]+result);
                         $li.append($messageBody).appendTo($messageList);
+                    }else if(content["type"]=="join_group_apply"){
+                        $li = $("<li></li>").attr("from",content["from"]).attr("group_id",content["group_id"]);
+                        var group_id = content["group_id"];
+                        var group_name = $("li.group[id=group-"+group_id+"]").children("p").text();
+                        $messageBody = $("<p></p>").addClass("message-center-content").text(content["from"]+"申请加入群"+group_name);
+                        $accept = $("<button>同意</button>").addClass("join-group-button").attr("action","add");
+                        $reject = $("<button>拒绝</button>").addClass("join-group-button").attr("action","del");
+                        $li.append($messageBody).append($accept).append($reject).appendTo($messageList);
+                    }else if(content["type"]=="join_group_confirm"){
+                        $li = $("<li></li>");
+                        var result;
+                        if(content["message"]=="success"){
+                            result = "群主同意了您的加群申请";
+                        }else{
+                            result = "群主拒绝了您的加群申请";
+                        }
+                        $messageBody = $("<p></p>").addClass("message-center-content").text(content["group_id"]+result);
+                        $li.append($messageBody).appendTo($messageList);
                     }
                 });
             }
@@ -1003,7 +1036,7 @@ var Account = {
             account.bindClick($messageList);
         }
         account.bindClick = function($div){
-            $div.on("click", ".message-center-button", function(event){
+            $div.on("click", "button.add-friends-button", function(event){
                 event.stopPropagation();
                 action = $(this).attr("action");
                 from_user = $(this).parent().attr("from");
@@ -1022,6 +1055,28 @@ var Account = {
                     if(action == "accept"){
                         account.get_friends();
                     }
+                    alert(data);
+                }).fail(function (jqXHR){
+                    alert(jqXHR.responseText);
+                });
+            });
+            $div.on("click", "button.join-group-button", function(event){
+                event.stopPropagation();
+                group_id = $(this).parent().attr("group_id");
+                from_user = $(this).parent().attr("from");
+                action = $(this).attr("action");
+                $.ajax({
+                    type: 'PUT',
+                    url: '/v1/groups/'+group_id+'/',
+                    contentType: "application/json; charset=UTF-8",
+                    headers: {"token":token},
+                    data: $.toJSON({'account':from_user,'operation':action}),
+                    dataType: 'text',
+                    statusCode: {
+                        401: error401,
+                        403: error403
+                    }
+                }).done(function (data){
                     alert(data);
                 }).fail(function (jqXHR){
                     alert(jqXHR.responseText);
@@ -1052,17 +1107,26 @@ var Account = {
                             var from = msg['args']['account'];
                             var time = msg['args']['time'];
                             var message = msg['args']['msg'];
-                            account.add_message(from, time, message, method);
+                            account.add_message(from, time, message, method, 0);
                             break;
                         case "add_friend_req":
                             var from = msg['args']['account'];
                             var time = msg['args']['time'];
                             var message = msg['args']['msg'];
-                            account.add_message(from, time, message, method);
+                            account.add_message(from, time, message, method, 0);
                             break;
                         case "join_group_apply":
+                            var from = msg['args']['account'];
+                            var time = msg['args']['time'];
+                            var groupid = msg['args']['group_id'];
+                            var message = msg['args']['msg'];
+                            account.add_message(from, time, message, method, groupid);
                             break;
                         case "join_group_confirm":
+                            var time = msg['args']['time'];
+                            var groupid = msg['args']['group_id'];
+                            var result = msg['args']['result'];
+                            account.add_message("", time, result, method, groupid);
                             break;
                         case "authorized":
                             window.location.href = "login.html";
@@ -1146,7 +1210,7 @@ var Account = {
             }
         };
         account.get_group_message = function(from,time,groupid,message){
-            var $groupList = $('#list-group-'+groupid);
+            var $groupList = $("#list-group-"+groupid);
             if(!($groupList.length != 0 && $groupList.hasClass("chat-focus"))
                 &&($("#group-" + groupid).children("img").filter(function(index, event) {return $(event).attr("title") == "msg-reminder";}).length == 0)) {
                 $("<img src='/static/images/msg-reminder.png'/>").css({
@@ -1175,7 +1239,7 @@ var Account = {
             var content = "";
             var img = new Array();
             for(var i=0; i<message.length; i++) {
-                if(message[i]['type'] == "text") {
+                if(message[i]["type"] == "text") {
                     content += message[i]['content'];
                 }
                 else if(['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg'].indexOf(message[i]['type'])) {
@@ -1206,7 +1270,7 @@ var Account = {
                 setTimeout(callback(img[i]), 0);
             }
         };
-        account.add_message = function(from, time, message, msg_type){
+        account.add_message = function(from, time, message, msg_type, group_id){
             if($("#message-center img[title=msg-reminder]").length == 0){
                 $("<img src='/static/images/msg-reminder.png'/>").css({
                     "position": "absolute",
@@ -1223,6 +1287,7 @@ var Account = {
                 "time":time,
                 "message":message,
                 "type":msg_type,
+                "group_id":group_id,
             }
             if($("#message-center").data("messages") == undefined){
                 $("#message-center").data("messages",[]);
