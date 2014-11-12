@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask.views import MethodView
-from flask import request, make_response, session, jsonify, Response
+from flask import request, make_response, escape, jsonify, Response
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, UserAuth,GroupMember, FriendList
 #from sqlalchemy import and_
@@ -21,11 +21,14 @@ class accounts_view(MethodView):
             except Exception as e:
                 resp = make_response(("The json data can't be parsed", 403, ))
                 return resp
-                
-            account = para['account']
-            password = para['password']
-            nickname = para['nickname']
-            email = para['email']
+            try:
+                account = para['account']
+                password = para['password']
+                nickname = para['nickname']
+                email = para['email']
+            except Exception as e:
+                return make_response(("Parameter error", 400, ))
+            nickname = escape(nickname)
             if not all((account, password, nickname, email)):
                 return make_response(("Missing important data in the request", 400, ))
             tmp_re = re.compile(tmp_str)
