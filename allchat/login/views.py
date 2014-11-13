@@ -7,6 +7,7 @@ from allchat import db
 import time, string, base64, threading
 from allchat.amqp.Impl_kombu import send_message
 from allchat.authentication import authorized,checked
+from allchat import user_states
 
 class login_view(MethodView):
     @authorized
@@ -57,6 +58,7 @@ class login_view(MethodView):
                     try:
                         auth.clear()
                         db_session.commit()
+                        user_states[db_user.username] = logstate
                     except:
                         db_session.rollback()
                     else:
@@ -99,6 +101,7 @@ class login_view(MethodView):
                 try:
                     auth.fresh()
                     db_session.commit()
+                    user_states[db_user.username] = logstate
                 except:
                     db_session.rollback()
                     return ("DataBase Failed", 503, )

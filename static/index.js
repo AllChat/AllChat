@@ -94,7 +94,7 @@ var Account = {
                     url: "/v1/friends/" + user,
                     type: "DELETE",
                     contentType: "application/json; charset=UTF-8",
-                    data: $.toJSON({"account":$(this).parent().attr("id").slice(5),}),
+                    data: $.toJSON({"account":$(this).parent().attr("id").slice(5),"bidirectional":"true"}),
                     headers: {"token":token},
                     async: false,
                     statusCode: {

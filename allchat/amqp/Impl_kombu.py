@@ -3,6 +3,7 @@ from kombu import Exchange, Connection, Consumer, Producer,Queue
 from flask import json
 import time
 import allchat
+from allchat import user_states
 from allchat.messages.handles import rpc_callbacks
 
 class rpc(object):
@@ -194,12 +195,22 @@ def receive_message(user, timeout = 240):
     conn = RPC.create_connection()
     comsumer = RPC.create_consumer(user, conn, queue)
     if not comsumer.callbacks[0].empty: #若回调函数消息队列非空，则直接从队列中获取消息
+        state = user_states.get(user)
+        if state == None or state == "offline":
+            RPC.release_connection(conn)
+            RPC.release_consumer(user)
+            return None
         msg = comsumer.callbacks[0].get_msg()
         RPC.release_connection(conn)
         RPC.release_consumer(user)
         return msg
     loop = 0
     while loop < (timeout / 5):
+        state = user_states.get(user)
+        if state == None or state == "offline":
+            RPC.release_connection(conn)
+            RPC.release_consumer(user)
+            return None
         #conn.drain_events(timeout = timeout)
         msg = comsumer.queues[0].get()
         if msg:

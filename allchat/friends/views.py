@@ -135,7 +135,7 @@ class friends_view(MethodView):
             except Exception,e:
                 db_session.rollback()
                 return ("Delete friend {account} failed due to DataBase error".format(account = para['account']), 500)
-            if 'bidirectional' in para and para['bidirectional'] == True:
+            if para.get('bidirectional') == "true":
                 db_session.begin()
                 try:
                     resp_user = db_session.query(UserInfo).join(FriendList).with_lockmode('update').\

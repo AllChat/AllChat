@@ -6,7 +6,7 @@ app.config.from_pyfile('../conf/allchat.cfg', silent = True)
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 db = SQLAlchemy(app, session_options={'autoflush':False, 'expire_on_commit':False, \
                                       'autocommit':True})
-
+user_states = dict()
 
 # from allchat.database.sql import get_session
 from allchat.database import init_db
