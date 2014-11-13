@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask.views import MethodView
-from flask import request, make_response, session
-from flask import jsonify
+from flask import request, make_response, session, escape, jsonify
 from allchat.database.sql import get_session
 from allchat.database.models import UserInfo, FriendList, GroupInfo, GroupMember
 from allchat.amqp.Impl_kombu import send_message, receive_message
@@ -127,7 +126,7 @@ class messages_view(MethodView):
         record = ""
         for pic in para['msg']:
             if(pic['type'] == "text"):
-                record += pic['content']
+                record += escape(pic['content'])
                 continue
             elif(pic['type'] in ['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg']):
                 path = saver.savePicture(base64.b64decode(pic['content']), pic['type'], user_from.username)
@@ -179,7 +178,7 @@ class messages_view(MethodView):
         record = ""
         for pic in para['msg']:
             if(pic['type'] == "text"):
-                record += pic['content']
+                record += escape(pic['content'])
                 continue
             elif(pic['type'] in ['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg']):
                 path = saver.savePicture(base64.b64decode(pic['content']), pic['type'], user_from.username)
