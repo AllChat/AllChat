@@ -1,46 +1,27 @@
 # -*- coding: utf-8 -*-
+
 class Encryptor(object):
-    def __init__(self):
-        self.key = 3881916286L
-        
-    def int2hexStr(self,integer):
-        string = hex(integer)[2:-1]
-        while len(string)<8:
-            string = '0'+string
-        array = [string[i*2:i*2+2].decode('hex')
-                        for i in range(4)]
-        return ''.join(array)
-
-    def hexStr2int(self,string):
-        s_array = [x.encode('hex') for x in string]
-        s = ''.join(s_array)
-        return int(s,16)
-
-    def intEcrypt(self,integer):
-        return integer^self.key
+    def __init__(self, key):
+        self._key = key
+        self._key_length = len(hex(key).lstrip("0x").rstrip("L"))
+        self._block_length = self._key_length
 
     def EncryptStr(self,string):
-        if isinstance(string,unicode):
-            string = string.encode('utf-8')
-        while len(string)%4>0:
-            string += '\x00'
-        encryptedStr = ''
-        index = 0
-        while index<len(string):
-            sliceStr = string[index:index+4]
-            encryptedStr += self.int2hexStr(self.intEcrypt(
-                self.hexStr2int(sliceStr)))
-            index += 4
-        return encryptedStr
+        import os
+        salt = os.urandom(16).encode("hex")
+        hex_str = string.encode("hex")
+        blocks = len(hex_str)/self._block_length
+        if len(hex_str)%self._block_length>0:
+            blocks += 1
+            hex_str = hex_str.zfill(blocks*self._block_length)
+        return salt + "".join([hex(int(hex_str[i*self._block_length:(i+1)*self._block_length],16)^self._key^(int(salt,16))
+            ).lstrip("0x").rstrip("L").zfill(self._key_length) for i in xrange(blocks)])
 
     def DecryptStr(self,string):
-        decryptedStr = ''
-        index = 0
-        while index<len(string):
-            sliceStr = string[index:index+4]
-            decryptedStr += self.int2hexStr(self.intEcrypt(
-                self.hexStr2int(sliceStr)))
-            index += 4
-        while decryptedStr[-1]=='\x00':
-            decryptedStr = decryptedStr[:-1]
-        return decryptedStr
+        salt = string[:32]
+        string = string[32:]
+        blocks = len(string)/self._key_length
+        hex_str = "".join([hex(int(string[i*self._key_length:(i+1)*self._key_length],16)^self._key^(int(salt,16))
+            ).lstrip("0x").rstrip("L").zfill(self._block_length) for i in xrange(blocks)])
+        hex_str = hex_str.lstrip("0")
+        return hex_str.decode("hex")

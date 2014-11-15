@@ -9,7 +9,7 @@ from allchat import db
 import time, base64, os
 from allchat.filestore import saver
 from allchat.authentication import authorized, checked
-from allchat.path import getPicturePath
+from allchat.path import get_picture_dir
 
 
 class messages_view(MethodView):
@@ -43,7 +43,7 @@ class messages_view(MethodView):
                 name, tag = os.path.splitext(file)
                 if tag is None:
                     return ('file extension is not allowed', 403)
-                path = os.path.join(getPicturePath(),file)
+                path = os.path.join(get_picture_dir(),file)
                 tmp = dict()
                 tmp['type'] = tag.lstrip('.')
                 try:
@@ -129,7 +129,7 @@ class messages_view(MethodView):
                 record += escape(pic['content'])
                 continue
             elif(pic['type'] in ['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg']):
-                path = saver.savePicture(base64.b64decode(pic['content']), pic['type'], user_from.username)
+                path = saver.savePicture(base64.b64decode(pic['content']), pic['type'])
                 pic_name = path.split('\\')[-1]
                 pic['content'] = pic_name
                 record += "@$^*" + path + "@$^*"
@@ -139,7 +139,7 @@ class messages_view(MethodView):
         for i in range(0,3):
             ret = send_message(user_from.username, user_to.username, message)
             if not ret:
-                saver.saveSingleMessage(user_from.username, user_to.username,
+                saver.saveSingleMsg(user_from.username, user_to.username,
                                         [tmp['time'], record])
                 return ("Send message successfully", 200)
             else:
@@ -181,13 +181,13 @@ class messages_view(MethodView):
                 record += escape(pic['content'])
                 continue
             elif(pic['type'] in ['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg']):
-                path = saver.savePicture(base64.b64decode(pic['content']), pic['type'], user_from.username)
+                path = saver.savePicture(base64.b64decode(pic['content']), pic['type'])
                 pic_name = path.split('\\')[-1]
                 pic['content'] = pic_name
                 record += "@$^*" + path + "@$^*"
         tmp['msg'] = para['msg']
         message['para'] = tmp
-        saver.saveGroupMsg(sender, group_to.group_name,[tmp['time'], record])
+        saver.saveGroupMsg(sender, group_to.group_id,[tmp['time'], record])
         failed = []
         for user in group_to.groupmembers:
             if user.member_account == user_from.username or user.confirmed == False:

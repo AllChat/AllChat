@@ -1,5 +1,6 @@
 from flask import Blueprint
-from allchat.filestore import fileSave
 
 filestore = Blueprint('filestore', __name__)
-saver = fileSave.FileSaver()
+
+from allchat.filestore import storage
+saver = storage.MessageSaver()
