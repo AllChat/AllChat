@@ -228,14 +228,15 @@ class FriendList(db.Model):
     confirmed = db.Column(db.Boolean, nullable = False, default = False)
     index = db.Column(db.Integer, db.ForeignKey('userinfo.id', onupdate="CASCADE", ondelete='CASCADE'), nullable = False)
     
-    def __init__(self, username, nickname, state = None, confirmed = False, icon = None):
+    def __init__(self, username, nickname, state = 'offline', confirmed = False, icon = 0):
         self.username = username
         self.nickname = nickname
-        if state is None:
-            self.state = 'offline'
-        else:
-            self.state = state
-        self.icon = int(icon) if (type(icon) == int) and (int(icon) >= 0) else 0
+        self.state = state
+        try:
+            icon = int(icon)
+        except:
+            icon = 0
+        self.icon = icon if icon >= 0 else 0
         self.confirmed = confirmed
 
 class GroupInfo(db.Model):
