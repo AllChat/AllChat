@@ -138,9 +138,9 @@ class friends_view(MethodView):
             if para.get('bidirectional') == "true":
                 db_session.begin()
                 try:
-                    resp_user = db_session.query(UserInfo).join(FriendList).with_lockmode('update').\
-                                filter(db.and_(UserInfo.username == para['account'], FriendList.username == name)).first()
-                    if (resp_user is not None) and len(resp_user.friends) != 0:
+                    resp_user = db_session.query(UserInfo).join(FriendList).with_lockmode('update').filter(
+                        db.and_(UserInfo.username == para['account'], FriendList.username == name)).first()
+                    if (resp_user is not None) and resp_user.friends:
                         db_session.delete(resp_user.friends[0])
                     db_session.commit()
                 except Exception,e:
