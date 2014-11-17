@@ -15,9 +15,8 @@ class records_view(MethodView):
         header = request.headers
         type_ = header.get("type")
         identity = header.get("identity")
-        start_date = header.get("start_date")
-        end_date = header.get("end_date")
-        if not all(type_,identity,start_date,end_date):
+        date = header.get("date")
+        if not all(type_,identity,date):
             return make_response(("Missing critical information.", 403))
 
         db_session = get_session()
@@ -38,5 +37,5 @@ class records_view(MethodView):
         else:
             return make_response(('Chattype wrong.',403))
 
-        chat_record = getMessages(directory,start_date,end_date)
+        chat_record = getMessages(directory,date)
         return jsonify(chat_record)
