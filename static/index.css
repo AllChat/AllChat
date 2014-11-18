@@ -431,7 +431,7 @@ body
     height: 37px;
 }
 
-#chat
+#chat, .chat-history-div
 {
     width: 550px;
     height: 540px;
@@ -1039,4 +1039,28 @@ body
     width: 260px;
     margin: 0px;
     padding: 0px;
+}
+#chat-history
+{
+    width: 100px;
+    height: 28px;
+    line-height: 28px;
+    padding: 0px;
+    margin: 0px 10px;
+    display: inline-block;
+    cursor: pointer;
+    text-align: center;
+    color: #f0f0f0;
+    border: solid 1px transparent;
+}
+#chat-history:hover
+{
+    border-color: #aaa;
+}
+#chat-history img
+{
+    width: 24px;
+    height: 24px;
+    padding: 0px;
+    margin: 0px 3px;
 }

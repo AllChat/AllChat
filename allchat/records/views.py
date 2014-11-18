@@ -1,3 +1,4 @@
+import os
 from flask.views import MethodView
 from flask import request, make_response, g, session, jsonify
 from allchat.database.sql import get_session
@@ -5,18 +6,17 @@ from allchat.database.models import UserInfo, GroupMember, FriendList, GroupInfo
 # from sqlalchemy import and_
 from allchat import db
 from allchat.authentication import authorized
-from allchat.filestore.retrieve import getMessages
+from allchat.filestore.retrieve import getMessages, getDates
 from allchat.path import get_single_msg_dir,get_group_msg_dir
 
 class records_view(MethodView):
     @authorized
-    def get(self):
+    def get(self, date):
         user_name = session.get("account")
         header = request.headers
         type_ = header.get("type")
         identity = header.get("identity")
-        date = header.get("date")
-        if not all(type_,identity,date):
+        if not all((type_,identity)):
             return make_response(("Missing critical information.", 403))
 
         db_session = get_session()
@@ -37,5 +37,7 @@ class records_view(MethodView):
         else:
             return make_response(('Chattype wrong.',403))
 
-        chat_record = getMessages(directory,date)
-        return jsonify(chat_record)
+        if date == "dates":
+            return getDates(directory)
+        else:
+            return getMessages(directory,date)

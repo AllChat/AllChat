@@ -33,6 +33,7 @@ var Account = {
             account.init_setup_button();
             account.init_search_button();
             account.init_message_center();
+            account.bind_get_history();
             account.getMsg();
         };
         account.getSelf = function() {
@@ -1083,6 +1084,46 @@ var Account = {
                 });
             });
         }
+        account.get_dates = function(chat_type,chat_identity){
+            $.ajax({
+                url: "/v1/records/dates/",
+                type: "GET",
+                dataType: "json",
+                headers: {"token":token, "type":chat_type, "identity":chat_identity},
+                statusCode: {
+                    401: error401,
+                    403: error403
+                }
+            }).done(function (data, textStatus, jqXHR) {
+                return data;
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText);
+            });
+        }
+        account.build_history_window = function(chat_type,chat_identity){
+            if($("#history-"+chat_type+"-"+chat_identity).length==0){
+                $history = $("<div></div>").attr("id","history-"+chat_type+"-"+chat_identity).addClass('chat-history-div');
+                $history.append($("<p>x</p>"));
+                dates = account.get_dates(chat_type,chat_identity);
+                $.each(dates, function(index, val) {
+                    $("<li></li>").text(val).appendTo($history);
+                });
+                $layer.append($history);
+            }else{
+                $("#history-"+chat_type+"-"+chat_identity).css('display', 'block');
+            }
+        }
+        account.bind_get_history = function(){
+            $("#chat-history").on("click", function(event) {
+                event.stopPropagation();
+                active_user = $(".chat-focus").attr("id").split("-");
+                account.build_history_window(active_user[1],active_user[2]);
+            });
+            $("div.chat-history-div p").on("click", function(event) {
+                event.stopPropagation();
+                $(this).parent().css("display", "none");
+            });
+        }
         account.getMsg = function() {
             if(typeof(Worker)!=="undefined") {
                 var worker =new Worker("/static/getmsg.js");
@@ -1141,21 +1182,24 @@ var Account = {
                 worker.postMessage({'user':user, 'token':token});
             }
         }
+        account.add_msg_reminder = function($div, left_pos, top_pos){
+            $("<img src='/static/images/msg-reminder.png'/>").css({
+                "position": "absolute",
+                "padding": "0",
+                "margin": "0",
+                "width": "8px",
+                "height": "8px",
+                "left": left_pos,
+                "top": top_pos,
+            }).attr("title", "msg-reminder").prependTo($div);
+        }
         account.get_individual_message = function(from, time, msg) {
             var exist = false;
             var $listUser = $("#list-user-" + from);
             if($("#user-" + from).length != 0) {
                 if(!($listUser.length != 0 && $listUser.hasClass("chat-focus"))
                     &&($("#user-" + from).children("img").filter(function(index, event) {return $(event).attr("title") == "msg-reminder";}).length == 0)) {
-                    $("<img src='/static/images/msg-reminder.png'/>").css({
-                        "position": "absolute",
-                        "padding": "0",
-                        "margin": "0",
-                        "width": "8px",
-                        "height": "8px",
-                        "left": "48px",
-                        "top": "1px"
-                    }).attr("title", "msg-reminder").prependTo($("#user-" + from));
+                    account.add_msg_reminder($("#user-" + from),"48px","1px");
                 }
                 exist = true;
             }
@@ -1213,15 +1257,7 @@ var Account = {
             var $groupList = $("#list-group-"+groupid);
             if(!($groupList.length != 0 && $groupList.hasClass("chat-focus"))
                 &&($("#group-" + groupid).children("img").filter(function(index, event) {return $(event).attr("title") == "msg-reminder";}).length == 0)) {
-                $("<img src='/static/images/msg-reminder.png'/>").css({
-                    "position": "absolute",
-                    "padding": "0",
-                    "margin": "0",
-                    "width": "8px",
-                    "height": "8px",
-                    "left": "48px",
-                    "top": "1px"
-                }).attr("title", "msg-reminder").prependTo($("#group-" + groupid));
+                account.add_msg_reminder($("#group-" + groupid),"48px","1px");
             }
             if($groupList.length==0){
                 var $li = $("<li></li>").attr("id", "list-group-" + groupid)
@@ -1272,15 +1308,7 @@ var Account = {
         };
         account.add_message = function(from, time, message, msg_type, group_id){
             if($("#message-center img[title=msg-reminder]").length == 0){
-                $("<img src='/static/images/msg-reminder.png'/>").css({
-                    "position": "absolute",
-                    "padding": "0",
-                    "margin": "0",
-                    "width": "8px",
-                    "height": "8px",
-                    "right": "1px",
-                    "top": "1px"
-                }).attr("title", "msg-reminder").prependTo($("#message-center"));
+                account.add_msg_reminder($("#message-center"),"28px","1px");
             }
             var data = {
                 "from":from,
