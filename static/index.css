@@ -14,6 +14,7 @@ body
     height: 560px;
     padding: 0px;
     margin: 50px auto;
+    position: relative;
 }
 
 #control
@@ -431,7 +432,7 @@ body
     height: 37px;
 }
 
-#chat, .chat-history-div
+#chat
 {
     width: 550px;
     height: 540px;
@@ -443,11 +444,10 @@ body
     -moz-box-shadow: 0 0 20px #000;
     -webkit-box-shadow: 0 0 20px #000;
     box-shadow: 0 0 20px #000;
-    position: relative;
     z-index: 0;
 }
 
-#chat-list
+#chat-list, .chat-history-header
 {
     width: 550px;
     height: 45px;
@@ -464,7 +464,7 @@ body
     z-index: 1;
 }
 
-#chat-list > p
+#chat-list > p, .chat-history-div p
 {
     width: 30px;
     height: 25px;
@@ -489,7 +489,7 @@ body
     z-index: 2;
 }
 
-#chat-list > p:hover
+#chat-list > p:hover, .chat-history-div p:hover
 {
     background-color: #9e3038;
     -moz-box-shadow: inset 0 0 5px #c02e33;
@@ -1063,4 +1063,44 @@ body
     height: 24px;
     padding: 0px;
     margin: 0px 3px;
+}
+.chat-history-div
+{
+    width: 550px;
+    height: 540px;
+    padding: 0px;
+    margin: 0px;
+    position: absolute;
+    left: 331px;
+    top: 10px;
+    border-radius: 10px;
+    -moz-box-shadow: 0 0 20px #000;
+    -webkit-box-shadow: 0 0 20px #000;
+    box-shadow: 0 0 20px #000;
+    z-index: 1;
+    background-color: #f0f0f0;
+}
+.chat-history-selector
+{
+    width: 100px;
+    height: 495px;
+    padding: 0px;
+    margin: 0px;
+    background-color: #bababa;
+}
+.chat-history-selector ul
+{
+    width: 100px;
+    height: 495px;
+    padding: 0px;
+    margin: 0px;
+    list-style: none;
+}
+.chat-history-selector ul li
+{
+    width: 100px;
+    height: 25px;
+    line-height: 25px;
+    padding: 0px;
+    margin: 0px;
 }

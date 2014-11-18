@@ -1095,7 +1095,12 @@ var Account = {
                     403: error403
                 }
             }).done(function (data, textStatus, jqXHR) {
-                return data;
+                $list = $("#history-"+chat_type+"-"+chat_identity).children("div.chat-history-selector");
+                $ul = $("<ul></ul>");
+                $.each(data, function(index, val) {
+                    $("<li></li>").text(val).appendTo($ul);
+                });
+                $ul.appendTo($list);
             }).fail(function (jqXHR, textStatus, errorThrown) {
                 alert(jqXHR.responseText);
             });
@@ -1104,11 +1109,15 @@ var Account = {
             if($("#history-"+chat_type+"-"+chat_identity).length==0){
                 $history = $("<div></div>").attr("id","history-"+chat_type+"-"+chat_identity).addClass('chat-history-div');
                 $history.append($("<p>x</p>"));
-                dates = account.get_dates(chat_type,chat_identity);
-                $.each(dates, function(index, val) {
-                    $("<li></li>").text(val).appendTo($history);
+                $history.append($("<div></div>").addClass("chat-history-header"));
+                $history.append($("<div></div>").addClass("chat-history-selector"));
+                $history.on("click", "p" ,function(event) {
+                    event.stopPropagation();
+                    $(this).parent().css("display", "none");
                 });
-                $layer.append($history);
+                $("#layer").append($history);
+                account.get_dates(chat_type,chat_identity);
+                
             }else{
                 $("#history-"+chat_type+"-"+chat_identity).css('display', 'block');
             }
@@ -1118,10 +1127,6 @@ var Account = {
                 event.stopPropagation();
                 active_user = $(".chat-focus").attr("id").split("-");
                 account.build_history_window(active_user[1],active_user[2]);
-            });
-            $("div.chat-history-div p").on("click", function(event) {
-                event.stopPropagation();
-                $(this).parent().css("display", "none");
             });
         }
         account.getMsg = function() {
