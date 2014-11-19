@@ -1078,29 +1078,71 @@ body
     -webkit-box-shadow: 0 0 20px #000;
     box-shadow: 0 0 20px #000;
     z-index: 1;
-    background-color: #f0f0f0;
+    background-color: #fffbe2;
 }
-.chat-history-selector
+.chat-history-selector, .chat-history-selector ul
 {
     width: 100px;
     height: 495px;
     padding: 0px;
     margin: 0px;
+    border-bottom-left-radius: 10px;
     background-color: #bababa;
 }
 .chat-history-selector ul
 {
-    width: 100px;
-    height: 495px;
-    padding: 0px;
-    margin: 0px;
     list-style: none;
+    overflow-y: auto;
 }
 .chat-history-selector ul li
 {
     width: 100px;
-    height: 25px;
-    line-height: 25px;
+    height: 30px;
+    line-height: 30px;
     padding: 0px;
     margin: 0px;
+    cursor: pointer;
+    text-align: center;
+}
+.chat-history-selector ul li:hover
+{
+    color: #f0f0f0;
+    background-color: #6d6d6d;
+}
+.chat-history-selector ul li.selected_date
+{
+    color: #484848;
+    background-color: #fffbe2;
+}
+.chat-history-list, .chat-history-list ul
+{
+    width: 450px;
+    height: 485px;
+    padding: 0px;
+    margin: 0px;
+    border-bottom-right-radius: 10px;
+    background-color: #fffbe2;
+}
+.chat-history-list
+{
+    position: absolute;
+    top: 45px;
+    left: 100px;
+}
+.chat-history-list ul
+{
+    list-style: none;
+    overflow-y: auto;
+}
+.chat-history-title
+{
+    height: 35px;
+    line-height: 35px;
+    font-size: 20px;
+    padding: 0px;
+    margin: 0px;
+    color: #e0e0e0;
+    position: absolute;
+    top: 5px;
+    left: 20px;
 }

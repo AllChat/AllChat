@@ -644,6 +644,31 @@ var Account = {
             $dl.append($dt).append($dd).appendTo($("#" + id));
             $("#" + id).get(0).scrollTop = $("#" + id).get(0).scrollHeight;
         };
+        account.get_picture = function(name, $id){
+            if($("#layer").data(name)==undefined){
+                var url = "/v1/messages/image/" + user + "/" + name;
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    dataType: "json",
+                    headers: {"token":token},
+                    statusCode: {
+                        401: error401,
+                        403: error403
+                    }
+                }).done(function (data, textStatus, jqXHR) {
+                    $("#layer").data(name, data);
+                    var src = "data:image/" + data['type'] + ";base64," + data['content'];
+                    $id.attr("src", src).css("max-width","480px");
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    $id.attr("src", "/static/images/failed.jpg");
+                });
+            }else{
+                data = $("#layer").data(name);
+                var src = "data:image/" + data['type'] + ";base64," + data['content'];
+                $id.attr("src", src).css("max-width","480px");
+            }
+        }
         account.init_setup_button = function(){
             $("body").on("click", "div", function(event){
                 event.stopPropagation();
@@ -1085,39 +1110,111 @@ var Account = {
             });
         }
         account.get_dates = function(chat_type,chat_identity){
+            var result;
             $.ajax({
                 url: "/v1/records/dates/",
                 type: "GET",
                 dataType: "json",
                 headers: {"token":token, "type":chat_type, "identity":chat_identity},
+                async: false,
                 statusCode: {
                     401: error401,
                     403: error403
                 }
             }).done(function (data, textStatus, jqXHR) {
-                $list = $("#history-"+chat_type+"-"+chat_identity).children("div.chat-history-selector");
-                $ul = $("<ul></ul>");
-                $.each(data, function(index, val) {
-                    $("<li></li>").text(val).appendTo($ul);
-                });
-                $ul.appendTo($list);
+                result = data;
             }).fail(function (jqXHR, textStatus, errorThrown) {
                 alert(jqXHR.responseText);
             });
+            return result;
+        }
+        account.build_history_window_layout = function(chat_type,chat_identity){
+            $history = $("<div></div>").attr("id","history-"+chat_type+"-"+chat_identity).addClass('chat-history-div');
+            $history.append($("<p>x</p>"));
+            $header = $("<div></div>").addClass("chat-history-header");
+            $header.append($("<div></div>").text("与"+chat_identity+"的聊天记录").addClass("chat-history-title"));
+            $history.append($header);
+            $history.append($("<div></div>").addClass("chat-history-selector"));
+            $history.append($("<div></div>").addClass("chat-history-list"));
+            $history.on("click", "p" ,function(event) {
+                event.stopPropagation();
+                $(this).parent().css("display", "none");
+            });
+            $("#layer").append($history);
+            return $history;
+        }
+        account.get_chat_history_by_date = function(chat_type,chat_identity,date){
+            var result;
+            $.ajax({
+                url: "/v1/records/"+date+"/",
+                type: "GET",
+                dataType: "json",
+                headers: {"token":token, "type":chat_type, "identity":chat_identity},
+                async: false,
+                statusCode: {
+                    401: error401,
+                    403: error403
+                }
+            }).done(function (data, textStatus, jqXHR) {
+                result = data;
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText);
+            });
+            return result;
+        }
+        account.refresh_chat_history_list = function($chat_selector_li){
+            if($chat_selector_li.attr("class")!="selected_date"){
+                $chat_history_list = $chat_selector_li.parent().parent().siblings(".chat-history-list");
+                $chat_history_list.empty();
+                chat_id = $chat_history_list.parent().attr("id");
+                chat_type = chat_id.split("-")[1];
+                chat_identity = chat_id.split("-")[2];
+                date = $chat_selector_li.text();
+                if($chat_history_list.data(date)==undefined){
+                    chat_history = account.get_chat_history_by_date(chat_type,chat_identity,date);
+                    $chat_history_list.data(date, chat_history);
+                }else{
+                    chat_history = $chat_history_list.data(date);
+                }
+                $ul = $("<ul></ul>");
+                $.each(chat_history, function(index, val) {
+                    var chat_user = val[0];
+                    var chat_time = account.adjust_timezone(val[1]);
+                    var chat_content;
+                    if(val[2].slice(0,4)=="@$^*" && val[2].slice(-4)=="@$^*"){
+                        pic_id = "pic_"+chat_time.replace(/[\/ :-]/g,"")+"_"+Math.ceil(Math.random()*100);
+                        chat_content = "<img src='/static/images/loading.gif' id='" + pic_id + "' name="+val[2].slice(4,-4)+">";
+                    }else{
+                        chat_content = val[2];
+                    }
+                    $dl = $("<dl></dl>").addClass("chatBox");
+                    $dt = $("<dt></dt>").addClass("chatBox-head").attr("title", chat_user).text(chat_user).append($("<span></span>").css("margin-left", "5px").text(chat_time));
+                    $dd = $("<dd></dd>").addClass("charBox-msg").html(chat_content);
+                    $dl.append($dt).append($dd).appendTo($ul);
+                });
+                $chat_history_list.append($ul);
+                $.each($chat_history_list.find("img"), function(index, val) {
+                    pic_id = $(val).attr("id");
+                    pic_name = $(val).attr("name");
+                    account.get_picture(pic_name, $("#"+pic_id));
+                });
+                $chat_selector_li.siblings(".selected_date").removeClass("selected_date");
+                $chat_selector_li.addClass("selected_date");
+            }
         }
         account.build_history_window = function(chat_type,chat_identity){
             if($("#history-"+chat_type+"-"+chat_identity).length==0){
-                $history = $("<div></div>").attr("id","history-"+chat_type+"-"+chat_identity).addClass('chat-history-div');
-                $history.append($("<p>x</p>"));
-                $history.append($("<div></div>").addClass("chat-history-header"));
-                $history.append($("<div></div>").addClass("chat-history-selector"));
-                $history.on("click", "p" ,function(event) {
-                    event.stopPropagation();
-                    $(this).parent().css("display", "none");
+                $history = account.build_history_window_layout(chat_type,chat_identity);
+                dates = account.get_dates(chat_type,chat_identity);
+                $ul = $("<ul></ul>");
+                $.each(dates, function(index, val) {
+                    $("<li></li>").text(val).appendTo($ul);
                 });
-                $("#layer").append($history);
-                account.get_dates(chat_type,chat_identity);
-                
+                $ul.appendTo($history.children("div.chat-history-selector"));
+                var date_list = $history.children("div.chat-history-selector").children("ul").children("li");
+                if(date_list.length>0){
+                    account.refresh_chat_history_list(date_list.last());
+                }
             }else{
                 $("#history-"+chat_type+"-"+chat_identity).css('display', 'block');
             }
@@ -1127,6 +1224,10 @@ var Account = {
                 event.stopPropagation();
                 active_user = $(".chat-focus").attr("id").split("-");
                 account.build_history_window(active_user[1],active_user[2]);
+            });
+            $("body").on("click", "div.chat-history-selector li",function(event){
+                event.stopPropagation();
+                account.refresh_chat_history_list($(this));
             });
         }
         account.getMsg = function() {
@@ -1198,6 +1299,12 @@ var Account = {
                 "top": top_pos,
             }).attr("title", "msg-reminder").prependTo($div);
         }
+        account.adjust_timezone = function(time){
+            var timeTmp = new Date();
+            timeTmp = new Date(Date.parse(time.replace(/[-]/g, "/")) - timeTmp.getTimezoneOffset()*60000);
+            time = timeTmp.toLocaleDateString() + " " + timeTmp.toTimeString().split(" ")[0];
+            return time;
+        }
         account.get_individual_message = function(from, time, msg) {
             var exist = false;
             var $listUser = $("#list-user-" + from);
@@ -1221,44 +1328,33 @@ var Account = {
                 $("<div></div>").addClass("chat-records-setting").css("display", "none")
                     .attr("id", "records-user-" + from).appendTo("#chat-records");
             }
-            var timeTmp = new Date();
-            timeTmp = new Date(Date.parse(time.replace(/[-]/g, "/")) - timeTmp.getTimezoneOffset()*60000);
-            time = timeTmp.toLocaleDateString() + " " + timeTmp.toTimeString().split(" ")[0];
+            time = account.adjust_timezone(time);
             var content = "";
-            var img = new Array();
-            for(var i=0; i<msg.length; i++) {
-                if(msg[i]['type'] == "text") {
-                    content += msg[i]['content'];
-                }
-                else if(['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg'].indexOf(msg[i]['type'])) {
-                    content += "<img src='/static/images/loading.gif' id='" + msg[i]['content'].split(".", 2)[0] + "'/>";
-                    img.push(msg[i]['content']);
-                }
+            if(msg[0]['type'] == "text") {
+                content += msg[0]['content'];
+                account.addContent('records-user-'+from, $("#user-" + from).find(".nickname").eq(0).text(), content, time);
+            }else if(['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg'].indexOf(msg[0]['type'])){
+                var pic_id = "pic_"+time.replace(/[\/ :]/g,"")+"_"+Math.ceil(Math.random()*100);
+                content += "<img src='/static/images/loading.gif' id='" + pic_id + "'/>";
+                account.addContent('records-user-'+from, $("#user-" + from).find(".nickname").eq(0).text(), content, time);
+                setTimeout(account.get_picture(msg[0]['content'], $("#"+pic_id)), 0);
             }
-            account.addContent('records-user-'+from, $("#user-" + from).find(".nickname").eq(0).text(), content, time);
-            for(var i=0; i<img.length; i++) {
-                var callback = function(name) {
-                    var url = "/v1/messages/image/" + user + "/" + name;
-                    $.ajax({
-                        url: url,
-                        type: "GET",
-                        dataType: "json",
-                        headers: {"token":token},
-                        statusCode: {
-                            401: error401,
-                            403: error403
-                        }
-                    }).done(function (data, textStatus, jqXHR) {
-                        var src = "data:image/" + data['type'] + ";base64," + data['content'];
-                        $("#" + name.split(".", 2)[0]).attr("src", src).css("max-width","480px");
-                    }).fail(function (jqXHR, textStatus, errorThrown) {
-                        $("#"+img[i]).attr("src", "/static/images/failed.jpg");
-                    });
-                };
-                setTimeout(callback(img[i]), 0);
-            }
+            // var img = new Array();
+            // for(var i=0; i<msg.length; i++) {
+            //     if(msg[i]['type'] == "text") {
+            //         content += msg[i]['content'];
+            //     }
+            //     else if(['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg'].indexOf(msg[i]['type'])) {
+            //         content += "<img src='/static/images/loading.gif' id='" + msg[i]['content'].split(".", 2)[0] + "'/>";
+            //         img.push(msg[i]['content']);
+            //     }
+            // }
+            // account.addContent('records-user-'+from, $("#user-" + from).find(".nickname").eq(0).text(), content, time);
+            // for(var i=0; i<img.length; i++) {
+            //     setTimeout(account.get_picture(img[i], $("#"+img[i].split(".", 2)[0])), 0);
+            // }
         };
-        account.get_group_message = function(from,time,groupid,message){
+        account.get_group_message = function(from,time,groupid,msg){
             var $groupList = $("#list-group-"+groupid);
             if(!($groupList.length != 0 && $groupList.hasClass("chat-focus"))
                 &&($("#group-" + groupid).children("img").filter(function(index, event) {return $(event).attr("title") == "msg-reminder";}).length == 0)) {
@@ -1278,38 +1374,29 @@ var Account = {
             timeTmp = new Date(Date.parse(time.replace(/[-]/g, "/")) - timeTmp.getTimezoneOffset()*60000);
             time = timeTmp.toLocaleDateString() + " " + timeTmp.toTimeString().split(" ")[0];
             var content = "";
-            var img = new Array();
-            for(var i=0; i<message.length; i++) {
-                if(message[i]["type"] == "text") {
-                    content += message[i]['content'];
-                }
-                else if(['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg'].indexOf(message[i]['type'])) {
-                    content += "<img src='/static/images/loading.gif' id='" + message[i]['content'].split(".", 2)[0] + "'/>";
-                    img.push(message[i]['content']);
-                }
+            if(msg[0]['type'] == "text") {
+                content += msg[0]['content'];
+                account.addContent('content-group-'+groupid, $("#user-" + from).find(".nickname").eq(0).text(), content, time);
+            }else if(['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg'].indexOf(msg[0]['type'])){
+                var pic_id = "pic_"+time.replace(/[\/ :]/g,"")+"_"+Math.ceil(Math.random()*100);
+                content += "<img src='/static/images/loading.gif' id='" + pic_id + "'/>";
+                account.addContent('content-group-'+groupid, $("#user-" + from).find(".nickname").eq(0).text(), content, time);
+                setTimeout(account.get_picture(msg[0]['content'], $("#"+pic_id)), 0);
             }
-            account.addContent('content-group-'+groupid, from, content, time);
-            for(var i=0; i<img.length; i++) {
-                var callback = function(name) {
-                    var url = "/v1/messages/image/" + user + "/" + name;
-                    $.ajax({
-                        url: url,
-                        type: "GET",
-                        dataType: "json",
-                        headers: {"token":token},
-                        statusCode: {
-                            401: error401,
-                            403: error403
-                        }
-                    }).done(function (data, textStatus, jqXHR) {
-                        var src = "data:image/" + data['type'] + ";base64," + data['content'];
-                        $("#" + name.split(".", 2)[0]).attr("src", src);
-                    }).fail(function (jqXHR, textStatus, errorThrown) {
-                        $("#"+img[i]).attr("src", "/static/images/failed.jpg");
-                    });
-                };
-                setTimeout(callback(img[i]), 0);
-            }
+            // var img = new Array();
+            // for(var i=0; i<msg.length; i++) {
+            //     if(msg[i]["type"] == "text") {
+            //         content += msg[i]['content'];
+            //     }
+            //     else if(['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg'].indexOf(msg[i]['type'])) {
+            //         content += "<img src='/static/images/loading.gif' id='" + msg[i]['content'].split(".", 2)[0] + "'/>";
+            //         img.push(msg[i]['content']);
+            //     }
+            // }
+            // account.addContent('content-group-'+groupid, $("#user-" + from).find(".nickname").eq(0).text(), content, time);
+            // for(var i=0; i<img.length; i++) {
+            //     setTimeout(account.get_picture(img[i], $("#"+img[i].split(".", 2)[0])), 0);
+            // }
         };
         account.add_message = function(from, time, message, msg_type, group_id){
             if($("#message-center img[title=msg-reminder]").length == 0){
