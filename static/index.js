@@ -134,7 +134,7 @@ var Account = {
             $li.on("click", "img" ,function(event){
                 event.stopPropagation();
                 $li.siblings().children("div.btn").css("display","none");
-                $li.children("div.btn").toggle(600);
+                $li.children("div.btn").toggle(300);
             });
         };
         account.order_friends = function(list) {
@@ -1119,7 +1119,7 @@ var Account = {
             });
         }
         account.get_dates = function(chat_type,chat_identity){
-            var result;
+            var result = [];
             $.ajax({
                 url: "/v1/records/dates/",
                 type: "GET",
@@ -1133,7 +1133,6 @@ var Account = {
             }).done(function (data, textStatus, jqXHR) {
                 result = data;
             }).fail(function (jqXHR, textStatus, errorThrown) {
-                alert(jqXHR.responseText);
             });
             return result;
         }
@@ -1227,9 +1226,14 @@ var Account = {
                 $history = account.build_history_window_layout(chat_type,chat_identity);
                 dates = account.get_dates(chat_type,chat_identity);
                 $ul = $("<ul></ul>");
-                $.each(dates, function(index, val) {
-                    $("<li></li>").text(val).appendTo($ul);
-                });
+                if(dates.length>0){
+                    $.each(dates, function(index, val) {
+                        $("<li></li>").text(val).appendTo($ul);
+                    });
+                }else{
+                    $history.find("div.chat-history-list").append($("<div></div>").text("暂时没有聊天记录")
+                        .css({"margin":"30px auto","width":"130px","text-align":"center","font-size":"16px"}));
+                }
                 $ul.appendTo($history.children("div.chat-history-selector"));
                 var date_list = $history.children("div.chat-history-selector").children("ul").children("li");
                 if(date_list.length>0){
@@ -1246,7 +1250,9 @@ var Account = {
                 });
                 $.each(dates, function(index, val) {
                     if(exist_date.indexOf(val)<0){
-                        $("<li></li>").text(val).appendTo($date_ul);
+                        $new_date = $("<li></li>").text(val);
+                        $new_date.appendTo($date_ul);
+                        account.refresh_chat_history_list($new_date);
                     }
                 });
             }
