@@ -19,6 +19,10 @@ var state;
 var Account = {
     createNew: function() {
         var account = {};
+        var friend_nickname_dict = {};
+        var group_name_dict = {};
+        var font_size = $("#font-size").val();
+        var font_family = $("#font").val();
         account.init = function() {
             $.base64.utf8encode = true;
             $.base64.utf8decode = true;
@@ -116,6 +120,7 @@ var Account = {
             var $li = $("<li></li>").attr("id", 'user-' + friend['account']).addClass("friends");
             var $img = $("<img/>").attr("src", "/static/images/head/" + friend['icon'] +".jpg").addClass("icon");
             var $nickname = $("<p></p>").addClass("nickname").text(friend['nickname']);
+            friend_nickname_dict[friend['account']] = friend['nickname'];
             if (friend['state'] === "online") {
                 tmp = "[在线]";
             }
@@ -128,6 +133,7 @@ var Account = {
             account.bindChat($li);
             $li.on("click", "img" ,function(event){
                 event.stopPropagation();
+                $li.siblings().children("div.btn").css("display","none");
                 $li.children("div.btn").toggle(600);
             });
         };
@@ -190,6 +196,7 @@ var Account = {
             var $li = $("<li></li>").attr('id','group-'+group_id).addClass('group');
             var $img = $("<img />").attr('src','/static/images/group.jpg').addClass('icon');
             var $groupname = $("<p></p>").addClass('groupname').text(group_name);
+            group_name_dict[group_id] = group_name;
             $li.append($img).append($groupname).appendTo($("#control-list-middle-groups ul"));
             account.bindChat($li);
         };
@@ -284,6 +291,8 @@ var Account = {
         };
         account.bindChat = function($li) {
             $li.on("dblclick", function(event) {
+                $("#layer").children("div.chat-history-div").css("display","none");
+                $("#control-list-middle-accounts>ul>li>div.btn").css("display","none");
                 $this = $(this);
                 var $chat = $("#chat");
                 var id = $this.attr("id");
@@ -440,18 +449,18 @@ var Account = {
             }
         };
         account.setFontAndSize = function() {
-            $("#chat-input textarea").css("font-size", $("#font-size").val());
-            $(".chatBox dd").css("font-size", $("#font-size").val());
+            $("#chat-input textarea").css("font-size", font_size+"px");
+            $(".chatBox-msg").css("font-size", font_size+"px");
             $("#font").change(function(event) {
-                var value = $(this).val();
-                $(".chatBox dd").css("font-family", value);
-                $("#chat-input textarea").css("font-family", value);
+                font_family = $(this).val();
+                $(".chatBox-msg").css("font-family", font_family);
+                $("#chat-input textarea").css("font-family", font_family);
                 
             });
             $("#font-size").change(function(event) {
-                var value = $(this).val();
-                $(".chatBox dd").css("font-size", value + "px");
-                $("#chat-input textarea").css("font-size", value + "px");
+                font_size = $(this).val();
+                $(".chatBox-msg").css("font-size", font_size + "px");
+                $("#chat-input textarea").css("font-size", font_size + "px");
             });
         };
         account.uploadImage = function() {
@@ -640,7 +649,7 @@ var Account = {
             }
             var $dl = $("<dl></dl>").addClass("chatBox");
             var $dt = $("<dt></dt>").addClass("chatBox-head").attr("title", name).text(name).append($("<span></span>").css("margin-left", "5px").text(timestr));
-            var $dd = $("<dd></dd>").addClass("charBox-msg").html(content);
+            var $dd = $("<dd></dd>").addClass("chatBox-msg").css("font-size",font_size+"px").css("font-family",font_family).html(content);
             $dl.append($dt).append($dd).appendTo($("#" + id));
             $("#" + id).get(0).scrollTop = $("#" + id).get(0).scrollHeight;
         };
@@ -1132,7 +1141,13 @@ var Account = {
             $history = $("<div></div>").attr("id","history-"+chat_type+"-"+chat_identity).addClass('chat-history-div');
             $history.append($("<p>x</p>"));
             $header = $("<div></div>").addClass("chat-history-header");
-            $header.append($("<div></div>").text("与"+chat_identity+"的聊天记录").addClass("chat-history-title"));
+            var title_text = "unkown的聊天记录";
+            if(chat_type=="user"){
+                title_text = "与 "+friend_nickname_dict[chat_identity]+" 的聊天记录";
+            }else if(chat_type=="group"){
+                title_text = "群 "+group_name_dict[chat_identity]+" 的聊天记录";
+            }
+            $header.append($("<div></div>").text(title_text).addClass("chat-history-title"));
             $history.append($header);
             $history.append($("<div></div>").addClass("chat-history-selector"));
             $history.append($("<div></div>").addClass("chat-history-list"));
@@ -1178,9 +1193,14 @@ var Account = {
                 }
                 $ul = $("<ul></ul>");
                 $.each(chat_history, function(index, val) {
-                    var chat_user = val[0];
+                    var chat_user;
                     var chat_time = account.adjust_timezone(val[1]);
                     var chat_content;
+                    if(val[0]==user){
+                        chat_user = nickname;
+                    }else{
+                        chat_user = friend_nickname_dict[val[0]];
+                    }
                     if(val[2].slice(0,4)=="@$^*" && val[2].slice(-4)=="@$^*"){
                         pic_id = "pic_"+chat_time.replace(/[\/ :-]/g,"")+"_"+Math.ceil(Math.random()*100);
                         chat_content = "<img src='/static/images/loading.gif' id='" + pic_id + "' name="+val[2].slice(4,-4)+">";
@@ -1189,7 +1209,7 @@ var Account = {
                     }
                     $dl = $("<dl></dl>").addClass("chatBox");
                     $dt = $("<dt></dt>").addClass("chatBox-head").attr("title", chat_user).text(chat_user).append($("<span></span>").css("margin-left", "5px").text(chat_time));
-                    $dd = $("<dd></dd>").addClass("charBox-msg").html(chat_content);
+                    $dd = $("<dd></dd>").addClass("chatBox-msg").html(chat_content);
                     $dl.append($dt).append($dd).appendTo($ul);
                 });
                 $chat_history_list.append($ul);
@@ -1216,7 +1236,19 @@ var Account = {
                     account.refresh_chat_history_list(date_list.last());
                 }
             }else{
-                $("#history-"+chat_type+"-"+chat_identity).css('display', 'block');
+                $history = $("#history-"+chat_type+"-"+chat_identity);
+                $history.css('display', 'block');
+                dates = account.get_dates(chat_type,chat_identity);
+                var exist_date = [];
+                $date_ul = $history.children("div.chat-history-selector").children("ul");
+                $.each($date_ul.children("li"), function(index, val){
+                    exist_date.push($(val).text());
+                });
+                $.each(dates, function(index, val) {
+                    if(exist_date.indexOf(val)<0){
+                        $("<li></li>").text(val).appendTo($date_ul);
+                    }
+                });
             }
         }
         account.bind_get_history = function(){
@@ -1332,11 +1364,11 @@ var Account = {
             var content = "";
             if(msg[0]['type'] == "text") {
                 content += msg[0]['content'];
-                account.addContent('records-user-'+from, $("#user-" + from).find(".nickname").eq(0).text(), content, time);
+                account.addContent('records-user-'+from, friend_nickname_dict[from], content, time);
             }else if(['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg'].indexOf(msg[0]['type'])){
                 var pic_id = "pic_"+time.replace(/[\/ :]/g,"")+"_"+Math.ceil(Math.random()*100);
                 content += "<img src='/static/images/loading.gif' id='" + pic_id + "'/>";
-                account.addContent('records-user-'+from, $("#user-" + from).find(".nickname").eq(0).text(), content, time);
+                account.addContent('records-user-'+from, friend_nickname_dict[from], content, time);
                 setTimeout(account.get_picture(msg[0]['content'], $("#"+pic_id)), 0);
             }
             // var img = new Array();
@@ -1376,11 +1408,11 @@ var Account = {
             var content = "";
             if(msg[0]['type'] == "text") {
                 content += msg[0]['content'];
-                account.addContent('content-group-'+groupid, $("#user-" + from).find(".nickname").eq(0).text(), content, time);
+                account.addContent('content-group-'+groupid, friend_nickname_dict[from], content, time);
             }else if(['jpg', 'png', 'bmp', 'gif', 'psd', 'jpeg'].indexOf(msg[0]['type'])){
                 var pic_id = "pic_"+time.replace(/[\/ :]/g,"")+"_"+Math.ceil(Math.random()*100);
                 content += "<img src='/static/images/loading.gif' id='" + pic_id + "'/>";
-                account.addContent('content-group-'+groupid, $("#user-" + from).find(".nickname").eq(0).text(), content, time);
+                account.addContent('content-group-'+groupid, friend_nickname_dict[from], content, time);
                 setTimeout(account.get_picture(msg[0]['content'], $("#"+pic_id)), 0);
             }
             // var img = new Array();
