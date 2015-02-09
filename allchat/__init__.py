@@ -45,7 +45,7 @@ def init_admin():
         except Exception,e:
             db.session.rollback()
             raise e
-
+#@app.before_first_request
 def init():
     init_db()
     init_admin()

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from kombu import Exchange, Connection, Consumer, Producer,Queue
 from flask import json
-import time
+#import time
+from eventlet import sleep
 import allchat
 from allchat import user_states
 from allchat.messages.handles import rpc_callbacks
@@ -217,7 +218,7 @@ def receive_message(user, timeout = 240):
             comsumer.receive(msg.payload, msg)
             break
         loop += 1
-        time.sleep(5)
+        sleep(5)
     if loop == (timeout / 5):
         RPC.release_connection(conn)
         RPC.release_consumer(user)
