@@ -8,6 +8,8 @@ db = SQLAlchemy(app, session_options={'autoflush':False, 'expire_on_commit':Fals
                                       'autocommit':True})
 user_states = dict()
 
+app.debug=True
+
 # from allchat.database.sql import get_session
 from allchat.database import init_db
 from allchat.database.models import UserAuth, UserInfo
@@ -42,7 +44,7 @@ def init_admin():
             db.session.add(admin)
             db.session.add(auth)
             db.session.commit()
-        except Exception,e:
+        except Exception as e:
             db.session.rollback()
             raise e
 #@app.before_first_request
@@ -66,7 +68,7 @@ def index():
         # token = request.headers['token']
         # auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == account, \
         #                                                     UserAuth.deleted == False)).one()
-    except Exception,e:
+    except Exception as e:
         return redirect(url_for('login'))
     else:
         # if not auth.is_token(token) or auth.is_token_timeout():

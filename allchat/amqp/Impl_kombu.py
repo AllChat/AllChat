@@ -27,7 +27,7 @@ class rpc(object):
             self.connection = Connection(url, ssl = ssl)
             try:
                 self.connection.connect()
-            except Exception,e:
+            except Exception as e:
                 raise e
             else:
                 self.connection.close()
@@ -48,14 +48,14 @@ class rpc(object):
         try:
             if conn is not None:
                 conn.release()
-        except Exception,e:
+        except Exception as e:
             raise e
 
     def close_connection(self, conn):
         try:
             if conn is not None:
                 conn.close()
-        except Exception,e:
+        except Exception as e:
             raise e
 
     # def create_channel(self, conn):
@@ -68,7 +68,7 @@ class rpc(object):
     #     try:
     #         if channel is not None:
     #             channel.close()
-    #     except Exception,e:
+    #     except Exception as e:
     #         raise e
 
     # def create_consumer(self, name, channel , queues = None, callbacks = None):
@@ -90,7 +90,7 @@ class rpc(object):
             try:
                 if self.callbacks[name] != self.consumer[name].callbacks:
                     self.consumer[name].callbacks = self.callbacks[name]
-            except KeyError,e:
+            except KeyError as e:
                 raise Exception("Please invoke register_callbacks before")
             self.consumer[name].revive(channel)
         else:
@@ -98,7 +98,7 @@ class rpc(object):
                 queues = self.create_queue(name, name)
             try:
                 self.callbacks[name]
-            except KeyError,e:
+            except KeyError as e:
                 self.register_callbacks(name, [rpc_callbacks()])
                 #raise Exception("Please invoke register_callbacks before")
             finally:
@@ -110,7 +110,7 @@ class rpc(object):
         try:
             if name in self.consumer:
                 self.consumer[name].cancel()
-        except Exception,e:
+        except Exception as e:
             raise e
 
     def create_producer(self, name, channel):
@@ -124,7 +124,7 @@ class rpc(object):
         try:
             if name in self.producer:
                 self.producer[name].close()
-        except Exception,e:
+        except Exception as e:
             raise e
 
     def create_queue(self, name, routing_key, durable = True):
@@ -139,13 +139,13 @@ class rpc(object):
             if name in self.consumer:
                 try:
                     self.consumer[name].close()
-                except Exception, e:
+                except Exception as  e:
                     pass
                 del self.consumer[name]
             if name in self.producer:
                 try:
                     self.producer[name].close()
-                except Exception, e:
+                except Exception as  e:
                     pass
                 del self.producer[name]
             if name in self.queue:
@@ -154,7 +154,7 @@ class rpc(object):
                 self.queue[name].delete()
                 self.close_connection(tmp)
                 del self.queue[name]
-        except Exception,e:
+        except Exception as e:
             raise e
 
     def register_callbacks(self, name, callbacks):
@@ -175,7 +175,7 @@ class rpc(object):
 def cast(producer, message, routing_key, delivery_mode = 2):
     try:
         producer.publish(message, routing_key, delivery_mode)
-    except Exception,e:
+    except Exception as e:
         raise e
 
 def send_message(req_user, resp_user, message):

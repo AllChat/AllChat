@@ -2,6 +2,7 @@ from allchat import app,db
 # from allchat.database.sql import get_session
 
 def init_db():
+    app.config['SQLALCHEMY_ECHO'] = False
     if app.config['DATABASE'].upper() == 'MYSQL':
         import MySQLdb
         origin_url = app.config['SQLALCHEMY_DATABASE_URI']
@@ -26,7 +27,7 @@ def init_db():
         ip = tmp[0]
         try:
             port = tmp[1]
-        except IndexError, e:
+        except IndexError as  e:
             port = 3306
         else:
             port = int(tmp[1])

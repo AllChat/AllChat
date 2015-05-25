@@ -22,7 +22,7 @@ class messages_view(MethodView):
             try:
                 account = db_session.query(UserInfo).filter(db.and_(UserInfo.deleted == False,
                                 UserInfo.state != 'offline', UserInfo.username == user)).one()
-            except Exception,e:
+            except Exception as e:
                 return ("Account {0} doesn't exist or logout now".format(user), 404)
             if not file:
                 msg = receive_message(account.username)
@@ -37,7 +37,7 @@ class messages_view(MethodView):
             try:
                 account = db_session.query(UserInfo).filter(db.and_(UserInfo.deleted == False,
                                 UserInfo.state != 'offline', UserInfo.username == user)).one()
-            except Exception,e:
+            except Exception as e:
                 return ("Account {0} doesn't exist or logout now".format(user), 404)
             if file:
                 name, tag = os.path.splitext(file)
@@ -51,7 +51,7 @@ class messages_view(MethodView):
                         tmp['content'] = base64.b64encode(fp.read())
                 except IOError:
                     return ('Not found', 404)
-                except Exception,e:
+                except Exception as e:
                     return ('Operation Failed', 500)
                 return jsonify(tmp)
             else:
@@ -75,7 +75,7 @@ class messages_view(MethodView):
                     return self.group_message()
                 else:
                     return ("Error URL", 403)
-            except Exception,e:
+            except Exception as e:
                 return ("Failed to pass the message", 500)
         else:
             return ("Error Content_Type in the request, please upload a "
@@ -89,7 +89,7 @@ class messages_view(MethodView):
         try:
             sender = request.headers['message_sender']
             receiver = request.headers['message_receiver']
-        except Exception,e:
+        except Exception as e:
             return ("HTTP header format error", 403)
         if sender != session['account']:
             return ("Account error", 403)
@@ -161,12 +161,12 @@ class messages_view(MethodView):
             user_from = db_session.query(UserInfo).filter(UserInfo.username == sender).\
                                 filter(db.and_(UserInfo.state != "offline",
                                 UserInfo.deleted == False)).one()
-        except Exception,e:
+        except Exception as e:
             return ('Message send failed due to the sender not exist or offline', 403)
         try:
             group_to = db_session.query(GroupInfo).join(GroupMember).filter(
                                     GroupInfo.group_id == group_id).one()
-        except Exception,e:
+        except Exception as e:
             return ("Group doesn't exist", 403)
         message = dict()
         message['method'] = 'send_group_message'

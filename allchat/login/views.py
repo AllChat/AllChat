@@ -39,7 +39,7 @@ class login_view(MethodView):
                                                                             UserInfo.state != "offline")).one()
                         auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == name, \
                                                                 UserAuth.deleted == False)).one()
-                    except Exception, e:
+                    except Exception as  e:
                         return None
                     db_session.begin()
                     db_user.state = "offline"
@@ -76,7 +76,7 @@ class login_view(MethodView):
                                                                     UserInfo.deleted == False)).one()
                 auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == name, \
                                                                     UserAuth.deleted == False)).one()
-            except Exception, e:
+            except Exception as  e:
                 return make_response(("Account or password error", 403, ))
             if auth.is_authenticated(password):
                 db_session.begin()

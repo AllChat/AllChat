@@ -9,7 +9,7 @@
 
 import os
 import json
-from encrypt import Encryptor
+from .encrypt import Encryptor
 from allchat.path import get_project_root
 
 #----------------------------------------------------------------------
@@ -31,12 +31,18 @@ def getMessages(directory, date):
 #----------------------------------------------------------------------
 def _read_file(file_path):
     """"""
-    key = _get_encrypt_key()
-    encryptor = Encryptor(key)
+    key,IV = _get_encrypt_key()
+    encryptor = Encryptor(key,IV)
     messages = list()
     with open(file_path,"rb") as output:
-        for line in output:
-            messages.append(encryptor.DecryptStr(line.rstrip(os.linesep)).split("\t\t"))
+        sep = b"\0\1\2\3\4"*2
+        lines = output.read().rstrip(sep)
+        for line in lines.split(sep):
+            try:
+                line = encryptor.DecryptStr(line)
+                messages.append(line.split("\t\t"))
+            except Exception as e:
+                print(e)
     return messages
 
 #----------------------------------------------------------------------
@@ -47,9 +53,11 @@ def _get_encrypt_key():
     if not os.path.exists(conf_path):
         raise ValueError("Invalid config file path.")
     with open(conf_path,"rb") as conf:
-        config_dict = dict(tuple(line.split(";")[0].split(" "))
-                           for line in conf)
-    return int(config_dict.get("encrypt_key"))
+        configs = conf.read()
+        config_dict = dict(tuple(line.split(b"="))
+                           for line in configs.split(b"\n"))
+    return (config_dict.get(b"encrypt_key"),
+            config_dict.get(b"IV"))
 
 def getDates(path):
     result = list()
@@ -58,7 +66,9 @@ def getDates(path):
             for month in os.listdir(os.path.join(path,year)):
                 for file_name in os.listdir(os.path.join(path,year,month)):
                     if file_name.endswith(".bin"):
-                        result.append("-".join((year,month,file_name.rstrip(".bin"))))
+                        result.append("-".join(
+                            (year,month,file_name.rstrip(".bin"))
+                            ))
     else:
         return ("No records found", 404)
     return json.JSONEncoder().encode(result)

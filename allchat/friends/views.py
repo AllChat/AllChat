@@ -20,7 +20,7 @@ class friends_view(MethodView):
         try:
             user = db_session.query(UserInfo).filter(UserInfo.username == name).\
                         filter(UserInfo.deleted == False).filter(UserInfo.state != 'offline').one()
-        except Exception,e:
+        except Exception as e:
             return ("Account {0} doesn't exist".format(name), 404)
         resp = {}
         resp['friendlist'] = []
@@ -55,13 +55,13 @@ class friends_view(MethodView):
             try:
                 req_user = db_session.query(UserInfo).with_lockmode('read').filter(db.and_(UserInfo.username == name,
                                     UserInfo.deleted == False, UserInfo.state != 'offline')).one()
-            except Exception, e:
+            except Exception as  e:
                 return ("The account {account} is not exist or offline".format(account = name), 404)
             else:
                 try:
                     resp_user = db_session.query(UserInfo).with_lockmode('read').filter(
                                     db.and_(UserInfo.username == para['account'],UserInfo.deleted == False)).one()
-                except Exception,e:
+                except Exception as e:
                     return ("The user {account} being added doesn't exist".format(account = para['account']), 404)
                 else:
                     try:
@@ -114,7 +114,7 @@ class friends_view(MethodView):
         if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
             try:
                 para = request.get_json()
-            except Exception,e:
+            except Exception as e:
                 return ("The json data can't be parsed", 405)
             if 'account' not in para:
                 return ("Missing 'account' Section", 404)
@@ -132,7 +132,7 @@ class friends_view(MethodView):
                 if friend is not None:
                     db_session.delete(friend)
                 db_session.commit()
-            except Exception,e:
+            except Exception as e:
                 db_session.rollback()
                 return ("Delete friend {account} failed due to DataBase error".format(account = para['account']), 500)
             if para.get('bidirectional') == "true":
@@ -143,7 +143,7 @@ class friends_view(MethodView):
                     if (resp_user is not None) and resp_user.friends:
                         db_session.delete(resp_user.friends[0])
                     db_session.commit()
-                except Exception,e:
+                except Exception as e:
                     db_session.rollback()
                     return ("Failed to delete your account in opposing friendlist", 500)
             return ('Delete successfully', 200)
@@ -158,7 +158,7 @@ class friends_view(MethodView):
         if (request.environ['CONTENT_TYPE'].split(';', 1)[0] == "application/json"):
             try:
                 para = request.get_json()
-            except Exception,e:
+            except Exception as e:
                 return ("The json data can't be parsed", 405, )
             if 'account' not in para:
                 return ("Missing 'account' Section", 404)
@@ -169,14 +169,14 @@ class friends_view(MethodView):
                 req_user = db_session.query(UserInfo).with_lockmode('read').filter(
                                 db.and_(UserInfo.username == name, UserInfo.deleted == False,
                                      UserInfo.state != 'offline')).one()
-            except Exception,e:
+            except Exception as e:
                 return ("The account {account} is not exist or offline".format(account = name), 404)
             else:
                 try:
                     resp_user = db_session.query(UserInfo).join(FriendList).with_lockmode('read').filter(
                                             db.and_(UserInfo.username == para['account'],UserInfo.deleted == False,
                                                 FriendList.username == name, FriendList.confirmed == False)).one()
-                except Exception,e:
+                except Exception as e:
                     return ("Can't invoke the API before someone request to add you as a friend", 405)
                 else:
                     message = dict()

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from flask import json
-import Queue
+try:
+    import queue as Queue
+except ImportError:
+    import Queue
 
 
 class base(object):
@@ -20,7 +23,7 @@ class rpc_callbacks(base):
         handle = getattr(self, method, self.default)
         try:
             return handle(body, message)
-        except Exception,e:
+        except Exception as e:
             raise e
 
     def add_friend_req(self, body, message):
@@ -35,7 +38,7 @@ class rpc_callbacks(base):
         tmp['args']['msg'] = msg
         try:
             self.queue.put(tmp, True, self.timeout)
-        except Queue.Full,e:
+        except Queue.Full as e:
             message.reject()
             return None
         message.ack()
@@ -49,7 +52,7 @@ class rpc_callbacks(base):
             # try:
             #     user = db_session.query(UserInfo).join(FriendList).with_lockmode('read').filter(and_(
             #             UserInfo.username == para['to'], UserInfo.deleted == False)).one()
-            # except Exception, e:
+            # except Exception as  e:
             #     message.ack()
             #     return None
             # for tmp in user.friends:
@@ -68,7 +71,7 @@ class rpc_callbacks(base):
             # try:
             #     user = db_session.query(UserInfo).join(FriendList).with_lockmode('read').filter(and_(
             #             UserInfo.username == para['to'], UserInfo.deleted == False)).one()
-            # except Exception, e:
+            # except Exception as  e:
             #     message.ack()
             #     return None
             # for tmp in user.friends:
@@ -92,7 +95,7 @@ class rpc_callbacks(base):
         tmp['args']['msg'] = result
         try:
             self.queue.put(tmp, True, self.timeout)
-        except Queue.Full,e:
+        except Queue.Full as e:
             message.reject()
             return None
         message.ack()
@@ -107,7 +110,7 @@ class rpc_callbacks(base):
                         "time":para.get("time",""),"msg":para.get("msg","")}
         try:
             self.queue.put(tmp, True, self.timeout)
-        except Queue.Full, e:
+        except Queue.Full as  e:
             message.reject()
             return None
         message.ack()
@@ -120,7 +123,7 @@ class rpc_callbacks(base):
                         "result":para.get("result","unkown")}
         try:
             self.queue.put(tmp, True, self.timeout)
-        except Queue.Full, e:
+        except Queue.Full as  e:
             message.reject()
             return None
         message.ack()
@@ -137,7 +140,7 @@ class rpc_callbacks(base):
         tmp['args']['msg'] = msg
         try:
             self.queue.put(tmp, True, self.timeout)
-        except Queue.Full,e:
+        except Queue.Full as e:
             message.reject()
             return None
         message.ack()
@@ -155,7 +158,7 @@ class rpc_callbacks(base):
         tmp['args']['msg'] = msg
         try:
             self.queue.put(tmp, True, self.timeout)
-        except Queue.Full,e:
+        except Queue.Full as e:
             message.reject()
             return None
         message.ack()
@@ -172,7 +175,7 @@ class rpc_callbacks(base):
         tmp['args']['msg'] = msg
         try:
             self.queue.put(tmp, True, self.timeout)
-        except Queue.Full,e:
+        except Queue.Full as e:
             message.reject()
             return None
         message.ack()
@@ -190,7 +193,7 @@ class rpc_callbacks(base):
         tmp['args']['msg'] = msg
         try:
             self.queue.put(tmp, True, self.timeout)
-        except Queue.Full,e:
+        except Queue.Full as e:
             message.reject()
             return None
         message.ack()
@@ -198,7 +201,7 @@ class rpc_callbacks(base):
     def get_msg(self):
         try:
             tmp = self.queue.get(True, self.timeout)
-        except Queue.Empty, e:
+        except Queue.Empty as e:
             return None
         self.queue.task_done()
         return tmp

@@ -74,7 +74,7 @@ class groups_view(MethodView):
                 db_session = get_session()
                 try:
                     db_user = db_session.query(UserInfo).filter_by(username = account).one()
-                except Exception, e:
+                except Exception as  e:
                     return ("User not found", 404)
                 max_group_id = db_session.query(GroupInfo.group_id).order_by(db.desc(GroupInfo.group_id)).first()
                 if max_group_id is None:
@@ -91,7 +91,7 @@ class groups_view(MethodView):
                     for user in {}.fromkeys(userlist).keys(): # eliminate the duplicated account
                         try:
                             db_user = db_session.query(UserInfo).filter_by(username = user).one()
-                        except Exception, e:
+                        except Exception as  e:
                             illegal_users.add(user)
                         else:
                             if user != account:
@@ -193,11 +193,11 @@ class groups_view(MethodView):
             db_session = get_session()
             try:
                 db_user = db_session.query(UserInfo).filter_by(username = account).one()
-            except Exception, e:
+            except Exception as  e:
                 return ("Invalid user.", 404)
             try:
                 db_group = db_session.query(GroupInfo).filter_by(group_id = groupID).one()
-            except Exception, e:
+            except Exception as  e:
                 return ("Group not found", 404)
             # this is the group owner try to add or del group member
             if session['account'] == db_group.owner:
@@ -354,7 +354,7 @@ class groups_view(MethodView):
             db_session = get_session()
             try:
                 db_group = db_session.query(GroupInfo).filter_by(group_id = groupID).one()
-            except Exception, e:
+            except Exception as  e:
                 return ("Group not found", 404)
             if account != db_group.owner:
                 return ("You don't have the permission to the operation", 405)

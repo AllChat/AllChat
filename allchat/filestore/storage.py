@@ -3,7 +3,7 @@ import os
 import time
 import hashlib
 from multiprocessing import Process, Queue
-from encrypt import Encryptor
+from .encrypt import Encryptor
 from allchat.path import get_single_msg_dir, get_group_msg_dir, get_picture_dir, get_project_root
 
 class MessageSaver(object):
@@ -19,9 +19,9 @@ class MessageSaver(object):
         if not os.path.exists(os.path.dirname(conf_path)):
             os.makedirs(os.path.dirname(conf_path))
         with open(conf_path,"wb") as conf:
-            _encrypt_key = int(os.urandom(16).encode("hex"),16)
-            encrypt_key = " ".join(("encrypt_key",str(_encrypt_key)))+";"
-            conf.write(encrypt_key)
+            encrypt_key = b"=".join((b"encrypt_key",os.urandom(16)))
+            IV = b"=".join((b"IV",os.urandom(16)))
+            conf.write(b"\n".join((encrypt_key,IV)))
 
     def _get_config(self):
         root = get_project_root()
@@ -29,9 +29,11 @@ class MessageSaver(object):
         if not os.path.exists(conf_path):
             self._init_config(conf_path)
         with open(conf_path,"rb") as conf:
-            config_dict = dict(tuple(line.split(";")[0].split(" "))
-                               for line in conf)
-        self._encrypt_key = int(config_dict.get("encrypt_key"))
+            configs = conf.read()
+            config_dict = dict(tuple(line.split(b"="))
+                               for line in configs.split(b"\n"))
+        self._encrypt_key = config_dict.get(b"encrypt_key")
+        self._IV = config_dict.get(b"IV")
 
     def __stop_writing(self):
         if self._single_message_proc:
@@ -43,13 +45,18 @@ class MessageSaver(object):
 
     def saveSingleMsg(self, sender, receiver, msg):
         if sender and receiver and isinstance(msg, list) and msg[0] and msg[1]:
-            users = "&&".join(set([sender,receiver]))
+            users = "&&".join(sorted([sender,receiver]))
             self._single_message_queue.put((sender,users,msg))
             if not self._single_message_proc:
-                self._single_message_proc = Process(target=_write_message, args=(self._single_message_queue,
-                                                                self._terminator,
-                                                                self._encrypt_key,
-                                                                get_single_msg_dir(),))
+                self._single_message_proc = Process(target=_write_message, 
+                                            args=(
+                                                self._single_message_queue,
+                                                self._terminator,
+                                                self._encrypt_key,
+                                                self._IV,
+                                                get_single_msg_dir(),
+                                                )  
+                                        )
                 self._single_message_proc.start()
             return True
         else:
@@ -59,10 +66,15 @@ class MessageSaver(object):
         if sender and group_id and isinstance(msg, list) and msg[0] and msg[1]:
             self._group_message_queue.put((sender,str(group_id),msg))
             if not self._group_message_proc:
-                self._group_message_proc = Process(target=_write_message, args=(self._group_message_queue,
-                                                                self._terminator,
-                                                                self._encrypt_key,
-                                                                get_group_msg_dir(),))
+                self._group_message_proc = Process(target=_write_message, 
+                                        args=(
+                                            self._group_message_queue,
+                                            self._terminator,
+                                            self._encrypt_key,
+                                            self._IV,
+                                            get_group_msg_dir(),
+                                            )
+                                        )
                 self._group_message_proc.start()
             return True
         else:
@@ -82,8 +94,8 @@ class MessageSaver(object):
         else:
             return False
 
-def _write_message(queue, terminator, encrypt_key, root_dir):
-    encryptor = Encryptor(encrypt_key)
+def _write_message(queue, terminator, encrypt_key, IV, root_dir):
+    encryptor = Encryptor(encrypt_key, IV)
     while True:
         message = queue.get()
         if message == terminator:
@@ -97,6 +109,6 @@ def _write_message(queue, terminator, encrypt_key, root_dir):
         file_name = os.path.join(directory, day+".bin")
         msg_sep = "\t\t"
         content = msg_sep.join((sender,msg[0],msg[1]))
-        with open(file_name,"a+") as output:
+        with open(file_name,"ab+") as output:
             output.write(encryptor.EncryptStr(content))
-            output.write(os.linesep)
+            output.write(b"\0\1\2\3\4"*2)

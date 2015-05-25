@@ -43,7 +43,7 @@ class accounts_view(MethodView):
             db_session = get_session()
             try:
                 db_user = db_session.query(UserInfo).filter_by(username = account).one()
-            except Exception, e:
+            except Exception as  e:
                 user = UserInfo(account, email, nickname)
                 auth = UserAuth(account, password)
                 db_session.begin()
@@ -110,7 +110,7 @@ class accounts_view(MethodView):
             try:
                 user = db_session.query(UserInfo).filter(db.and_(UserInfo.username == name, UserInfo.deleted == False)).one()
                 auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == name, UserInfo.deleted == False)).one()
-            except Exception, e:
+            except Exception as  e:
                 return make_response(("The account {0} isn't existed".format(name), 404, ))
             if all((new_password, old_password)):
                 tmp_re = re.compile(tmp_str)
@@ -200,7 +200,7 @@ class accounts_view(MethodView):
             try:
                 user = db_session.query(UserInfo).filter(db.and_(UserInfo.username == name, UserInfo.deleted == False)).one()
                 auth = db_session.query(UserAuth).filter(db.and_(UserAuth.account == name, UserInfo.deleted == False)).one()
-            except Exception, e:
+            except Exception as  e:
                 return make_response(("The account {0} isn't existed or password is wrong".format(name), 404, ))
             if not auth.is_authenticated(para['password']):
                 return ('Account or password is not corrected', 401)

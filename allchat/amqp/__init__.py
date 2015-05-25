@@ -12,7 +12,7 @@ def init_rpc():
                         the correct pattern is 'amqp://user:password@address:port//'")
     try:
         host = tmp.group(1)
-    except IndexError,e:
+    except IndexError as e:
         raise e
     account, address = host.strip('/').split('@', 1)
     if not any([account, address]):
@@ -23,7 +23,7 @@ def init_rpc():
                         the correct pattern is 'amqp://user:password@address:port//'")
     try:
         RPC.init_connection(url)
-    except Exception,e:
+    except Exception as e:
         raise e
     RPC.init_exchange(exchange_name)
 

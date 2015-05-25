@@ -9,13 +9,13 @@ def authorized(func):
         try:
             token = request.headers['token']
             account = session['account']
-        except Exception,e:
+        except Exception as e:
             return make_response("Authentication first", 401)
         else:
             db_session = get_session()
             try:
                 auth =db_session.query(UserAuth).filter(UserAuth.account == account).one()
-            except Exception,e:
+            except Exception as e:
                 return make_response("Authentication first", 401)
             else:
                 if not auth.is_token(token) or auth.is_token_timeout():
@@ -29,7 +29,7 @@ def checked(func):
         try:
             name = kwargs['name']
             account = session['account']
-        except Exception,e:
+        except Exception as e:
             return func(*args, **kwargs)
         else:
             if name == account:

@@ -33,7 +33,7 @@ class records_view(MethodView):
                 db_user = db_session.query(UserInfo).join(FriendList).filter(db.and_(UserInfo.username == user_name, FriendList.username == identity, FriendList.confirmed == True )).one()
             except:
                 return make_response(('Requested users are not friends.',404))
-            directory = os.path.join(get_single_msg_dir(),"&&".join(set([user_name,identity])))
+            directory = os.path.join(get_single_msg_dir(),"&&".join(sorted([user_name,identity])))
         else:
             return make_response(('Chattype wrong.',403))
 

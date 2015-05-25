@@ -80,7 +80,7 @@ class UserAuth(db.Model):
     def __init__(self, account, password):
         self.account = account
         self.salt = ''.join(random.sample(string.ascii_letters + string.digits, 8))
-        self.password = hashlib.sha256(self.salt+password).hexdigest()
+        self.password = hashlib.sha256((self.salt+password).encode("utf-8")).hexdigest()
         self.token = None
         self.prev_token = None
         self.created = datetime.datetime.utcnow()
@@ -90,7 +90,7 @@ class UserAuth(db.Model):
     def is_authenticated(self, password):
         if self.deleted:
             return False
-        if self.password == hashlib.sha256(self.salt+password).hexdigest():
+        if self.password == hashlib.sha256((self.salt+password).encode("utf-8")).hexdigest():
             # db.session.begin(subtransactions=True)
             # try:
             #     self.prev_token = self.token
@@ -150,7 +150,7 @@ class UserAuth(db.Model):
         if self.is_authenticated(password):
             db.session.begin(subtransactions=True)
             try:
-                self.password = hashlib.sha256(self.salt+new).hexdigest()
+                self.password = hashlib.sha256((self.salt+new).encode("utf-8")).hexdigest()
                 self.prev_token = None
                 self.token = ''.join(random.sample(string.ascii_letters + string.digits, 32))
                 self.updated = datetime.datetime.utcnow()
@@ -195,7 +195,7 @@ class UserAuth(db.Model):
                 db.session.rollback()
                 return False
             return True
-        if password == hashlib.sha256(self.salt+password).hexdigest():
+        if password == hashlib.sha256((self.salt+password).encode("utf-8")).hexdigest():
             db.session.begin(subtransactions=True)
             try:
                 self.deleted = False
