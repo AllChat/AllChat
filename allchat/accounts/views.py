@@ -102,7 +102,7 @@ class accounts_view(MethodView):
             new_password = para.get("new_password")
             nickname = para.get("nickname")
             email = para.get("email")
-            icon = int(para.get("icon"))
+            icon = para.get("icon")
             state = para.get("state")
             if(not any((old_password, new_password, nickname, email, icon, state))):
                 return ("No content in request", 202)
@@ -133,6 +133,10 @@ class accounts_view(MethodView):
                 else:
                     return ("Please login first", 401, )
             if(icon):
+                try:
+                    icon = int(icon)
+                except ValueError:
+                    return make_response(("The icon number {0} is invalid".format(icon), 400, ))
                 if(user.state != 'offline'):
                     if(icon > 255 or icon < 0):
                         return make_response(("The icon number {0} is unacceptable".format(icon), 400, ))

@@ -2,13 +2,13 @@
 <html>
 <head>
     <META charset="UTF-8">
-    <link rel="stylesheet" href="../static/index.css">
-    <script src="../static/jquery-1.11.1.min.js"></script>
-    <script src="../static/jquery.json-2.4.min.js"></script>
-    <script src="../static/jquery.cookie.js"></script>
-    <script src="../static/jquery.base64.js"></script>
-    <script src="../static/getmsg.js"></script>
-    <script src="../static/index.js"></script>
+    <link rel="stylesheet" href="/static/css/index.css">
+    <script src="/static/js/jquery-1.11.1.min.js"></script>
+    <script src="/static/js/jquery.json-2.4.min.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script src="/static/js/jquery.base64.js"></script>
+    <script src="/static/js/getmsg.js"></script>
+    <script src="/static/js/index.js"></script>
     <title>AllChat</title>
 </head>
 <body>
@@ -127,7 +127,7 @@
                         <option value="17">17</option>
                         <option value="18">18</option>
                     </select>
-                    <img src="/static/images/color_click.jpg" />
+                    <img id="color-select-icon" src="/static/images/color_click.jpg" />
                     <input style="visibility:hidden; position: absolute;" type="color" id="color" name="color" class="chat-setting-form-child" />
                     <img id="image-select-icon" src="/static/images/image_click.jpg"/>
                     <input style="visibility:hidden; position: absolute;" type="file" id="image" name="image" class="chat-setting-form-child" accept="image/gif, image/jpeg, image/jpg, image/png, image/bmp" />
@@ -136,8 +136,8 @@
             </div>
             <div id="chat-input">
                 <textarea></textarea>
-                <button>取消</button>
-                <button>发送</button>
+                <button class='btn-submit btn-primary'>清空</button>
+                <button class='btn-submit btn-primary'>发送</button>
             </div>
         </div>
     </div>
