@@ -5,12 +5,29 @@ AllChat is an IM server. It provides a Web interface allow users to visit and an
 
 
 ## HowTo
-|Please follow the steps to install AllChat:|
-|1. Install the MySQL database|
-|2. Install the RabbitMQ message queue|
-|3. If python2.x is used, install dependencies in requirements-py2.txt; if python3.x is used, install dependencies in requirements-py3.txt|
-|4. Modify the conf/allchat.cfg|
-|5. Start the AllChat process via "python run.py" in bin, if development mode is needed, start via "python run.py --debug"|
+
+Please follow the steps to install AllChat:
+
+- Install the MySQL database
+
+- Install the RabbitMQ message queue
+
+- If python2.x is used, install dependencies in requirements-py2.txt;
+  if python3.x is used, install dependencies in requirements-py3.txt
+
+- Modify the conf/allchat.cfg
+
+- Start the AllChat process by running the following command in the project root directory:
+
+```bash
+$ python bin/run.py
+```
+
+  If development mode is needed, add a --debug option in the command:
+
+```bash
+$ python bin/run.py --debug
+```
 
 
 ## License
