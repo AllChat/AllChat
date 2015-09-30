@@ -143,7 +143,7 @@ def group_update_status(sender, group_id, state):
     except:
         return ("Failed to change group {0}'s state".format(group_id), 403)
     tmp = {}
-    tmp['method'] = "friendlist_update_status"
+    tmp['method'] = "group_update_status"
     tmp['from'] = sender
     tmp['to'] = None
     tmp['group_id'] = group_id

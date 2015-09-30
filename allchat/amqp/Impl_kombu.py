@@ -128,7 +128,7 @@ class rpc(object):
             raise e
 
     def create_queue(self, name, routing_key, durable = True):
-        if(name not in self.queue):
+        if name not in self.queue:
             self.queue[name] = Queue(name, self.get_exchange(), routing_key, durable = durable)
         return self.queue[name]
 
@@ -139,13 +139,13 @@ class rpc(object):
             if name in self.consumer:
                 try:
                     self.consumer[name].close()
-                except Exception as  e:
+                except Exception as e:
                     pass
                 del self.consumer[name]
             if name in self.producer:
                 try:
                     self.producer[name].close()
-                except Exception as  e:
+                except Exception as e:
                     pass
                 del self.producer[name]
             if name in self.queue:
@@ -184,46 +184,42 @@ def send_message(req_user, resp_user, message):
     try:
         cast(sender, json.dumps(message), resp_user)
     except:
+        return ("Send message failed due to system error", 500)
+    finally:
         RPC.release_producer(req_user)
         RPC.release_connection(cnn)
-        return ("Send message failed due to system error", 500)
-    RPC.release_producer(req_user)
-    RPC.release_connection(cnn)
     return None
 
 def receive_message(user, timeout = 240):
     queue = RPC.create_queue(user, user)
     conn = RPC.create_connection()
-    comsumer = RPC.create_consumer(user, conn, queue)
-    if not comsumer.callbacks[0].empty: #若回调函数消息队列非空，则直接从队列中获取消息
+    consumer = RPC.create_consumer(user, conn, queue)
+    if not consumer.callbacks[0].empty: #若回调函数消息队列非空，则直接从队列中获取消息
         state = user_states.get(user)
-        if state == None or state == "offline":
-            RPC.release_connection(conn)
-            RPC.release_consumer(user)
-            return None
-        msg = comsumer.callbacks[0].get_msg()
+        if state is None or state == "offline":
+            msg = None
+        else:
+            msg = consumer.callbacks[0].get_msg()
         RPC.release_connection(conn)
         RPC.release_consumer(user)
         return msg
-    loop = 0
-    while loop < (timeout / 5):
+    SLEEP_INTERVAL = 5
+    waited = 0
+    while waited < timeout:
+        sleep(SLEEP_INTERVAL)
+        waited += SLEEP_INTERVAL
         state = user_states.get(user)
-        if state == None or state == "offline":
-            RPC.release_connection(conn)
-            RPC.release_consumer(user)
-            return None
-        #conn.drain_events(timeout = timeout)
-        msg = comsumer.queues[0].get()
-        if msg:
-            comsumer.receive(msg.payload, msg)
+        if state is None or state == "offline":
             break
-        loop += 1
-        sleep(5)
-    if loop == (timeout / 5):
-        RPC.release_connection(conn)
-        RPC.release_consumer(user)
-        return None
-    msg = comsumer.callbacks[0].get_msg()
+        #conn.drain_events(timeout = timeout)
+        msg = consumer.queues[0].get()
+        if msg:
+            break
+    if msg:
+        consumer.receive(msg.payload, msg)
+        msg = consumer.callbacks[0].get_msg()
+    else:
+        msg = None
     RPC.release_connection(conn)
     RPC.release_consumer(user)
     return msg

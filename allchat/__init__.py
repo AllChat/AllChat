@@ -1,14 +1,25 @@
 from flask import Flask, render_template, url_for, redirect, session, request, make_response
 from flask.ext.sqlalchemy import SQLAlchemy
+import os
+import base64
+from .path import get_project_root
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
-app.config.from_pyfile('../conf/allchat.cfg', silent = True)
-app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+config_file = os.path.join(get_project_root(), 'conf/allchat.cfg')
+app.config.from_pyfile(config_file, silent = True)
+sk_file = os.path.join(get_project_root(), 'conf/seckey')
+if not os.path.exists(sk_file):
+    raw_key = os.urandom(32)
+    with open(sk_file, 'wb') as f:
+        f.write(raw_key)
+else:
+    with open(sk_file, 'rb') as f:
+        raw_key = f.read()
+app.secret_key = base64.b64encode(raw_key).decode()
+
 db = SQLAlchemy(app, session_options={'autoflush':False, 'expire_on_commit':False, \
                                       'autocommit':True})
 user_states = dict()
-
-app.debug=True
 
 # from allchat.database.sql import get_session
 from allchat.database import init_db
@@ -79,7 +90,7 @@ def index():
 
 @app.route('/login.html', methods = ['GET'])
 def login():
-        return render_template('login.html')
+    return render_template('login.html')
 
 @app.route('/register.html', methods = ['GET'])
 def signup():
